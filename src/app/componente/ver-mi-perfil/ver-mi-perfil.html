@@ -1,0 +1,358 @@
+<section class="encabezado">
+  <div class="encabezado-logos">
+    <img ngSrc="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img">
+  </div>
+  <div class="encabezado-buscar">
+    <form [formGroup]="buscarForm" class="encabezado-buscar-formulario">
+      <div class="campo-donde">
+        <input id="Donde" formControlName="Donde" type="text" required>
+        <label for="Donde">Dónde</label>
+      </div>
+      <div class="campo-aforo">
+        <input id="Aforo" formControlName="Aforo" type="number" required>
+        <label for="Aforo">Aforo</label>
+      </div>
+      <div class="campo-fecha">
+        <input id="Fecha" formControlName="Fecha" type="date" required>
+        <label for="Fecha">Fecha</label>
+        <div class="campo-fecha-buscar" [class.invalido]="buscarForm.invalid">
+          <a href="#">
+            <button type="submit" [disabled]="buscarForm.invalid" [routerLink]="['/']" [queryParams]="{}"><img ngSrc="/assets/search-13-xxl%201.png" width="22" height="22" class="buscar-img" [class.invalido]="buscarForm.invalid"></button>
+          </a>
+        </div>
+      </div>
+    </form>
+    <div class="encabezado-buscar-avanzada" [class.activo]="mostrarFiltrosAvanzados">
+      <div class="encabezado-buscar-avanzada-container">
+        <img ngSrc="/assets/icon.png" width="28" height="28" class="buscar-avanzada-img" (click)="toggleFiltrosAvanzados();">
+      </div>
+    </div>
+  </div>
+  <div class="overlay-buscar-avanzada" [class.activo]="mostrarFiltrosAvanzados" (click)="cerrarFiltrosAvanzados()">
+    @if (mostrarFiltrosAvanzados){
+      <form [formGroup]="buscarAvanzadaForm" class="encabezado-buscar-avanzada-cuadro" (click)="$event.stopPropagation()">
+        <div class="encabezado-buscar-avanzada-cuadro-inicio">
+          <h3 class="encabezado-buscar-avanzada-cuadro-h3">Filtros Avanzados</h3>
+          <img ngSrc="/assets/X.png" width="29" height="28" class="X" (click)="toggleFiltrosAvanzados()">
+        </div>
+        <div class="filtros-avanzados">
+          <div class="filtros-avanzados-ubicacion">
+            <div class="filtros-avanzados-ubicacion-1">
+              <h3>Ubicación</h3>
+              <img ngSrc="/assets/location_on.png" width="14" height="14">
+            </div>
+            <input formControlName="UbicacionAvanzada" type="text" required>
+          </div>
+          <div class="filtros-avanzados-tipoevento">
+            <div class="filtros-avanzados-tipoevento-1">
+              <h3>Tipo de evento</h3>
+              <img ngSrc="/assets/icononpng.png" width="10" height="5">
+            </div>
+            <input formControlName="TipoEventoAvanzada" type="text" required>
+          </div>
+          <div class="filtros-avanzados-fechainicio">
+            <div class="filtros-avanzados-fechainicio-1">
+              <h3>Fecha inicio</h3>
+              <img ngSrc="/assets/Icononcalendar1.png" width="15" height="16">
+            </div>
+            <input formControlName="FechaInicioAvanzada" type="date" required>
+          </div>
+          <div class="filtros-avanzados-fechafin">
+            <div class="filtros-avanzados-fechafin-1">
+              <h3>Fecha fin</h3>
+              <img ngSrc="/assets/Icononcalendar2.png" width="15" height="16">
+            </div>
+            <input formControlName="FechaFinAvanzada" type="date" required>
+          </div>
+          <div class="filtros-avanzados-aforo">
+            <div class="filtros-avanzados-aforo-1">
+              <h3>Aforo</h3>
+              <img ngSrc="/assets/icononperson.png" width="12" height="12">
+            </div>
+            <input formControlName="AforoAvanzada" type="number" required>
+          </div>
+          <div class="filtros-avanzados-presupuesto">
+            <div class="filtros-avanzados-presupuesto-1">
+              <h3>Presupuesto</h3>
+              <img ngSrc="/assets/Iconondolar.png" width="9" height="16">
+            </div>
+            <input formControlName="PresupuestoAvanzada" type="number" required>
+          </div>
+        </div>
+        <button type="submit" [disabled]="buscarAvanzadaForm.invalid" [routerLink]="['/']" [queryParams]="{}" class="boton-buscar">Buscar</button>
+      </form>
+    }
+  </div>
+  <a class="encabezado-h3" href="#">Conviertete en un proveedor</a>
+  <div class="encabezado-perfil">
+    <img ngSrc="/assets/thispersondoesnotexist-4.png" width="60" height="60">
+    <div class="encabezado-perfil-container" (click)="toggleMenuPerfil()">
+      <h3 class="encabezado-perfil-container-1">inicio de sesión como:</h3>
+      <h3 class="encabezado-perfil-container-2">test(backend)</h3>
+    </div>
+    <div class="encabezado-perfil-menu" [class.activo]="menuPerfilActivo">
+      <nav class="encabezado-perfil-menu-nav">
+        <ul class="encabezado-perfil-menu-ul">
+          <li><a class="Vermiperfil-a" href="#">Ver mi perfil</a></li>
+          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+<body>
+<section class="menu-hamburguesa">
+  <div class="menu-hamburguesa-boton" [class.desactivado]="mostrarFiltrosAvanzados" (click)="toggleMenu()">
+    <img ngSrc="/assets/Menu.png" width="41" height="41" class="menu-hamburguesa-img">
+  </div>
+  <div class="overlay" [class.activo]="menuActivo"></div>
+  <nav class="menu-hamburguesa-text">
+    <ul class="menu-hamburguesa-text-1">
+      <li><a class="EventosEnCurso" href="#">Eventos en curso</a></li>
+      <li><a class="HistorialDeEventos" href="#">Historial de eventos</a></li>
+      <li><a class="ChatearConLaIA" href="#">Chatear con la IA</a></li>
+      <li><a class="CentroDeAyuda" href="#">Centro de ayuda</a></li>
+    </ul>
+    <ul class="menu-hamburguesa-text-2">
+      <li><a class="Configuracion" href="#">Configuración</a></li>
+      <li><a class="CerrarSesion" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+      <li><a class="legal" href="#">Legal</a></li>
+    </ul>
+  </nav>
+</section>
+  @if (mostrarCerrarSesion) {
+    <section class="cerrar-sesion">
+      <div class="overlay-cerrar-sesion"></div>
+      <div class="cerrar-sesion-container" (click)="$event.stopPropagation()">
+        <h1>Cerrar Sesión</h1>
+        <h3>¿Estas seguro de cerrar tu sesión?</h3>
+        <div class="cerrar-sesion-container-botones" (click)="cerrarSesion()">
+          <button class="boton-si" (click)="confirmarCerrarSesion($event)"><a href="">Sí</a></button>
+          <button class="boton-no" (click)="cancelarCerrarSesion($event)">No</button>
+        </div>
+      </div>
+    </section>
+  }
+
+<section class="perfil-contenido">
+
+  <div class="perfil-header">
+    <button [routerLink]="['/']" type="button" class="perfil-back-button" >
+      <img ngSrc="/assets/back.png" width="44" height="44" alt="Volver">
+    </button>
+    <h1 class="perfil-title">Mi perfil</h1>
+  </div>
+
+  <div class="perfil-main">
+
+    <div class="perfil-aside">
+
+      @if (!modoEdicion) {
+        <div class="perfil-avatar-container">
+          <img ngSrc="/assets/thispersondoesnotexist%204.png" alt="Foto de perfil" class="perfil-avatar" width="160" height="160">
+        </div>
+        <a class="perfil-expand-link" (click)="abrirModalImagen()">Click para expandir imagen</a>
+      }
+
+      @if (modoEdicion) {
+        <div class="perfil-avatar-container">
+          <img [src]="selectedImagePreview || '/assets/thispersondoesnotexist%204.png'"
+               alt="Previsualización" class="perfil-avatar" width="160" height="160">
+        </div>
+        <label for="file-upload" class="btn-cambiar-foto">Cambiar foto</label>
+        <input id="file-upload" type="file" (change)="onFileSelected($event)">
+      }
+
+    </div>
+
+    <form class="perfil-form-content" [formGroup]="perfilForm">
+
+      <div class="form-group">
+        <label for="nombres">Nombres y Apellidos</label>
+        <input type="text"
+               id="nombres"
+               formControlName="nombres"
+               [readonly]="!modoEdicion"
+               [class.editable]="modoEdicion">
+      </div>
+      @if (modoEdicion && perfilForm.get('nombres')?.invalid && perfilForm.get('nombres')?.touched) {
+        <div class="error-message">
+          @if (perfilForm.get('nombres')?.errors?.['required']) {
+            El nombre es requerido.
+          }
+          @if (perfilForm.get('nombres')?.errors?.['minlength']) {
+            Debe tener al menos 2 caracteres.
+          }
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="dni">DNI</label>
+        <input type="text"
+               id="dni"
+               formControlName="dni"
+               [readonly]="!modoEdicion"
+               [class.editable]="modoEdicion">
+      </div>
+      @if (modoEdicion && perfilForm.get('dni')?.invalid && (perfilForm.get('dni')?.touched || perfilForm.get('dni')?.dirty)) {
+        <div class="error-message">
+          @if (perfilForm.get('dni')?.errors?.['required']) {
+            El DNI es requerido.
+          }
+          @if (perfilForm.get('dni')?.errors?.['pattern']) { El DNI debe tener 8 dígitos numéricos.
+          }
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email"
+               id="email"
+               formControlName="email"
+               [readonly]="!modoEdicion"
+               [class.editable]="modoEdicion">
+      </div>
+      @if (modoEdicion && perfilForm.get('email')?.invalid && perfilForm.get('email')?.touched) {
+        <div class="error-message">
+          @if (perfilForm.get('email')?.errors?.['required']) {
+            El email es requerido.
+          }
+          @if (perfilForm.get('email')?.errors?.['email']) {
+            El formato del email no es válido.
+          }
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="telefono">Número telefónico</label>
+        <input type="tel"
+               id="telefono"
+               formControlName="telefono"
+               [readonly]="!modoEdicion"
+               [class.editable]="modoEdicion">
+      </div>
+      @if (modoEdicion && perfilForm.get('telefono')?.invalid && (perfilForm.get('telefono')?.touched || perfilForm.get('telefono')?.dirty)) {
+        <div class="error-message">
+          @if (perfilForm.get('telefono')?.errors?.['required']) {
+            El teléfono es requerido.
+          }
+          @if (perfilForm.get('telefono')?.errors?.['pattern']) { El teléfono debe tener 9 dígitos numéricos.
+          }
+        </div>
+      }
+
+      <div class="form-group password-group">
+        <label for="contrasena">Contraseña</label>
+        <input [type]="passwordVisible ? 'text' : 'password'"
+               id="contrasena"
+               formControlName="contrasena"
+               placeholder="Nueva contraseña (opcional)"
+               [readonly]="!modoEdicion"
+               [class.editable]="modoEdicion">
+        <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()">
+          @if (passwordVisible) {
+            <img ngSrc="/assets/Eye.png" alt="Ocultar" width="24" height="24">
+          } @else {
+            <img ngSrc="/assets/Eye-off.png" alt="Mostrar" width="24" height="24">
+          }
+        </button>
+      </div>
+
+      @if (modoEdicion) {
+        <div class="form-group password-group">
+          <label for="confirmarContrasena">Confirmar Contraseña</label>
+          <input type="password"
+                 id="confirmarContrasena"
+                 formControlName="confirmarContrasena"
+                 placeholder="Repite la nueva contraseña"
+                 [class.editable]="modoEdicion">
+        </div>
+
+        @if (perfilForm.get('confirmarContrasena')?.invalid && (perfilForm.get('confirmarContrasena')?.touched || perfilForm.get('confirmarContrasena')?.dirty)) {
+          <div class="error-message">
+            @if (perfilForm.get('confirmarContrasena')?.errors?.['mustMatch']) {
+              Las contraseñas no coinciden.
+            }
+          </div>
+        }
+      }
+      @if (modoEdicion && perfilForm.get('contrasena')?.invalid && (perfilForm.get('contrasena')?.touched || perfilForm.get('contrasena')?.dirty)) {
+        <div class="error-message">
+          @if (perfilForm.get('contrasena')?.errors?.['minlength']) {
+            La contraseña debe tener al menos 6 caracteres.
+          }
+        </div>
+      }
+
+
+      <div class="perfil-description">
+        <h2 class="perfil-description-title">¡Agrega una descripción a tu perfil!</h2>
+        <div class="form-group">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion"
+                    rows="7"
+                    formControlName="descripcion"
+                    [readonly]="!modoEdicion"
+                    [class.editable]="modoEdicion"></textarea>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+
+
+  <div class="perfil-actions">
+
+    @if (!modoEdicion) {
+      <button type="button" class="btn btn-primary" (click)="activarModoEdicion()">
+        Actualizar perfil
+      </button>
+      <button type="button" class="btn btn-danger" (click)="abrirModalEliminarCuenta()">
+        Eliminar cuenta
+      </button>
+    }
+
+    @if (modoEdicion) {
+      <button type="button"
+              class="btn btn-success"
+              (click)="guardarCambios()"
+              [disabled]="perfilForm.invalid">
+        Guardar Cambios
+      </button>
+      <button type="button" class="btn btn-cancelar" (click)="cancelarEdicion()">
+        Cancelar
+      </button>
+    }
+
+  </div>
+
+</section>
+  @if (mostrarEliminarCuenta) {
+    <section class="eliminar-cuenta" (click)="cerrarModalEliminar()">
+      <div class="overlay-eliminar-cuenta"></div>
+      <div class="eliminar-cuenta-container" (click)="$event.stopPropagation()">
+
+        <img ngSrc="/assets/celebra-emoji-triste.png" width="140" height="140" alt="Emoji triste" class="eliminar-cuenta-emoji">
+
+        <h1>Te echaremos de menos...</h1>
+
+        <a class="eliminar-cuenta-link" (click)="confirmarEliminarCuenta($event)">Eliminar cuenta</a>
+      </div>
+    </section>
+  }
+
+  @if (mostrarImagenModal) {
+    <section class="modal-imagen" (click)="cerrarModalImagen()">
+      <div class="overlay-modal-imagen"></div>
+
+      <div class="modal-imagen-container" (click)="$event.stopPropagation()">
+
+        <button class="modal-imagen-cerrar" (click)="cerrarModalImagen()" type="button">&times;</button>
+
+        <img ngSrc="/assets/thispersondoesnotexist-4.png" alt="Foto de perfil agrandada" class="modal-imagen-img" width="500" height="500">
+
+      </div>
+    </section>
+  }
+</body>
