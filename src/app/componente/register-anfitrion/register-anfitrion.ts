@@ -9,40 +9,36 @@ import {
   ValidationErrors,
   Validators
 } from '@angular/forms';
-import {Proveedor} from '../../model/proveedor';
-import {ProveedorServices} from '../../services/proveedor-services';
-import {Especializacion} from '../../model/especializacion';
-
+import {Anfitrion} from '../../model/anfitrion';
+import {AnfitrionServices} from '../../services/anfitrion-services';
 @Component({
-  selector: 'app-register-proveedor',
+  selector: 'app-register-anfitrion',
   imports: [
     RouterLink,
     NgOptimizedImage,
     ReactiveFormsModule
   ],
-  templateUrl: './register-proveedor.html',
-  styleUrl: './register-proveedor.css',
+  templateUrl: './register-anfitrion.html',
+  styleUrl: './register-anfitrion.css',
 })
-export class RegisterProveedor {
+export class RegisterAnfitrion {
   registroForm: FormGroup;
   private lastErrorCount = 0;
   private headerOffset = 80;
   previewUrl: string | ArrayBuffer | null = null;
   fotoBase64: string = '';
-  route : Router = inject(Router);
-  proveedor: Proveedor[] = [];
-  especializacion: Especializacion[] = [];
-  proveedorService: ProveedorServices = inject(ProveedorServices);
   private fb: FormBuilder = inject(FormBuilder);
+  anfitrion: Anfitrion[] = []
+  route : Router = inject(Router);
   constructor(private el: ElementRef, fb: FormBuilder) {
     this.registroForm = fb.group({
-      Ruc: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11)]],
-      Organizacion: ['', [Validators.required, Validators.minLength(2)]],
+      Nombre: ['', [Validators.required, Validators.minLength(2)]],
       Email: ['', [Validators.required, Validators.email]],
-      Celular: ['', [Validators.required, Validators.minLength(9), Validators.maxLength(9)]],
+      Dni: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8), Validators.pattern('^[0-9]+$')]],
+      Celular: ['', [Validators.required, Validators.minLength(9), Validators.maxLength(9), Validators.pattern('^[0-9]+$')]],
       Contrasena: ['', [Validators.required, Validators.minLength(6)]],
       Contrasena2: ['', Validators.required],
-      Direccion: ['', Validators.required],
+      Apellidos: ['', [Validators.required, Validators.minLength(2)]],
     }, {
       validators: this.passwordMatchValidator
     });
@@ -55,19 +51,16 @@ export class RegisterProveedor {
     const form = this.registroForm.value;
     this.route.navigate(['/register-captcha'], {
       queryParams: {
-        tipo: 'PROVEEDOR',
-        especializacion: {id: 1, nombre: 'Bodas'},
+        tipo: 'ANFITRION',
+        nombre: form.Nombre,
+        apellido: form.Apellidos,
+        dni: form.Dni,
         email: form.Email,
-        ruc: form.Ruc,
-        numerocontacto: form.Celular,
-        nombreorganizacion: form.Organizacion,
+        telefono: form.Celular,
         contrasena: form.Contrasena,
-        direccion: form.Direccion,
         foto: this.fotoBase64 || '',
-        ganancia: 0,
-        valoracion: 0,
         estado: true,
-        role: {id: 2, name: 'ROLE_PROVEEDOR'},
+        role: { id: 3, name: 'ROLE_ANFITRION' }
       }
     });
   }
@@ -118,35 +111,38 @@ export class RegisterProveedor {
     }
     return '';
   }
-  get organizacionError(): string {
-    const organizacionControl = this.registroForm.get('Organizacion');
-    if (organizacionControl?.errors?.['required'] && organizacionControl.touched) {
-      return 'El nombre de la organización es requerido';
+  get nombreError(): string {
+    const nombreControl = this.registroForm.get('Nombre');
+    if (nombreControl?.errors?.['required'] && nombreControl.touched) {
+      return 'El nombre es requerido';
     }
-    if (organizacionControl?.errors?.['minlength'] && organizacionControl.touched) {
-      return 'El nombre de la organización debe tener al menos 2 caracteres';
-    }
-    return '';
-  }
-  get direccionError(): string {
-    const organizacionControl = this.registroForm.get('Direccion');
-    if (organizacionControl?.errors?.['required'] && organizacionControl.touched) {
-      return 'El nombre de la dirección es requerido';
+    if (nombreControl?.errors?.['minlength'] && nombreControl.touched) {
+      return 'El nombre debe tener al menos 2 caracteres';
     }
     return '';
   }
-  get rucError(): string {
-    const rucControl = this.registroForm.get('Ruc');
-    if (!rucControl) return '';
+  get apellidoError(): string {
+    const nombreControl = this.registroForm.get('Apellidos');
+    if (nombreControl?.errors?.['required'] && nombreControl.touched) {
+      return 'El apellido es requerido';
+    }
+    if (nombreControl?.errors?.['minlength'] && nombreControl.touched) {
+      return 'El apellido debe tener al menos 2 caracteres';
+    }
+    return '';
+  }
+  get dniError(): string {
+    const dniControl = this.registroForm.get('Dni');
+    if (!dniControl) return '';
 
-    if (rucControl.errors?.['required'] && rucControl.touched) {
-      return 'El RUC es requerido';
+    if (dniControl.errors?.['required'] && dniControl.touched) {
+      return 'El DNI es requerido';
     }
-    if (rucControl.errors?.['pattern'] && rucControl.touched) {
-      return 'El RUC solo debe contener números';
+    if (dniControl.errors?.['pattern'] && dniControl.touched) {
+      return 'El DNI solo debe contener números';
     }
-    if ((rucControl.errors?.['minlength'] || rucControl.errors?.['maxlength']) && rucControl.touched) {
-      return 'El RUC debe tener 11 dígitos';
+    if ((dniControl.errors?.['minlength'] || dniControl.errors?.['maxlength']) && dniControl.touched) {
+      return 'El DNI debe tener exactamente 8 dígitos';
     }
     return '';
   }

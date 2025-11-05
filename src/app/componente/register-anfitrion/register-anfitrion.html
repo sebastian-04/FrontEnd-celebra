@@ -881,66 +881,66 @@
       <path d="M0 0 C1.98 0 3.96 0 6 0 C6.33 1.32 6.66 2.64 7 4 C6.34 4 5.68 4 5 4 C5 3.34 5 2.68 5 2 C3.35 2 1.7 2 0 2 C0 1.34 0 0.68 0 0 Z " fill="#A0D87D" transform="translate(94,49)"/>
     </svg>
   </div>
-  <section class="registro-anfitrion">
-    <div class="registro-anfitrion-header">
-      <a [routerLink]="['/register']"><img ngSrc="/assets/Arrow%20left-circle.png" width="48" height="48" class="boton-animacion"></a>
-      <h1>Registro: Proveedor</h1>
-    </div>
-    <div class="registro-anfitrion-container">
-      <form [formGroup]="registroForm" class="registro-anfitrion-form">
-        <h3>Complete sus datos</h3>
-        <div class="campo-email">
-          <input id="Email" formControlName="Email" type="text" required placeholder="Email">
-          @if(emailError){
-            <div class="error-message">{{emailError}}</div>
-          }
-        </div>
-        <div class="campo-ruc">
-          <input id="Ruc" formControlName="Ruc" type="text" required placeholder="RUC" pattern="[0-9]*">
-          @if(rucError){
-            <div class="error-message">{{rucError}}</div>
-          }
-        </div>
-        <div class="campo-celular">
-          <input id="Celular" formControlName="Celular" type="text" required placeholder="Numero de contacto" pattern="[0-9]*">
-          @if(celularError){
-            <div class="error-message">{{celularError}}</div>
-          }
-        </div>
-        <div class="campo-organizacion">
-          <input id="Organizacion" formControlName="Organizacion" type="text" required placeholder="Nombre de Organización">
-          @if(organizacionError){
-            <div class="error-message">{{organizacionError}}</div>
-          }
-        </div>
-        <div class="campo-direccion">
-          <input id="Direccion" formControlName="Direccion" type="text" required placeholder="Dirección">
-          @if(direccionError){
-            <div class="error-message">{{direccionError}}</div>
-          }
-        </div>
-        <div class="campo-contrasena">
-          <input id="Contrasena" formControlName="Contrasena" type="password" required placeholder="Contraseña">
-          @if (contrasenaError) {
-            <div class="error-message">{{contrasenaError}}</div>
-          }
-        </div>
-        <div class="campo-contrasena-repetido">
-          <input id="Contrasena2" formControlName="Contrasena2" type="password" required placeholder="Repetir contraseña">
-          @if (contrasena2Error) {
-            <div class="error-message">{{contrasena2Error}}</div>
-          }
-        </div>
-        <div class="campo-foto">
-          <div class="foto-container">
-            <img [src]="previewUrl || '/assets/Group%20633475.png'" height="157" width="142" class="img-1">
+    <section class="registro-anfitrion">
+      <div class="registro-anfitrion-header">
+        <a [routerLink]="['/register']"><img ngSrc="/assets/Arrow%20left-circle.png" width="48" height="48" class="boton-animacion"></a>
+        <h1>Registro: Anfitrión</h1>
+      </div>
+      <div class="registro-anfitrion-container">
+        <form [formGroup]="registroForm" class="registro-anfitrion-form">
+          <h3>Complete sus datos</h3>
+          <div class="campo-nombreyapellidos">
+            <input id="Nombre" formControlName="Nombre" type="text" required placeholder="Nombres">
+            @if(nombreError){
+              <div class="error-message">{{nombreError}}</div>
+            }
           </div>
-        </div>
-        <input type="file" id="file-input" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
-        <button type="button" class="campo-foto-boton" (click)="triggerFileInput()">Subir foto</button>
-        <button type="button" [disabled]="registroForm.invalid" class="registro-anfitrion-boton" [routerLink]="['/register-captcha']" (click)="continuarRegistro()">Confirmar Registro</button>
-      </form>
-    </div>
-  </section>
+          <div class="campo-apellidos">
+            <input id="Apellidos" formControlName="Apellidos" type="text" required placeholder="Apellidos">
+            @if(apellidoError){
+              <div class="error-message">{{apellidoError}}</div>
+            }
+          </div>
+          <div class="campo-dni">
+            <input id="Dni" formControlName="Dni" type="text" required placeholder="DNI" pattern="[0-9]*">
+            @if(dniError){
+              <div class="error-message">{{dniError}}</div>
+            }
+          </div>
+          <div class="campo-email">
+            <input id="Email" formControlName="Email" type="text" required placeholder="Email">
+            @if(emailError){
+              <div class="error-message">{{emailError}}</div>
+            }
+          </div>
+          <div class="campo-celular">
+            <input id="Celular" formControlName="Celular" type="text" required placeholder="Celular" pattern="[0-9]*">
+            @if(celularError){
+              <div class="error-message">{{celularError}}</div>
+            }
+          </div>
+          <div class="campo-contrasena">
+            <input id="Contrasena" formControlName="Contrasena" type="password" required placeholder="Contraseña">
+            @if(contrasenaError){
+              <div class="error-message">{{contrasenaError}}</div>
+            }
+          </div>
+          <div class="campo-contrasena-repetido">
+            <input id="Contrasena2" formControlName="Contrasena2" type="password" required placeholder="Repetir contraseña">
+            @if (contrasena2Error) {
+              <div class="error-message">{{contrasena2Error}}</div>
+            }
+          </div>
+          <div class="campo-foto">
+            <div class="foto-container">
+              <img [src]="previewUrl || '/assets/Group%20633475.png'" height="157" width="142"  class="img-1">
+            </div>
+          </div>
+          <input type="file" id="file-input" (change)="onFileSelected($event)" accept="image/*" style="display: none;">
+          <button type="button" class="campo-foto-boton" (click)="triggerFileInput()">Subir foto</button>
+          <button type="button" [disabled]="registroForm.invalid" [routerLink]="['/register-captcha']" class="registro-anfitrion-boton" (click)="continuarRegistro()">Confirmar Registro</button>
+        </form>
+      </div>
+    </section>
   </body>
 </div>
