@@ -1,0 +1,217 @@
+<section class="encabezado">
+  <div class="encabezado-logos">
+    <img ngSrc="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img">
+  </div>
+  @if (usuario.role?.name === 'ROLE_ANFITRION'){
+    <div class="encabezado-buscar">
+      <form [formGroup]="buscarForm" class="encabezado-buscar-formulario">
+        <div class="campo-donde">
+          <input id="Donde" formControlName="Donde" type="text" required>
+          <label for="Donde">Dónde</label>
+        </div>
+        <div class="campo-aforo">
+          <input id="Aforo" formControlName="Aforo" type="number" required>
+          <label for="Aforo">Aforo</label>
+        </div>
+        <div class="campo-fecha">
+          <input id="Fecha" formControlName="Fecha" type="date" required>
+          <label for="Fecha">Fecha</label>
+          <div class="campo-fecha-buscar" [class.invalido]="buscarForm.invalid">
+            <a href="#">
+              <button type="submit" [disabled]="buscarForm.invalid" [routerLink]="['/buscar-eventos',anfitrion.id]" [queryParams]="{}"><img ngSrc="/assets/search-13-xxl%201.png" width="22" height="22" class="buscar-img" [class.invalido]="buscarForm.invalid"></button>
+            </a>
+          </div>
+        </div>
+      </form>
+      <div class="encabezado-buscar-avanzada" [class.activo]="mostrarFiltrosAvanzados">
+        <div class="encabezado-buscar-avanzada-container">
+          <img ngSrc="/assets/icon.png" width="28" height="28" class="buscar-avanzada-img" (click)="toggleFiltrosAvanzados();">
+        </div>
+      </div>
+    </div>
+  }
+  <div class="overlay-buscar-avanzada" [class.activo]="mostrarFiltrosAvanzados" (click)="cerrarFiltrosAvanzados()">
+    @if (mostrarFiltrosAvanzados){
+      <form [formGroup]="buscarAvanzadaForm" class="encabezado-buscar-avanzada-cuadro" (click)="$event.stopPropagation()">
+        <div class="encabezado-buscar-avanzada-cuadro-inicio">
+          <h3 class="encabezado-buscar-avanzada-cuadro-h3">Filtros Avanzados</h3>
+          <img ngSrc="/assets/X.png" width="29" height="28" class="X" (click)="toggleFiltrosAvanzados()">
+        </div>
+        <div class="filtros-avanzados">
+          <div class="filtros-avanzados-ubicacion">
+            <div class="filtros-avanzados-ubicacion-1">
+              <h3>Ubicación</h3>
+              <img ngSrc="/assets/location_on.png" width="14" height="14">
+            </div>
+            <input formControlName="UbicacionAvanzada" type="text" required>
+          </div>
+          <div class="filtros-avanzados-tipoevento">
+            <div class="filtros-avanzados-tipoevento-1">
+              <h3>Tipo de evento</h3>
+              <img ngSrc="/assets/icononpng.png" width="10" height="5">
+            </div>
+            <input formControlName="TipoEventoAvanzada" type="text" required>
+          </div>
+          <div class="filtros-avanzados-fechainicio">
+            <div class="filtros-avanzados-fechainicio-1">
+              <h3>Fecha inicio</h3>
+              <img ngSrc="/assets/Icononcalendar1.png" width="15" height="16">
+            </div>
+            <input formControlName="FechaInicioAvanzada" type="date" required>
+          </div>
+          <div class="filtros-avanzados-fechafin">
+            <div class="filtros-avanzados-fechafin-1">
+              <h3>Fecha fin</h3>
+              <img ngSrc="/assets/Icononcalendar2.png" width="15" height="16">
+            </div>
+            <input formControlName="FechaFinAvanzada" type="date" required>
+          </div>
+          <div class="filtros-avanzados-aforo">
+            <div class="filtros-avanzados-aforo-1">
+              <h3>Aforo</h3>
+              <img ngSrc="/assets/icononperson.png" width="12" height="12">
+            </div>
+            <input formControlName="AforoAvanzada" type="number" required>
+          </div>
+          <div class="filtros-avanzados-presupuesto">
+            <div class="filtros-avanzados-presupuesto-1">
+              <h3>Presupuesto</h3>
+              <img ngSrc="/assets/Iconondolar.png" width="9" height="16">
+            </div>
+            <input formControlName="PresupuestoAvanzada" type="number" required>
+          </div>
+        </div>
+        <button type="submit" [disabled]="buscarAvanzadaForm.invalid" [routerLink]="['/']" [queryParams]="{}" class="boton-buscar">Buscar</button>
+      </form>
+    }
+  </div>
+  @if (usuario.role?.name === 'ROLE_ANFITRION'){
+    <a class="encabezado-h3" href="#">Conviertete en un proveedor</a>
+  } @else {
+    <a class="encabezado-h3-p" href="#">Conviertete en un anfitrión</a>
+  }
+  <div class="encabezado-perfil">
+    @if (usuario.role?.name === 'ROLE_ANFITRION'){
+      <img [src]="anfitrion.foto" width="60" height="60">
+    } @else {
+      <img [src]="proveedor.foto" width="60" height="60">
+    }
+    <div class="encabezado-perfil-container" (click)="toggleMenuPerfil()">
+      <h3 class="encabezado-perfil-container-1">inicio de sesión como:</h3>
+      @if (usuario.role?.name === 'ROLE_ANFITRION'){
+        <h3 class="encabezado-perfil-container-2">{{anfitrion.email}}</h3>
+      } @else {
+        <h3 class="encabezado-perfil-container-2">{{proveedor.email}}</h3>
+      }
+    </div>
+    <div class="encabezado-perfil-menu" [class.activo]="menuPerfilActivo">
+      <nav class="encabezado-perfil-menu-nav">
+        <ul class="encabezado-perfil-menu-ul">
+          @if (usuario.role?.name === 'ROLE_ANFITRION'){
+            <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', anfitrion.id]">Ver mi perfil</a></li>
+          } @else {
+            <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', proveedor.id]">Ver mi perfil</a></li>
+          }
+          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+<body>
+<section class="menu-hamburguesa">
+  <div class="menu-hamburguesa-boton" [class.desactivado]="mostrarFiltrosAvanzados" (click)="toggleMenu()">
+    <img ngSrc="/assets/Menu.png" width="41" height="41" class="menu-hamburguesa-img">
+  </div>
+  <div class="overlay" [class.activo]="menuActivo"></div>
+  @if (usuario.role?.name === 'ROLE_ANFITRION'){
+    <nav class="menu-hamburguesa-text">
+      <ul class="menu-hamburguesa-text-1">
+        <li><a class="EventosEnCurso" href="#">Eventos en curso</a></li>
+        <li><a class="HistorialDeEventos" href="#">Historial de eventos</a></li>
+        <li><a class="ChatearConLaIA" href="#">Chatear con la IA</a></li>
+        <li><a class="CentroDeAyuda" [routerLink]="['/centro-ayuda', anfitrion.id, anfitrion.role?.name]">Centro de ayuda</a></li>
+      </ul>
+      <ul class="menu-hamburguesa-text-2">
+        <li><a class="Configuracion" [routerLink]="['/configuracion', anfitrion.id, anfitrion.role?.name]">Configuración</a></li>
+        <li><a class="CerrarSesion" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+        <li><a class="legal" [routerLink]="['/legal', anfitrion.id, anfitrion.role?.name]">Legal</a></li>
+      </ul>
+    </nav>
+  } @else {
+    <nav class="menu-hamburguesa-text">
+      <ul class="menu-hamburguesa-text-1-p">
+        <li><a class="ContratosActuales-p" [routerLink]="['/crear-evento', proveedor.id]">Crear eventos</a></li>
+        <li><a class="HistorialDeContratos-p" href="#">Historial de contratos</a></li>
+        <li><a class="ConsultarReportes-p" href="#">Consultar reportes</a></li>
+        <li><a class="ChatearConLaIA-p" href="#">Chatear con la IA</a></li>
+        <li><a class="CentroDeAyuda-p" [routerLink]="['/centro-ayuda', proveedor.id, proveedor.role?.name]">Centro de ayuda</a></li>
+      </ul>
+      <ul class="menu-hamburguesa-text-2-p">
+        <li><a class="Configuracion-p" [routerLink]="['/configuracion', proveedor.id, proveedor.role?.name]">Configuración</a></li>
+        <li><a class="CerrarSesion-p" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+        <li><a class="legal-p" [routerLink]="['/legal', proveedor.id, proveedor.role?.name]">Legal</a></li>
+      </ul>
+    </nav>
+  }
+</section>
+  @if (mostrarCerrarSesion) {
+    <section class="cerrar-sesion">
+      <div class="overlay-cerrar-sesion"></div>
+      <div class="cerrar-sesion-container" (click)="$event.stopPropagation()">
+        <h1>Cerrar Sesión</h1>
+        <h3>¿Estas seguro de cerrar tu sesión?</h3>
+        <div class="cerrar-sesion-container-botones" (click)="cerrarSesion()">
+          <button class="boton-si" (click)="confirmarCerrarSesion($event)"><a href="">Sí</a></button>
+          <button class="boton-no" (click)="cancelarCerrarSesion($event)">No</button>
+        </div>
+      </div>
+    </section>
+  }
+<!-- Empieza comunicate-con-nosotros -->
+<section class="comunicate-section">
+  <div class="contact-wrapper">
+    <div class="contact-container-1">
+      @if (usuario.role?.name === 'ROLE_ANFITRION'){
+        <a [routerLink]="['/centro-ayuda', anfitrion.id, anfitrion.role?.name]"><img ngSrc="/assets/back.png" width="44" height="44" class="back-img"></a>
+      } @else {
+        <a [routerLink]="['/centro-ayuda', proveedor.id, proveedor.role?.name]"><img ngSrc="/assets/back.png" width="44" height="44" class="back-img"></a>
+      }
+      <h1>Comunicate con nosotros</h1>
+    </div>
+    <div class="contact-options-container">
+      <div class="contact-card">
+
+        <h3>Atención por WhatsApp</h3>
+        <div class="icon-wrapper">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Logo de WhatsApp">
+        </div>
+        <button class="contact-button" (click)="iniciarChatWhatsApp()">
+          Comienza conversación por WhatsApp
+        </button>
+      </div>
+
+      <div class="contact-card">
+        <h3>Atención por Correo Electrónico</h3>
+        <div class="icon-wrapper">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Logo de Gmail">
+        </div>
+        <button class="contact-button" (click)="enviarCorreo()">
+          Enviar un correo
+        </button>
+      </div>
+
+      <div class="contact-card">
+        <h3>Chatea con Celebot</h3>
+        <div class="icon-wrapper">
+          <img src="assets/image 195.png" alt="Logo de Celebot" class="celebot-icon">
+        </div>
+        <button class="contact-button" (click)="abrirChatbot()">
+          Chatea con Celebot
+        </button>
+      </div>
+
+    </div>
+  </div>
+</section>
+</body>
