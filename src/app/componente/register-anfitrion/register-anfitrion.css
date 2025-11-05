@@ -74,14 +74,15 @@ nav #becameAnAnfitrion a{
   margin-top: -0.25rem;
   margin-bottom: 0.5rem;
 }
-.campo-direccion,
-.campo-organizacion,
-.campo-ruc,
+.campo-nombreyapellidos,
+.campo-dni,
 .campo-celular,
 .campo-contrasena,
 .campo-contrasena-repetido,
 .campo-foto,
-.campo-email{
+.campo-descripcion,
+.campo-email,
+.campo-apellidos{
   margin-bottom: 1rem;
 }
 .registro-anfitrion-form input{
@@ -135,13 +136,13 @@ nav #becameAnAnfitrion a{
   z-index: 1001;
   position: relative;
 }
-.campo-direccion input::placeholder,
-.campo-organizacion input::placeholder,
-.campo-ruc input::placeholder,
+.campo-nombreyapellidos input::placeholder,
+.campo-dni input::placeholder,
 .campo-email input::placeholder,
 .campo-celular input::placeholder,
 .campo-contrasena input::placeholder,
-.campo-contrasena-repetido input::placeholder {
+.campo-contrasena-repetido input::placeholder,
+.campo-apellidos input::placeholder{
   transform: translateY(-8px);
   font-size: 10px;
   color: #666;
