@@ -1,0 +1,160 @@
+header{
+  padding: 1rem;
+}
+
+nav {
+  border-bottom: #c4c4c4 solid 1px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+
+}
+/* Con esto se incluye ambos li para no incluirlo en cada uno */
+nav ul li{
+  list-style: none;
+}
+/* Se separa un poco el "Conviertete en un anfitrión" de la parte final derecha*/
+nav #becameAnAnfitrion li {
+  padding-right: 9em;
+}
+/* Se le coloca el tamaño de acuerdo al Figma */
+nav #becameAnAnfitrion a{
+  font-size: 16px;
+  color: black;
+}
+nav {
+  border-bottom: #c4c4c4 solid 1px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+/* Con esto se incluye ambos li para no incluirlo en cada uno */
+nav ul li{
+  list-style: none;
+}
+/* Se separa un poco el "Conviertete en un anfitrión" de la parte final derecha*/
+nav #becameAnAnfitrion li {
+  padding-right: 9em;
+}
+/* Se le coloca el tamaño de acuerdo al Figma */
+nav #becameAnAnfitrion a{
+  font-size: 16px;
+  color: black;
+}
+#backgroundImage {
+  width:100%;
+  height: 100%;
+  z-index: -9999 !important;
+  position: absolute;
+}
+#backgroundImage svg{
+  width: 100%;
+  height: 100%;
+}
+#SelectorSection {
+  padding: 80px 145px 80px 145px; /*Arriba, Derecha, Abajo, Izquierda*/
+}
+#SelectorSection h1 {
+  align-content: flex-start;
+  font-size: 36px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  margin-top: -2rem;
+}
+#ChooseTheRolPrincipal {
+  justify-items: center;
+  border: 1px solid black;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0.125rem 0.125rem 0.3rem #5D5D5D;
+}
+#ChooseTheRol{
+  display: flex;
+  margin-bottom: 88px;
+  gap: 118px;
+}
+.text{
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+}
+#RegisterAsAnfitrionbtn {
+  text-decoration: none;
+  color: black;
+  transition: .3s;
+  font-family: 'Inter', sans-serif;
+}
+#RegisterAsAnfitrionbtn:hover{
+  opacity: 0.5;
+  color: white;
+  #RegisterAsAnfitrion {
+    background: #000;
+    transition: .3s;
+  }
+  transition: .3s;
+}
+#ChooseTheRol #RegisterAsAnfitrion {
+  width: 448px;
+  height: 361px;
+  border: 1px solid black;
+  border-radius: 12px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center;   /* Centra verticalmente */
+  margin-top: 1.5rem;
+}
+#ChooseTheRol #RegisterAsAnfitrion p {
+  padding: 20px 53px 20px 53px; /* Arriba, Derecha, Abajo, Izquierda */
+  background: #E4CCFF;
+  border: 1px solid #D577FF
+}
+#RegisterAsProoveedorbtn {
+  text-decoration: none;
+  color: black;
+  transition: .3s;
+  font-family: 'Inter', sans-serif;
+}
+#RegisterAsProoveedorbtn:hover{
+  opacity: 0.5;
+  color: white;
+  #RegisterAsProovedor {
+    background: #000;
+    transition: .3s;
+  }
+  transition: .3s;
+}
+#ChooseTheRol #RegisterAsProovedor {
+  width: 448px;
+  height: 361px;
+  border: 1px solid black;
+  border-radius: 12px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center;   /* Centra verticalmente */
+  margin-top: 1.5rem;
+}
+#ChooseTheRol #RegisterAsProovedor p {
+  padding: 20px 53px 20px 53px; /* Arriba, Derecha, Abajo, Izquierda */
+  background: #E4CCFF;
+  border: 1px solid #D577FF;
+  border-radius: 10px;
+
+}
+.h3{
+  color: #5D5D5D;
+}
+.p{
+  color: #FFFFFF;
+  border-radius: 10px;
+}
+.h1-text{
+  margin-bottom: 2rem;
+}
