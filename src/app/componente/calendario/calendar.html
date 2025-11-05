@@ -1,0 +1,84 @@
+<div class="calendar-root" role="application" aria-label="Calendario">
+  <div class="calendar-header">
+    <button class="nav-btn" (click)="prevMonth()" aria-label="Mes anterior">‹</button>
+
+    <div class="month-year">
+      <button class="month-btn" (click)="toggleMonthPicker()">
+        {{ months[viewMonth] }}
+      </button>
+      <button class="year-btn" (click)="toggleYearPicker()">
+        {{ viewYear }}
+      </button>
+    </div>
+
+    <button class="nav-btn" (click)="nextMonth()" aria-label="Mes siguiente">›</button>
+  </div>
+
+  <div class="pickers">
+    @if (showMonthPicker) {
+      <div class="month-picker-overlay">
+        <div class="month-picker">
+          <div class="month-grid">
+            @for (m of months; track idx; let idx = $index) {
+              <button class="month-item" (click)="pickMonth(idx)">
+                {{ m.slice(0, 3) }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    @if (showYearPicker) {
+      <div class="year-picker-overlay">
+        <div class="year-picker">
+          <div class="year-grid">
+            @for (y of getYearRange(); track y) {
+              <button class="year-item" (click)="pickYear(y)">
+                {{ y }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="weeknames">
+    <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+  </div>
+
+  <div class="weeks">
+    @for (week of weeks; track idx; let idx = $index) {
+      <div class="week">
+        @for (cell of week; track cell.date) {
+          <div class="day"
+               [class.out-of-month]="!cell.inMonth"
+               [class.today]="isToday(cell.date)"
+               [class.selected]="isSelected(cell.date)"
+               [class.in-range]="isInRange(cell.date)"
+               (click)="endRange(cell.date)">
+            <span class="day-num">{{ cell.day }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="calendar-footer">
+    <button class="today-btn" (click)="goToToday()">Hoy</button>
+
+    @if (selectedStartDate && selectedEndDate) {
+      <div class="selected-info">
+        Rango seleccionado:
+        {{ selectedStartDate | date:'mediumDate' }} – {{ selectedEndDate | date:'mediumDate' }}
+      </div>
+    }
+
+    @if (selectedStartDate && !selectedEndDate) {
+      <div class="selected-info">
+        Fecha de inicio: {{ selectedStartDate | date:'mediumDate' }}
+      </div>
+    }
+  </div>
+</div>
