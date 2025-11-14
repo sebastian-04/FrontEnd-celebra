@@ -1,0 +1,374 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:host {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
+  background-color: #f5f5f5;
+}
+
+.encabezado {
+  width: 100%;
+  display: flex;
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #d9d9d9;
+  height: 6.25rem;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1001;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.encabezado-logos {
+  cursor: pointer;
+}
+
+.encabezado-logos-img {
+  max-width: 14rem;
+  max-height: 5rem;
+}
+
+.encabezado-perfil {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-right: 3rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.encabezado-perfil-container-1 {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #949494;
+}
+
+.encabezado-perfil-container-2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e1e1e;
+  text-decoration: underline;
+}
+
+.encabezado-perfil-menu {
+  position: absolute;
+  left: 0;
+  z-index: 1100;
+  margin-top: 9rem;
+  width: 100%;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-7px);
+  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+}
+
+.encabezado-perfil-menu.activo {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.encabezado-perfil-menu-nav {
+  border: 1px solid #d9d9d9;
+  background-color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.encabezado-perfil-menu-ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.encabezado-perfil-menu-ul li a {
+  display: block;
+  text-decoration: underline;
+  color: #000;
+  padding: 0.8rem 2rem;
+  text-align: center;
+  transition: background-color 0.2s ease;
+}
+
+.encabezado-perfil-menu-ul li a:hover {
+  background-color: #e2c9ff;
+}
+
+.mantenimiento {
+  margin-top: 6.25rem;
+  height: calc(100vh - 6.25rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.contenedor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #f9f9f9;
+
+}
+
+.toolbar {
+  background: #ede7f6;
+  color: #4a148c;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 0 2rem;
+  gap: 2rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.titulo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.campo-toolbar {
+  width: 220px;
+}
+
+.contenido {
+  flex: 1;
+  display: flex;
+  padding: 2rem;
+  gap: 2rem;
+  overflow: auto;
+}
+
+.panel-listado {
+  flex: 1;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  overflow: auto;
+}
+
+.panel-listado h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.panel-formulario {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+mat-card {
+  width: 100%;
+  max-width: 600px;
+  padding: 1rem;
+}
+
+mat-card-title {
+  font-weight: 600;
+  color: #4a148c;
+}
+
+mat-form-field.campo {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+mat-form-field.combo {
+  width: 220px;
+  margin: 0 10px;
+  z-index: 20;
+}
+
+.mat-form-field input {
+  text-align: center;
+}
+
+mat-form-field.mat-form-field {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.mat-select-value {
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.mat-form-field-label {
+  width: 100%;
+  text-align: center !important;
+}
+
+.mat-select-value-text {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.mat-select-value,
+.mat-select-value-text,
+.mat-select-trigger {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100%;
+}
+
+.mat-input-element {
+  text-align: center !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+
+.mat-input-element::placeholder {
+  padding-left: 12px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+button[mat-raised-button] {
+  background-color: #8e24aa;
+  color: white;
+}
+
+button[mat-stroked-button] {
+  color: #8e24aa;
+  border-color: #8e24aa;
+}
+
+.boton-si, .boton-no {
+  background-color: #e2c9ff;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4a148c;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.boton-si:hover, .boton-no:hover {
+  background-color: #d1b2ff;
+  transform: scale(1.05);
+}
+
+.header-controles {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.formulario-entidad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-cerrar-sesion {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+}
+
+.cerrar-sesion {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000 !important;
+}
+
+.cerrar-sesion-container {
+  background: #ffffff;
+  padding: 3rem 5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  text-align: center;
+  z-index: 2001 !important;
+}
+
+.cerrar-sesion-container h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e1e1e;
+}
+
+.cerrar-sesion-container h3 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #757575;
+  margin-top: 1rem;
+}
+
+.cerrar-sesion-container-botones {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.panel-listado, .panel-formulario {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.panel-listado.ng-enter, .panel-formulario.ng-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.mat-option-text {
+  text-align: center !important;
+  width: 100%;
+  justify-content: center;
+  display: flex;
+}
+
+.mat-select-panel {
+  background-color: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ddd;
+}
+
+.mat-form-field-infix {
+  text-align: center !important;
+  display: flex;
+  justify-content: center;
+}
+.encabezado-perfil img{
+  border-radius: 50%;
+  object-fit: cover;
+}
