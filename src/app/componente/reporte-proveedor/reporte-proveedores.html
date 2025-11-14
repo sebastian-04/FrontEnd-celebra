@@ -1,0 +1,108 @@
+<section class="encabezado">
+  <div class="encabezado-logos">
+    <a [routerLink]="['']"><img ngSrc="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img"></a>
+  </div>
+  <a class="encabezado-h3-p" [routerLink]="['/register-anfitrion']">Conviertete en un anfitrión</a>
+  <div class="encabezado-perfil">
+    <img [src]="proveedor.foto" width="60" height="60">
+    <div class="encabezado-perfil-container" (click)="toggleMenuPerfil()">
+      <h3 class="encabezado-perfil-container-1">inicio de sesión como:</h3>
+      <h3 class="encabezado-perfil-container-2">{{proveedor.email}}</h3>
+    </div>
+    <div class="encabezado-perfil-menu" [class.activo]="menuPerfilActivo">
+      <nav class="encabezado-perfil-menu-nav">
+        <ul class="encabezado-perfil-menu-ul">
+          <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', proveedor.id, proveedor.role?.name]">Ver mi perfil</a></li>
+          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+<body>
+<section class="menu-hamburguesa">
+  <div class="menu-hamburguesa-boton" [class.desactivado]="mostrarFiltrosAvanzados" (click)="toggleMenu()">
+    <img ngSrc="/assets/Menu.png" width="41" height="41" class="menu-hamburguesa-img">
+  </div>
+  <div class="overlay" [class.activo]="menuActivo"></div>
+  <nav class="menu-hamburguesa-text">
+    <ul class="menu-hamburguesa-text-1">
+      <li><a class="ContratosActuales" [routerLink]="['/listar-eventos', proveedor.id]">Crear eventos</a></li>
+      <li><a class="HistorialDeContratos" [routerLink]="['/historial-contratos', proveedor.id]">Historial de contratos</a></li>
+      <li><a class="ConsultarReportes" href="#">Consultar reportes</a></li>
+      <li><a class="ChatearConLaIA" href="#">Chatear con la IA</a></li>
+      <li><a class="CentroDeAyuda" [routerLink]="['/centro-ayuda', proveedor.id, proveedor.role?.name]">Centro de ayuda</a></li>
+    </ul>
+    <ul class="menu-hamburguesa-text-2">
+      <li><a class="Configuracion" [routerLink]="['/configuracion', proveedor.id, proveedor.role?.name]">Configuración</a></li>
+      <li><a class="CerrarSesion" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+      <li><a class="legal" [routerLink]="['/legal', proveedor.id, proveedor.role?.name]">Legal</a></li>
+    </ul>
+  </nav>
+</section>
+  @if (mostrarCerrarSesion) {
+    <section class="cerrar-sesion">
+      <div class="overlay-cerrar-sesion"></div>
+      <div class="cerrar-sesion-container" (click)="$event.stopPropagation()">
+        <h1>Cerrar Sesión</h1>
+        <h3>¿Estas seguro de cerrar tu sesión?</h3>
+        <div class="cerrar-sesion-container-botones" (click)="cerrarSesion()">
+          <button class="boton-si" (click)="confirmarCerrarSesion($event)"><a [routerLink]="['/']">Sí</a></button>
+          <button class="boton-no" (click)="cancelarCerrarSesion($event)">No</button>
+        </div>
+      </div>
+    </section>
+  }
+<section class="historial-contenido">
+  <div class="historial-header">
+    <a [routerLink]="['/menu-proveedor', proveedor.id]"><img src="/assets/back.png" height="44" width="44" class="back"></a>
+    <h3 class="consulta-text">Consulta de reportes</h3>
+  </div>
+  <form [formGroup]="historialForm" class="historial-filtro">
+    <label for="filtro-select">Filtrar por</label>
+    <select id="filtro-select" formControlName="filtro">
+      <option value="ultimomes">En el último mes</option>
+      <option value="ultimos3meses">En los últimos 3 meses</option>
+      <option value="ultimos6meses">En los últimos 6 meses</option>
+      <option value="ultimoanio">A lo largo del tiempo</option>
+    </select>
+    <div class="filtro-grupo">
+      <label for="tipo-grafico-select">Tipo de gráfico</label>
+      <select id="tipo-grafico-select" formControlName="tipoGrafico">
+        <option value="line">Línea</option>
+        <option value="bar">Barra (Histograma)</option>
+        <option value="pie">Torta (Porcentaje)</option>
+      </select>
+    </div>
+  </form>
+  <div class="grafico-container">
+    <canvas id="graficoGanancias"></canvas>
+  </div>
+  <div class="kpi-container">
+
+    <div class="kpi-box">
+      <span class="kpi-label">MES CON MENOR GANANCIA</span>
+      <span class="kpi-valor-sub">{{ mesMenorGanancia }}</span>
+      <span class="kpi-valor-monto">
+      {{"S/." + montoMenorGanancia }}
+    </span>
+    </div>
+
+    <div class="kpi-box kpi-box--total">
+      <span class="kpi-label">GANANCIAS TOTALES</span>
+      <span class="kpi-valor-total">
+      {{"S/." + gananciaTotal }}
+    </span>
+    </div>
+
+    <div class="kpi-box">
+      <span class="kpi-label">MES CON MAYOR GANANCIA</span>
+      <span class="kpi-valor-sub">{{ mesMayorGanancia }}</span>
+      <span class="kpi-valor-monto">
+      {{"S/." + montoMayorGanancia }}
+    </span>
+    </div>
+
+  </div>
+</section>
+
