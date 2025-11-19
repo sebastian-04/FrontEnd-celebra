@@ -160,14 +160,13 @@
                   @if (obtenerImagenesPorEvento(evento.id || 0).length > 1) {
                     <div class="carrusel" [attr.data-evento-id]="evento.id">
                       @for (img of obtenerImagenesPorEvento(evento.id!); track img; let j = $index) {
-                        <img [src]="getImagenSrc(img.imagen)" alt="Imagen del evento" class="carrusel-img" [class.activa]="j === indices[evento.id!]" [class.saliente]="haIniciadoAnimacion[evento.id!] && j === indicePrevio[evento.id!]"/>
+                        <img [src]="getImagenSrc(img.imagen)" class="carrusel-img" [class.activa]="j === indices[evento.id!]" [class.saliente]="haIniciadoAnimacion[evento.id!] && j === indicePrevio[evento.id!]"/>
                       }
                     </div>
                   } @else {
-                    <img [src]="obtenerImagenPorEvento(evento.id || 0)" alt="Imagen del evento" class="img-eventos">
+                    <img [src]="obtenerImagenPorEvento(evento.id || 0)" class="img-eventos">
                   }
                   <img ngSrc="/assets/Heart.png" width="36" height="36" class="evento-corazon" (click)="onCorazonClick($event)">
-                  <img [alt]="evento.titulo" class="evento-imagen">
                 </div>
                 <div class="evento-contenido-1">
                   <h3 class="evento-titulo">{{evento.titulo}}</h3>
@@ -207,13 +206,80 @@
                   <h1>Cerrar Sesión</h1>
                   <h3>¿Estas seguro de cerrar tu sesión?</h3>
                   <div class="cerrar-sesion-container-botones" (click)="cerrarSesion()">
-                    <button class="boton-si" (click)="confirmarCerrarSesion($event)"><a href="">Sí</a></button>
+                    <button class="boton-si" (click)="confirmarCerrarSesion($event)"><a [routerLink]="['']">Sí</a></button>
                     <button class="boton-no" (click)="cancelarCerrarSesion($event)">No</button>
                   </div>
                 </div>
           </section>
         }
-    <section class="IA">
+    <section class="chat">
+      <div class="chat-widget-container">
 
+        <div class="chat-views-wrapper" [class.visible]="chatVisible">
+          <div class="chat-list" [class.active]="activeChatName === null">
+            @for (c of chats; track c.id) {
+              <div class="chat-item"
+                   (click)="selectChat(c.proveedor.nombreorganizacion ?? '',c.proveedor.foto ?? null,c.id)">
+                <img [src]="c.proveedor.foto ?? 'assets/default-avatar.png'" class="chat-avatar" alt="Avatar">
+                <span class="chat-name">{{ c.proveedor.nombreorganizacion }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="chat-window" [class.active]="activeChatName !== null">
+
+            <div class="chat-window-header">
+              <button class="chat-back-button" (click)="selectChat(null, null)">&larr;</button>
+              <img [src]="activeChatAvatar ?? '/assets/default.png'" alt="Avatar" class="chat-avatar">
+              <span class="chat-name">{{ activeChatName }}</span>
+            </div>
+
+            <div class="chat-window-body" #scrollContainer>
+              @for (m of mensajes; track m.id) {
+                <div class="msg-date">
+                  {{ m.fechaenvio | date:'yyyy-MM-dd HH:mm' }}
+                </div>
+
+                <div class="message-row"
+                     [class.outgoing-row]="m.esPropio"
+                     [class.incoming-row]="!m.esPropio">
+
+                  @if (!m.esPropio && anfitrion) {
+                    <img [src]="activeChatAvatar" class="chat-avatar-msg">
+                  }
+
+                  <div class="message-content-wrapper">
+                    <div class="message-sender-name">
+                      @if (m.esPropio && anfitrion) {
+                        {{ anfitrion.nombre + ' ' + anfitrion.apellido }}
+                      } @else {
+                        {{ activeChatName }}
+                      }
+                    </div>
+                    <div class="message-bubble"
+                         [class.message-outgoing]="!m.esPropio"
+                         [class.message-incoming]="m.esPropio">
+                      <span [lang]="'es'">{{ m.contenido }}</span>
+                    </div>
+                  </div>
+                  @if (m.esPropio) {
+                    <img [src]="anfitrion.foto" class="chat-avatar-msg">
+                  }
+                </div>
+              }
+            </div>
+            <div class="chat-window-footer">
+              <input type="text"
+                     [(ngModel)]="mensajeTexto"
+                     placeholder="Escribe un mensaje..."
+                     (keyup.enter)="enviarMensaje()">
+              <button class="send-button" (click)="enviarMensaje()">&#9658;</button>
+            </div>
+          </div>
+        </div>
+        <button class="chat-open-button" [class.activo]="chatVisible" (click)="toggleChat()">
+          Click para abrir sus chats con proveedores
+        </button>
+      </div>
     </section>
   </body>
