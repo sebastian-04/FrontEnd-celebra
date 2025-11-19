@@ -1,5 +1,5 @@
-import {ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
-import {CurrencyPipe, NgOptimizedImage} from "@angular/common";
+import {ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {CurrencyPipe, DatePipe, NgOptimizedImage} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProveedorServices} from '../../services/proveedor-services';
@@ -20,6 +20,10 @@ import {startWith} from 'rxjs/operators';
 import {GananciaProveedorDTO} from '../../model/gananciaProveedorDTO';
 import {ReporteProveedorServices} from '../../services/reporte-proveedor-services';
 import {Chart, ChartConfiguration, ChartType, registerables} from 'chart.js';
+import {Mensaje} from '../../model/mensaje';
+import {MensajeServices} from '../../services/mensaje-services';
+import {Chat} from '../../model/chat';
+import {ChatServices} from '../../services/chat-services';
 
 @Component({
   selector: 'app-reporte-proveedor',
@@ -28,6 +32,7 @@ import {Chart, ChartConfiguration, ChartType, registerables} from 'chart.js';
     RouterLink,
     FormsModule,
     ReactiveFormsModule,
+    DatePipe,
   ],
   templateUrl: './reporte-proveedores.html',
   styleUrl: './reporte-proveedores.css',
@@ -48,6 +53,17 @@ export class ReporteProveedores implements OnInit {
   reporteProveedorService: ReporteProveedorServices = inject(ReporteProveedorServices);
 
   // Datos
+  private pollingInterval: any;
+  private chatListPollingInterval: any;
+  mensajes: Mensaje[] = [];
+  mensajeService: MensajeServices = inject(MensajeServices);
+  chats: Chat[] = [];
+  chatService: ChatServices = inject(ChatServices);
+  chatVisible: boolean = false;
+  activeChatId: number | null = null;
+  activeChatName: string | null = null;
+  activeChatAvatar: string | null = null;
+  mensajeTexto: string = '';
   id: number = 0;
   gananciaTotal: number = 0;
   mesMenorGanancia: string = '';
@@ -117,6 +133,100 @@ export class ReporteProveedores implements OnInit {
           this.renderizarGrafico();
         }
       });
+    this.cargarChats(this.id);
+    this.chatListPollingInterval = setInterval(() => {
+      this.cargarChats(this.id);
+    }, 1000);
+  }
+  ngOnDestroy(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    if (this.chatListPollingInterval) {
+      clearInterval(this.chatListPollingInterval);
+    }
+    this.chart?.destroy();
+  }
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+  toggleChat(): void {
+    this.chatVisible = !this.chatVisible;
+    if (!this.chatVisible) {
+      this.activeChatName = null;
+      this.activeChatAvatar = null;
+    }
+  }
+  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    this.activeChatId = idChat ?? null;
+    this.activeChatName = nombre;
+    this.activeChatAvatar = avatar ?? '/assets/default.png';
+
+    if (this.activeChatId !== null) {
+      this.cargarMensajes(true);
+      this.pollingInterval = setInterval(() => {
+        this.cargarMensajes(false);
+      }, 1000);
+    } else {
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
+    }
+  }
+  cargarMensajes(forzarScroll: boolean) {
+    if (!this.activeChatId) return;
+    const conteoActual = this.mensajes.length;
+    this.mensajeService.listarPorChat(this.activeChatId).subscribe({
+      next: (res: Mensaje[]) => {
+        this.mensajes = res;
+        if (forzarScroll || this.mensajes.length !== conteoActual) {
+          setTimeout(() => this.scrollBottom(), 50);
+        }
+      },
+      error: (err) => console.error("Error al cargar mensajes:", err)
+    });
+  }
+  enviarMensaje() {
+    if (!this.mensajeTexto.trim() || !this.activeChatId) return;
+
+    const nuevoMsg: Mensaje = {
+      contenido: this.mensajeTexto,
+      fechaenvio: new Date(),
+      chat: { id: this.activeChatId } as Chat
+    };
+
+    this.mensajeService.enviar(this.activeChatId, nuevoMsg).subscribe({
+      next: (msgCreado: any) => {
+        msgCreado.esPropio = true;
+        this.mensajes.push(msgCreado);
+        this.mensajeTexto = '';
+        setTimeout(() => this.scrollBottom(), 50);
+      }
+    });
+  }
+  scrollBottom() {
+    try {
+      this.scrollContainer.nativeElement.scrollTop =
+        this.scrollContainer.nativeElement.scrollHeight;
+    } catch {}
+  }
+  cargarChats(idProveedor: number) {
+    this.chatService.listarPorProveedor(idProveedor).subscribe({
+      next: (data: Chat[]) => {
+        this.chats = data.map(chat => ({
+          ...chat,
+          anfitrion: {
+            ...chat.anfitrion,
+            foto: chat.anfitrion.foto?.startsWith('data:')
+              ? chat.anfitrion.foto
+              : `data:image/png;base64,${chat.anfitrion.foto}`
+          }
+        }));
+        console.log("Chats cargados:", this.chats);
+      },
+      error: (err) => console.error("Error al cargar chats:", err)
+    });
   }
   cargarDatosDelGrafico(filtro: string): void {
     let servicioLlamado;
@@ -316,9 +426,6 @@ export class ReporteProveedores implements OnInit {
       return meses.join(' y ');
     }
     return meses.join(', ');
-  }
-  ngOnDestroy(): void {
-    this.chart?.destroy();
   }
   cargarProveedor(id: number): void {
     this.proveedorService.listarPorId(id).subscribe({

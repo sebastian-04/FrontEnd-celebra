@@ -102,7 +102,75 @@
       {{"S/." + montoMayorGanancia }}
     </span>
     </div>
-
   </div>
 </section>
+<section class="chat">
+  <div class="chat-widget-container">
 
+    <div class="chat-views-wrapper" [class.visible]="chatVisible">
+      <div class="chat-list" [class.active]="activeChatName === null">
+        @for (c of chats; track c.id) {
+          <div class="chat-item"
+               (click)="selectChat(c.anfitrion.nombre ?? '',c.anfitrion.foto ?? null,c.id)">
+            <img [src]="c.anfitrion.foto ?? 'assets/default-avatar.png'" class="chat-avatar" alt="Avatar">
+            <span class="chat-name">{{ c.anfitrion.nombre }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="chat-window" [class.active]="activeChatName !== null">
+
+        <div class="chat-window-header">
+          <button class="chat-back-button" (click)="selectChat(null, null)">&larr;</button>
+          <img [src]="activeChatAvatar ?? '/assets/default.png'" alt="Avatar" class="chat-avatar">
+          <span class="chat-name">{{ activeChatName }}</span>
+        </div>
+
+        <div class="chat-window-body" #scrollContainer>
+          @for (m of mensajes; track m.id) {
+            <div class="msg-date">
+              {{ m.fechaenvio | date:'yyyy-MM-dd HH:mm' }}
+            </div>
+            <div class="message-row"
+                 [class.outgoing-row]="m.esPropio"
+                 [class.incoming-row]="!m.esPropio">
+
+              @if (!m.esPropio && proveedor) {
+                <img [src]="activeChatAvatar" class="chat-avatar-msg">
+              }
+
+              <div class="message-content-wrapper">
+                <div class="message-sender-name">
+                  @if (m.esPropio && proveedor) {
+                    {{ proveedor.nombreorganizacion}}
+                  } @else {
+                    {{ activeChatName }}
+                  }
+                </div>
+                <div class="message-bubble"
+                     [class.message-outgoing]="!m.esPropio"
+                     [class.message-incoming]="m.esPropio">
+                  <span [lang]="'es'">{{ m.contenido }}</span>
+                </div>
+              </div>
+              @if (m.esPropio) {
+                <img [src]="proveedor.foto" class="chat-avatar-msg">
+              }
+            </div>
+          }
+        </div>
+        <div class="chat-window-footer">
+          <input type="text"
+                 [(ngModel)]="mensajeTexto"
+                 placeholder="Escribe un mensaje..."
+                 (keyup.enter)="enviarMensaje()">
+          <button class="send-button" (click)="enviarMensaje()">&#9658;</button>
+        </div>
+      </div>
+    </div>
+    <button class="chat-open-button" [class.activo]="chatVisible" (click)="toggleChat()">
+      Click para abrir sus chats con anfitriones
+    </button>
+  </div>
+</section>
+</body>
