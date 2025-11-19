@@ -64,9 +64,10 @@ export class RegisterCaptcha implements AfterViewInit {
       this.anfitrionService.registrar(anfitrion).subscribe({
         next: (response) => {
           console.log('Registro exitoso. Response del backend:', response);
+          alert('Registro exitoso');
           if (response && (response as any).id) {
             console.log('ID del anfitrión creado:',(response as any).id);
-            this.router.navigate([`/menu-anfitrion/${(response as any).id}`]);
+            this.router.navigate([`/login`]);
           }
         },
       });
@@ -95,7 +96,7 @@ export class RegisterCaptcha implements AfterViewInit {
           alert('Registro exitoso');
           if (response && (response as any).id) {
             console.log('ID del proveedor creado:',(response as any).id);
-            this.router.navigate([`/menu-proveedor/${(response as any).id}`]);
+            this.router.navigate([`/login`]);
           }
         },
       });
