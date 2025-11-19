@@ -926,3 +926,347 @@ body.modal-abierto {
 .empujar{
   margin-bottom: 2rem
 }
+.chat-widget-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 360px; /* Ancho del widget */
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- NUEVO Contenedor de Vistas --- */
+/* Este es el 'pop-up' que se anima desde abajo */
+.chat-views-wrapper {
+  position: relative; /* Clave para posicionar las vistas adentro */
+  width: 100%;
+  height: 480px; /* Altura fija para el pop-up */
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px;
+  overflow: hidden; /* ¡Súper importante para la animación de deslizamiento! */
+
+  /* Animación de aparición (la que ya tenías) */
+  transition: all 300ms ease-out;
+  opacity: 0;
+  transform: translateY(30px);
+  max-height: 0px;
+  visibility: hidden;
+}
+
+.chat-views-wrapper.visible {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 480px; /* Coincide con la altura */
+  visibility: visible;
+}
+
+/* --- VISTA 1: Lista de Chats --- */
+.chat-list {
+  /* Posición absoluta para apilarse con la ventana de chat */
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: auto; /* Mantiene el scroll */
+
+  /* Animación de deslizamiento */
+  transition: all 350ms ease-in-out;
+  opacity: 1;
+  transform: translateX(0);
+
+  /* ... (Pega tus estilos de scrollbar .chat-list::-webkit-scrollbar... aquí) ... */
+}
+
+.chat-list:not(.active) {
+  /* Estado oculto: se desliza a la izquierda */
+  opacity: 0;
+  transform: translateX(-100%);
+  visibility: hidden;
+}
+
+/* --- VISTA 2: Ventana de Chat --- */
+.chat-window {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+
+  /* Animación de deslizamiento */
+  transition: all 350ms ease-in-out;
+
+  /* Estado oculto: empieza a la derecha */
+  opacity: 0;
+  transform: translateX(100%);
+  visibility: hidden;
+}
+
+.chat-window.active {
+  /* Estado visible: se desliza al centro */
+  opacity: 1;
+  transform: translateX(0);
+  visibility: visible;
+}
+
+/* --- Estilos para los elementos de la Ventana de Chat --- */
+.chat-window-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebebeb;
+  background: #fdfdfd;
+  flex-shrink: 0; /* Evita que se encoja */
+}
+
+.chat-back-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 0 5px;
+  color: #555;
+}
+.chat-back-button:hover {
+  color: #000;
+}
+
+.chat-window-body {
+  flex-grow: 1; /* Ocupa todo el espacio disponible */
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #f9f9f9;
+}
+
+.message-bubble {
+  display: flex;
+  align-items: flex-start; /* Alinea el avatar con la burbuja */
+  gap: 8px;
+  max-width: 80%; /* Evita que los mensajes sean demasiado anchos */
+}
+.message-bubble .chat-avatar-msg {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.message-bubble span {
+  padding: 10px 14px;
+  border-radius: 18px;
+  background-color: #f0f0f0;
+  color: #000;
+  line-height: 1.4;
+  hyphens: auto;
+  -webkit-hyphens: auto; /* Para Safari/Chrome */
+  -ms-hyphens: auto;     /* Para IE/Edge antiguo */
+}
+
+/* Mensaje entrante (tuyo) */
+.message-bubble.message-incoming {
+  align-self: flex-end; /* Alinea a la derecha */
+  flex-direction: row-reverse; /* Invierte el orden (avatar a la derecha) */
+}
+.message-bubble.message-incoming span {
+  background-color: #E2C9FF; /* Tu color de tema */
+}
+
+/* Mensaje saliente (de ellos) */
+.message-bubble.message-outgoing {
+  align-self: flex-start; /* Alinea a la izquierda */
+}
+.message-bubble.message-outgoing span {
+  background-color: #ffffff;
+  border: 1px solid #eee;
+}
+
+.chat-window-footer {
+  display: flex;
+  padding: 12px;
+  border-top: 1px solid #ebebeb;
+  background: #fff;
+  flex-shrink: 0; /* Evita que se encoja */
+}
+.chat-window-footer input {
+  flex-grow: 1;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 10px 16px;
+  margin-right: 8px;
+  font-size: 14px;
+}
+.chat-window-footer input:focus {
+  outline: none;
+  border-color: #E2C9FF;
+}
+
+.send-button {
+  background: #E2C9FF;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  padding-left: 3px; /* Centra la flecha */
+}
+
+/* --- (Tus estilos existentes para .chat-item, .chat-avatar, .chat-name, .chat-open-button se mantienen igual) --- */
+.chat-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #ebebeb;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+.chat-item:last-child {
+  border-bottom: none;
+}
+.chat-item:hover {
+  background-color: #E2C9FF;
+}
+.chat-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 14px;
+}
+.chat-name {
+  font-weight: 500;
+  color: #1c1c1c;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+}
+.chat-open-button {
+  width: 100%;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  text-align: center;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.chat-open-button:hover,
+.chat-open-button.activo {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  background-color: #E2C9FF;
+}
+.msg-date {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #7e7e7e;
+  margin: 12px 0;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.message-content {
+  display: flex;
+  flex-direction: column; /* Apila el nombre ENCIMA de la burbuja */
+}
+
+/* Estilo para el nombre del remitente */
+.message-sender-name {
+  font-size: 0.8rem; /* Tamaño pequeño */
+  font-weight: 600;   /* Negrita */
+  color: #555;       /* Color gris oscuro */
+  margin-bottom: 4px; /* Espacio entre el nombre y la burbuja */
+}
+
+/* --- AJUSTES DE ALINEACIÓN --- */
+
+/* Para TUS mensajes (message-incoming, a la derecha) */
+.message-bubble.message-incoming .message-sender-name {
+  text-align: right; /* Alinea tu nombre a la derecha */
+  color: #6a1b9a;    /* Un color morado que combine */
+}
+
+/* Para SUS mensajes (message-outgoing, a la izquierda) */
+.message-bubble.message-outgoing .message-sender-name {
+  text-align: left; /* Alinea su nombre a la izquierda */
+}
+.message-row {
+  display: flex;
+  align-items: flex-end; /* Alinea los elementos al final (abajo) de la fila */
+  margin-bottom: 10px; /* Espacio entre filas de mensajes */
+}
+
+/* Estilo para los avatares */
+.chat-avatar-msg {
+  width: 40px; /* Tamaño del avatar */
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 8px; /* Espacio alrededor del avatar */
+}
+
+/* Contenedor del nombre y la burbuja */
+.message-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.message-sender-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+/* Estilo general para la burbuja del mensaje */
+.message-bubble {
+  padding: 8px 12px;
+  border-radius: 18px;
+  line-height: 1.4;
+}
+
+/* Mensajes ENTRANTES (tuyos, a la derecha) */
+.message-row.outgoing-row {
+  justify-content: flex-end; /* Alinea toda la fila a la derecha */
+}
+
+.message-row.outgoing-row .message-sender-name {
+  text-align: right; /* Alinea el nombre a la derecha */
+  color: #000000;    /* Color para tu nombre */
+}
+
+.message-row.outgoing-row .message-bubble {
+  background-color: #ede2ff; /* Un azul claro para tus mensajes */
+  color: #333;
+  border-bottom-right-radius: 2px; /* Esquina de la burbuja */
+}
+
+/* Mensajes SALIENTES (de ellos, a la izquierda) */
+.message-row.incoming-row {
+  justify-content: flex-start; /* Alinea toda la fila a la izquierda */
+}
+
+.message-row.incoming-row .message-sender-name {
+  text-align: left; /* Alinea el nombre a la izquierda */
+}
+
+.message-row.incoming-row .message-bubble {
+  background-color: #f0f0f0; /* Un gris claro para los mensajes de otros */
+  color: #000000;
+  border-bottom-left-radius: 2px; /* Esquina de la burbuja */
+}
+
+/* Ajustes para la fecha */
+.msg-date {
+  font-size: 0.75rem;
+  color: #999;
+  text-align: center;
+  margin: 15px 0 5px 0; /* Más espacio para la fecha */
+}
