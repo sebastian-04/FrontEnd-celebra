@@ -1,0 +1,48 @@
+<section class="encabezado">
+    <div class="encabezado-logos">
+      <a [routerLink]="['']"><img src="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img"></a>
+    </div>
+</section>
+<body>
+<div class="header-logo">
+  <img src="/assets/celebra-logo.png" alt="Logo de Celebra" class="logo">
+</div>
+
+<div class="formulario">
+  <form class="formulario-container" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <h3>Iniciar Sesión</h3>
+
+    <input id="email" type="email" formControlName="email" placeholder="E-mail o correo electrónico" required>
+    <input id="pass" type="password" formControlName="contrasena" placeholder="Contraseña" required>
+
+    <button type="submit">Continuar</button>
+  </form>
+
+  <h3 class="separador">o</h3>
+
+  <div class="formulario-opciones-varias">
+    <a href="https://www.google.com/"><div class="opcion-social google">
+      <img src="/assets/image%20188.png">
+      <h3>Continuar con Google</h3>
+    </div></a>
+    <a href="https://www.facebook.com/"><div class="opcion-social facebook">
+      <img src="/assets/image%20286.png">
+      <h3>Continuar con Facebook</h3>
+    </div></a>
+    <a href="https://www.gmail.com/"><div class="opcion-social correo">
+      <img src="/assets/image%20190.png">
+      <h3>Continuar con Correo Electrónico</h3>
+    </div></a>
+
+    <h3 class="olvidaste-contrasena">¿Olvidaste tu contraseña?</h3>
+
+    <div class="extra">
+      <h3>¿Primera vez en Celebra?</h3>
+      <a [routerLink]="['/register']"><h3 class="registrese-ahora">¡Regístrese ahora!</h3></a>
+    </div>
+  </div>
+</div>
+
+<img src="/assets/dc2srtk-2e75f459-93b8-4312-b279-231261ccb34a%201.png" class="fondo">
+</body>
+
