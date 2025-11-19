@@ -1,20 +1,25 @@
 import {ChangeDetectorRef, Component, ElementRef, inject, ViewChild} from '@angular/core';
-import {CalendarComponent} from '../calendario/calendar';
+import {CalendarComponent} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/componente/calendario/calendar';
 import {FormBuilder, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Evento} from '../../model/evento';
-import {ImagenEvento} from '../../model/imagenEvento';
-import {TipoEvento} from '../../model/tipoEvento';
-import {Distrito} from '../../model/distrito';
-import {Ciudad} from '../../model/ciudad';
-import {DistritoServices} from '../../services/distrito-services';
-import {CiudadServices} from '../../services/ciudad-services';
-import {ImagenEventoService} from '../../services/imagenEvento-services';
-import {EventoService} from '../../services/evento-services';
-import {ProveedorServices} from '../../services/proveedor-services';
-import {TipoEventoServices} from '../../services/tipo-evento-services';
+import {Evento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/evento';
+import {ImagenEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/imagenEvento';
+import {TipoEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/tipoEvento';
+import {Distrito} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/distrito';
+import {Ciudad} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/ciudad';
+import {DistritoServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/distrito-services';
+import {CiudadServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/ciudad-services';
+import {ImagenEventoService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/imagenEvento-services';
+import {EventoService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/evento-services';
+import {ProveedorServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/proveedor-services';
+import {TipoEventoServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/tipo-evento-services';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {Proveedor} from '../../model/proveedor';
+import {Proveedor} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/proveedor';
 import {debounceTime, fromEvent} from 'rxjs';
+import {DatePipe} from '@angular/common';
+import {Mensaje} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/mensaje';
+import {MensajeServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/mensaje-services';
+import {Chat} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/chat';
+import {ChatServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/chat-services';
 
 @Component({
   selector: 'app-listar-evento',
@@ -22,11 +27,23 @@ import {debounceTime, fromEvent} from 'rxjs';
     FormsModule,
     ReactiveFormsModule,
     RouterLink,
+    DatePipe,
   ],
   templateUrl: './listar-evento.html',
   styleUrl: './listar-evento.css',
 })
 export class ListarEvento {
+  private pollingInterval: any;
+  private chatListPollingInterval: any;
+  mensajes: Mensaje[] = [];
+  mensajeService: MensajeServices = inject(MensajeServices);
+  chats: Chat[] = [];
+  chatService: ChatServices = inject(ChatServices);
+  chatVisible: boolean = false;
+  activeChatId: number | null = null;
+  activeChatName: string | null = null;
+  activeChatAvatar: string | null = null;
+  mensajeTexto: string = '';
   mostrarFiltrosAvanzados = false;
   menuPerfilActivo = false;
   menuActivo = false;
@@ -88,6 +105,99 @@ export class ListarEvento {
       next: (data) => this.tipoEvento = data,
     })
     this.cargarEventos(idProveedor);
+    this.cargarChats(idProveedor);
+    this.chatListPollingInterval = setInterval(() => {
+      this.cargarChats(idProveedor);
+    }, 1000);
+  }
+  ngOnDestroy(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    if (this.chatListPollingInterval) {
+      clearInterval(this.chatListPollingInterval);
+    }
+  }
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+  toggleChat(): void {
+    this.chatVisible = !this.chatVisible;
+    if (!this.chatVisible) {
+      this.activeChatName = null;
+      this.activeChatAvatar = null;
+    }
+  }
+  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    this.activeChatId = idChat ?? null;
+    this.activeChatName = nombre;
+    this.activeChatAvatar = avatar ?? '/assets/default.png';
+
+    if (this.activeChatId !== null) {
+      this.cargarMensajes(true);
+      this.pollingInterval = setInterval(() => {
+        this.cargarMensajes(false);
+      }, 1000);
+    } else {
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
+    }
+  }
+  cargarMensajes(forzarScroll: boolean) {
+    if (!this.activeChatId) return;
+    const conteoActual = this.mensajes.length;
+    this.mensajeService.listarPorChat(this.activeChatId).subscribe({
+      next: (res: Mensaje[]) => {
+        this.mensajes = res;
+        if (forzarScroll || this.mensajes.length !== conteoActual) {
+          setTimeout(() => this.scrollBottom(), 50);
+        }
+      },
+      error: (err) => console.error("Error al cargar mensajes:", err)
+    });
+  }
+  enviarMensaje() {
+    if (!this.mensajeTexto.trim() || !this.activeChatId) return;
+
+    const nuevoMsg: Mensaje = {
+      contenido: this.mensajeTexto,
+      fechaenvio: new Date(),
+      chat: { id: this.activeChatId } as Chat
+    };
+
+    this.mensajeService.enviar(this.activeChatId, nuevoMsg).subscribe({
+      next: (msgCreado: any) => {
+        msgCreado.esPropio = true;
+        this.mensajes.push(msgCreado);
+        this.mensajeTexto = '';
+        setTimeout(() => this.scrollBottom(), 50);
+      }
+    });
+  }
+  scrollBottom() {
+    try {
+      this.scrollContainer.nativeElement.scrollTop =
+        this.scrollContainer.nativeElement.scrollHeight;
+    } catch {}
+  }
+  cargarChats(idProveedor: number) {
+    this.chatService.listarPorProveedor(idProveedor).subscribe({
+      next: (data: Chat[]) => {
+        this.chats = data.map(chat => ({
+          ...chat,
+          anfitrion: {
+            ...chat.anfitrion,
+            foto: chat.anfitrion.foto?.startsWith('data:')
+              ? chat.anfitrion.foto
+              : `data:image/png;base64,${chat.anfitrion.foto}`
+          }
+        }));
+        console.log("Chats cargados:", this.chats);
+      },
+      error: (err) => console.error("Error al cargar chats:", err)
+    });
   }
   cargarEventos(idProveedor: number): void {
     this.eventoService.listarPorIdProveedor(idProveedor).subscribe({
