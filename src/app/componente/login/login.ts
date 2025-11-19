@@ -1,17 +1,19 @@
 import {Component, inject, signal} from '@angular/core';
 import {Router, RouterLink, RouterModule, RouterOutlet} from '@angular/router';
-import {FormsModule} from '@angular/forms';
-import {AnfitrionServices} from '../../services/anfitrion-services';
-import {ProveedorServices} from '../../services/proveedor-services';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {AnfitrionServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/anfitrion-services';
+import {ProveedorServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/proveedor-services';
+import {LoginService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/login-service';
+import {RequestDto} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/request-dto';
+import {ResponseDto} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/response-dto';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterModule],
+  imports: [FormsModule, RouterModule, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
 export class Login {
-  nombre: String = "Conviertete en un anfitrión";
   email: string = '';
   contrasena: string = '';
   anfitrionService: AnfitrionServices = inject(AnfitrionServices);
@@ -19,44 +21,70 @@ export class Login {
   router: Router = inject(Router);
   correoAdministrador: string = 'admin@admin.com';
   contrasenaAdministrador: string = 'admin';
-  constructor() {}
-  login() {
-    if (this.email === this.correoAdministrador && this.contrasena === this.contrasenaAdministrador) {
-      this.router.navigate(['/administrador']);
+  loginForm: FormGroup;
+  fb: FormBuilder = inject(FormBuilder);
+  loginService: LoginService = inject(LoginService);
+  constructor() {
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      contrasena: ['', Validators.required],
+    })
+  }
+  ngOnInit() {
+    if(localStorage.getItem('token') != null){
+      localStorage.clear();
+      console.log("Token y items eliminados");
+    }
+    this.loadForm()
+  }
+  loadForm(): void {
+    console.log("Form");
+  }
+  onSubmit() {
+    if (!this.loginForm.valid) {
+      alert("Formulario no válido!");
       return;
     }
-    this.anfitrionService.listar().subscribe({
-      next: (anfitriones) => {
-        console.log('Anfitriones desde backend:', anfitriones);
-        console.log('Email ingresado:', this.email);
-        console.log('Contraseña ingresada:', this.contrasena);
-        const usuarioAnfitrion = anfitriones.find(a =>
-          a.email.trim() === this.email.trim() && a.contrasena.trim() === this.contrasena.trim()
-        );
-        if (usuarioAnfitrion) {
-          this.router.navigate([`/menu-anfitrion/${usuarioAnfitrion.id}`]);
-          return;
+    const email = this.loginForm.value.email;
+    const contrasena = this.loginForm.value.contrasena;
+    if (email === this.correoAdministrador && contrasena === this.contrasenaAdministrador) {
+      console.log("Administrador detectado");
+      const req = new RequestDto();
+      req.username = email;
+      req.password = contrasena;
+      this.loginService.login(req).subscribe(data => {
+        localStorage.setItem("token", data.jwt);
+        localStorage.setItem("rol", "ROLE_ADMIN");
+        this.router.navigate(['/administrador']);
+      });
+    }
+    const requestDto = new RequestDto();
+    requestDto.username = this.loginForm.value.email;
+    requestDto.password = this.loginForm.value.contrasena;
+    console.log("username: ", requestDto.username)
+    console.log("password: ", requestDto.password)
+    this.loginService.login(requestDto).subscribe({
+      next: (data: ResponseDto) => {
+        console.log("Respuesta login:", data);
+        localStorage.setItem("token", data.jwt);
+        const rol = data.roles[0];
+        localStorage.setItem("rol", rol);
+        if (rol === 'ROLE_ANFITRION') {
+          this.anfitrionService.listarPorCorreo(email).subscribe(anfitrion => {
+            this.router.navigate(['/menu-anfitrion', anfitrion.id]);
+          });
+        } else if (rol === 'ROLE_PROVEEDOR') {
+          this.proveedorService.listarPorCorreo(email).subscribe(proveedor => {
+            this.router.navigate(['/menu-proveedor', proveedor.id]);
+          });
+        } else {
+          this.router.navigate(['/home']);
         }
-        this.proveedorService.listar().subscribe({
-          next: (proveedores) => {
-            const usuarioProveedor = proveedores.find(p =>
-              p.email.trim() === this.email.trim() && p.contrasena.trim() === this.contrasena.trim()
-            );
-            if (usuarioProveedor) {
-              this.router.navigate([`/menu-proveedor/${usuarioProveedor.id}`]);
-            } else {
-              alert('Email o contraseña incorrectos');
-            }
-          },
-          error: (err) => {
-            console.error(err);
-            alert('Error al obtener los proveedores');
-          }
-        });
       },
       error: (err) => {
         console.error(err);
-        alert('Error al obtener los anfitriones');
+        alert("Credenciales incorrectas");
+        this.router.navigate(['/login']);
       }
     });
   }
