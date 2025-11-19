@@ -10,7 +10,7 @@ export class ChatServices {
   private url = environment.apiUrl;
   private httpclient: HttpClient = inject(HttpClient);
   constructor(){}
-  listar(){
+  listarChats(){
     return this.httpclient.get<Chat[]>(this.url + '/chats')
   }
   listarPorAnfitrion(id:number){

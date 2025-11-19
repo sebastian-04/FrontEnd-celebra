@@ -3,7 +3,6 @@ import {environment} from '../../environments/environment';
 import {HttpClient} from '@angular/common/http';
 import {Subject} from 'rxjs';
 import {Proveedor} from '../model/proveedor';
-import {Anfitrion} from '../model/anfitrion';
 
 @Injectable({
   providedIn: 'root'
@@ -27,5 +26,8 @@ export class ProveedorServices {
   }
   actualizar(proveedor: Proveedor){
     return this.httpClient.put(this.url + '/proveedor', proveedor);
+  }
+  listarPorCorreo(correo: String){
+    return this.httpClient.get<Proveedor>(this.url + '/proveedor/correo/' + correo)
   }
 }

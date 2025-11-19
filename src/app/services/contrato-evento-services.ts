@@ -53,9 +53,9 @@ export class ContratoEventoServices {
     return this.httpclient.put(this.url + '/evento/finalizado', contratoEvento)
   }
   verEventosContratadosPorIdAnfitrion(id: number){
-    return this.httpclient.get<ContratoEvento[]>(this.url + '/eventos/actuales/' + id);
+    return this.httpclient.get<ContratoEvento[]>(this.url + '/eventos/actuales/anfitrion/' + id);
   }
   verContratosContratadosPorIdProveedor(id: number){
-    return this.httpclient.get<ContratoEvento[]>(this.url + '/contrato/actuales/' + id);
+    return this.httpclient.get<ContratoEvento[]>(this.url + '/contrato/actuales/proveedor/' + id);
   }
 }

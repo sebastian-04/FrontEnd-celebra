@@ -27,4 +27,7 @@ export class AnfitrionServices {
   actualizar(anfitrion: Anfitrion){
     return this.httpClient.put(this.url + '/anfitrion', anfitrion);
   }
+  listarPorCorreo(correo: String){
+    return this.httpClient.get<Anfitrion>(this.url + '/anfitrion/correo/' + correo)
+  }
 }
