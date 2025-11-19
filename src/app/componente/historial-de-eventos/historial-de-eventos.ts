@@ -1,5 +1,14 @@
-import { ChangeDetectorRef, Component, HostListener, inject, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  inject,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef
+} from '@angular/core';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { startWith } from 'rxjs/operators';
 
@@ -20,13 +29,20 @@ import { TipoEvento } from '../../model/tipoEvento';
 import { Ciudad } from '../../model/ciudad';
 import { ContratoEvento } from '../../model/contratoEvento';
 import { ResenaEvento } from '../../model/resenaEvento';
+import {DatePipe} from '@angular/common';
+import {Mensaje} from '../../model/mensaje';
+import {MensajeServices} from '../../services/mensaje-services';
+import {Chat} from '../../model/chat';
+import {ChatServices} from '../../services/chat-services';
 
 @Component({
   selector: 'app-historial-de-eventos',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
+    DatePipe,
+    FormsModule
   ],
   templateUrl: './historial-de-eventos.html',
   styleUrl: './historial-de-eventos.css',
@@ -55,6 +71,17 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
   tipoEvento: TipoEvento[] = [];
   contratoEvento: ContratoEvento[] = [];
   resenaEvento: ResenaEvento[] = [];
+  private pollingInterval: any;
+  private chatListPollingInterval: any;
+  mensajes: Mensaje[] = [];
+  mensajeService: MensajeServices = inject(MensajeServices);
+  chats: Chat[] = [];
+  chatService: ChatServices = inject(ChatServices);
+  chatVisible: boolean = false;
+  activeChatId: number | null = null;
+  activeChatName: string | null = null;
+  activeChatAvatar: string | null = null;
+  mensajeTexto: string = '';
 
   // Mapa de Imágenes y control de estado
   imagenesEvento: { [idEvento: number]: ImagenEvento[] } = {};
@@ -118,8 +145,101 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     setTimeout(() => {
       this.cargarContratos(this.id);
     });
+    this.cargarChats(this.id);
+    this.chatListPollingInterval = setInterval(() => {
+      this.cargarChats(this.id);
+    }, 1000);
   }
+  ngOnDestroy(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    if (this.chatListPollingInterval) {
+      clearInterval(this.chatListPollingInterval);
+    }
+    this.limpiarIntervalos();
+  }
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+  toggleChat(): void {
+    this.chatVisible = !this.chatVisible;
+    if (!this.chatVisible) {
+      this.activeChatName = null;
+      this.activeChatAvatar = null;
+    }
+  }
+  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    this.activeChatId = idChat ?? null;
+    this.activeChatName = nombre;
+    this.activeChatAvatar = avatar ?? '/assets/default.png';
 
+    if (this.activeChatId !== null) {
+      this.cargarMensajes(true);
+      this.pollingInterval = setInterval(() => {
+        this.cargarMensajes(false);
+      }, 1000);
+    } else {
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
+    }
+  }
+  cargarMensajes(forzarScroll: boolean) {
+    if (!this.activeChatId) return;
+    const conteoActual = this.mensajes.length;
+    this.mensajeService.listarPorChat(this.activeChatId).subscribe({
+      next: (res: Mensaje[]) => {
+        this.mensajes = res;
+        if (forzarScroll || this.mensajes.length !== conteoActual) {
+          setTimeout(() => this.scrollBottom(), 50);
+        }
+      },
+      error: (err) => console.error("Error al cargar mensajes:", err)
+    });
+  }
+  enviarMensaje() {
+    if (!this.mensajeTexto.trim() || !this.activeChatId) return;
+
+    const nuevoMsg: Mensaje = {
+      contenido: this.mensajeTexto,
+      fechaenvio: new Date(),
+      chat: { id: this.activeChatId } as Chat
+    };
+
+    this.mensajeService.enviar(this.activeChatId, nuevoMsg).subscribe({
+      next: (msgCreado: any) => {
+        msgCreado.esPropio = true;
+        this.mensajes.push(msgCreado);
+        this.mensajeTexto = '';
+        setTimeout(() => this.scrollBottom(), 50);
+      }
+    });
+  }
+  scrollBottom() {
+    try {
+      this.scrollContainer.nativeElement.scrollTop =
+        this.scrollContainer.nativeElement.scrollHeight;
+    } catch {}
+  }
+  cargarChats(idAnfitrion: number) {
+    this.chatService.listarPorAnfitrion(idAnfitrion).subscribe({
+      next: (data: Chat[]) => {
+        this.chats = data.map(chat => ({
+          ...chat,
+          proveedor: {
+            ...chat.proveedor,
+            foto: chat.proveedor.foto?.startsWith('data:')
+              ? chat.proveedor.foto
+              : `data:image/png;base64,${chat.proveedor.foto}`
+          }
+        }));
+        console.log("Chats cargados:", this.chats);
+      },
+      error: (err) => console.error("Error al cargar chats:", err)
+    });
+  }
   cargarListasAuxiliares() {
     this.distritoService.listar().subscribe(data => this.distrito = data);
     this.ciudadService.listar().subscribe(data => this.ciudad = data);
@@ -378,8 +498,5 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     return this.resenaEvento.some(
       resena => resena.evento?.id === idEvento && resena.anfitrion?.id === this.anfitrion.id
     );
-  }
-  ngOnDestroy() {
-    this.limpiarIntervalos();
   }
 }
