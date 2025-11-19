@@ -1,28 +1,45 @@
 import {
   AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, inject, NgZone, OnInit, ViewChild
 } from '@angular/core';
-import {NgOptimizedImage} from '@angular/common';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {DatePipe, NgOptimizedImage} from '@angular/common';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import {Proveedor} from '../../model/proveedor';
-import {ProveedorServices} from '../../services/proveedor-services';
-import {ContratoEventoServices} from '../../services/contrato-evento-services';
-import {ContratoEvento} from '../../model/contratoEvento';
-import {ImagenEvento} from '../../model/imagenEvento';
-import {ImagenEventoService} from '../../services/imagenEvento-services';
+import {Proveedor} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/proveedor';
+import {ProveedorServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/proveedor-services';
+import {ContratoEventoServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/contrato-evento-services';
+import {ContratoEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/contratoEvento';
+import {ImagenEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/imagenEvento';
+import {ImagenEventoService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/imagenEvento-services';
 import {debounceTime, fromEvent} from 'rxjs';
+import {Mensaje} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/mensaje';
+import {MensajeServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/mensaje-services';
+import {Chat} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/chat';
+import {ChatServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/chat-services';
 
 @Component({
   selector: 'app-menu-proveedor',
   imports: [
     ReactiveFormsModule,
     NgOptimizedImage,
-    RouterLink
+    RouterLink,
+    DatePipe,
+    FormsModule
   ],
   templateUrl: './menu-proveedor.html',
   styleUrl: './menu-proveedor.css',
 })
 export class MenuProveedor{
+  private pollingInterval: any;
+  private chatListPollingInterval: any;
+  mensajes: Mensaje[] = [];
+  mensajeService: MensajeServices = inject(MensajeServices);
+  chats: Chat[] = [];
+  chatService: ChatServices = inject(ChatServices);
+  chatVisible: boolean = false;
+  activeChatId: number | null = null;
+  activeChatName: string | null = null;
+  activeChatAvatar: string | null = null;
+  mensajeTexto: string = '';
   proveedor: Proveedor;
   buscarForm: FormGroup;
   buscarAvanzadaForm: FormGroup;
@@ -68,6 +85,101 @@ export class MenuProveedor{
     });
     setTimeout(() => {
       this.cargarContratos(id);
+    });
+    this.cargarChats(id);
+    this.chatListPollingInterval = setInterval(() => {
+      this.cargarChats(id);
+    }, 1000);
+  }
+  ngOnDestroy(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    if (this.chatListPollingInterval) {
+      clearInterval(this.chatListPollingInterval);
+    }
+    console.log('Destruyendo componente y limpiando intervalos...');
+    this.limpiarIntervalos();
+  }
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+  toggleChat(): void {
+    this.chatVisible = !this.chatVisible;
+    if (!this.chatVisible) {
+      this.activeChatName = null;
+      this.activeChatAvatar = null;
+    }
+  }
+  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    this.activeChatId = idChat ?? null;
+    this.activeChatName = nombre;
+    this.activeChatAvatar = avatar ?? '/assets/default.png';
+
+    if (this.activeChatId !== null) {
+      this.cargarMensajes(true);
+      this.pollingInterval = setInterval(() => {
+        this.cargarMensajes(false);
+      }, 1000);
+    } else {
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
+    }
+  }
+  cargarMensajes(forzarScroll: boolean) {
+    if (!this.activeChatId) return;
+    const conteoActual = this.mensajes.length;
+    this.mensajeService.listarPorChat(this.activeChatId).subscribe({
+      next: (res: Mensaje[]) => {
+        this.mensajes = res;
+        if (forzarScroll || this.mensajes.length !== conteoActual) {
+          setTimeout(() => this.scrollBottom(), 50);
+        }
+      },
+      error: (err) => console.error("Error al cargar mensajes:", err)
+    });
+  }
+  enviarMensaje() {
+    if (!this.mensajeTexto.trim() || !this.activeChatId) return;
+
+    const nuevoMsg: Mensaje = {
+      contenido: this.mensajeTexto,
+      fechaenvio: new Date(),
+      chat: { id: this.activeChatId } as Chat
+    };
+
+    this.mensajeService.enviar(this.activeChatId, nuevoMsg).subscribe({
+      next: (msgCreado: any) => {
+        msgCreado.esPropio = true;
+        this.mensajes.push(msgCreado);
+        this.mensajeTexto = '';
+        setTimeout(() => this.scrollBottom(), 50);
+      }
+    });
+  }
+  scrollBottom() {
+    try {
+      this.scrollContainer.nativeElement.scrollTop =
+        this.scrollContainer.nativeElement.scrollHeight;
+    } catch {}
+  }
+  cargarChats(idProveedor: number) {
+    this.chatService.listarPorProveedor(idProveedor).subscribe({
+      next: (data: Chat[]) => {
+        this.chats = data.map(chat => ({
+          ...chat,
+          anfitrion: {
+            ...chat.anfitrion,
+            foto: chat.anfitrion.foto?.startsWith('data:')
+              ? chat.anfitrion.foto
+              : `data:image/png;base64,${chat.anfitrion.foto}`
+          }
+        }));
+        console.log("Chats cargados:", this.chats);
+      },
+      error: (err) => console.error("Error al cargar chats:", err)
     });
   }
   cargarContratos(id: number): void {
@@ -306,10 +418,6 @@ export class MenuProveedor{
   abrirModalCerrarSesion() {
     this.mostrarCerrarSesion = true;
     document.body.classList.add('modal-abierto');
-  }
-  ngOnDestroy(): void {
-    console.log('Destruyendo componente y limpiando intervalos...');
-    this.limpiarIntervalos();
   }
   @HostListener('document:click', ['$event'])
   onClickFuera(event: MouseEvent) {
