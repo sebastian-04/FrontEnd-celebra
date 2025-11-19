@@ -1,0 +1,215 @@
+:host {
+  display: block;
+  height: auto;
+  overflow-y: auto; /* permitir scroll */
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  height: auto; /* antes 100% */
+  overflow-y: auto; /* permite hacer scroll */
+}
+#celebraLogo{
+  padding: 0.5rem;
+}
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: white;
+  border-bottom: 1px solid #c4c4c4;
+}
+nav {
+  border-bottom: #c4c4c4 solid 1px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+nav ul li{
+  list-style: none;
+}
+nav #becameAnAnfitrion li {
+  padding-right: 9em;
+}
+nav #becameAnAnfitrion a{
+  font-size: 16px;
+  color: black;
+}
+
+.fondo {
+  position: fixed; /* que se quede atrás al hacer scroll */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+  pointer-events: none;
+  z-index: 0; /* el fondo siempre detrás */
+}
+
+.confetti {
+  position: absolute;
+  top: 7%; /* ajusta según quieras moverlo */
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+}
+
+.globos {
+  position: absolute;
+  top: 60%;
+  left: 0;
+  width: 100%;
+  height: auto;
+  z-index: -1;
+}
+
+.terminos-condiciones {
+  position: absolute;
+  max-width: 30%;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  margin-top: 8%;
+  margin-left: 35%;
+}
+.terminos-condiciones-container {
+  width: 100%;
+}
+.terminos-condiciones-container-h3 {
+  color: #1E1E1E;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+  text-align: center;
+  margin-top: -1rem;
+}
+.terminos-condiciones-container-img {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+.terminos-condiciones-container-parrafo {
+  position: relative;
+  height: 400px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border: 0.0625rem solid #D9D9D9;
+  border-radius: 0.25rem 0 0 0.25rem;
+  background-color: #ffffff;
+  display: flex;
+  overflow: hidden;
+  align-items: flex-start;
+}
+.p-1 {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #5D5D5D;
+  font-family: 'Inter', sans-serif;
+}
+.p-2 {
+  font-size: 0.8rem;
+  font-family: 'Inter', sans-serif;
+  color: #5D5D5D;
+  text-align: justify;
+  margin-right: 1rem;
+  line-height: 1.6;
+  transform: translateY(0);
+  transition: transform 0.05s linear;
+  will-change: transform;
+  overflow: hidden;
+}
+.barra-container {
+  position: absolute;
+  right: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.barra-1 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 100%;
+  z-index: 0;
+}
+.barra-2 {
+  position: absolute;
+  top: 1px;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 60px;
+  cursor: grab;
+  z-index: 1;
+  transition: transform 0.05s linear;
+  object-fit: contain;
+}
+.barra-2:active {
+  cursor: grabbing;
+}
+.descargar{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: -1rem;
+  margin-bottom: 1rem;
+  margin-left: 65%;
+  cursor: pointer;
+}
+.descargar-btn{
+  cursor: pointer;
+}
+.pdf{
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  color: #000000;
+}
+.aceptar{
+  display: flex;
+  gap: 1rem;
+  margin-left: 1%;
+}
+.aceptar-cbk{
+  transform: scale(2);
+  cursor: pointer;
+}
+.aceptar label{
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  color: #000000;
+}
+.btn{
+  color: #FFFFFF;
+  margin-left: 30%;
+  margin-top: 5%;
+  padding: 1rem 2.5rem;
+  background-color: #5376FF;
+  border: 2px solid #5376FF;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+.btn:hover {
+  background-color: #4935ff;
+}
+.btn:disabled {
+  background-color: #d3d3d3;
+  color: #9e9e9e;
+  cursor: not-allowed;
+  border: 2px solid #ccc;
+}
