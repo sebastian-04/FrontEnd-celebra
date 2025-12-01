@@ -1,6 +1,5 @@
 import {Component, ElementRef, inject} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {NgOptimizedImage} from '@angular/common';
 import { EspecializacionServices } from '../../services/especializacion-services';
 import {
   AbstractControl,
@@ -13,12 +12,14 @@ import {
 import {Proveedor} from '../../model/proveedor';
 import {ProveedorServices} from '../../services/proveedor-services';
 import {Especializacion} from '../../model/especializacion';
+import {firstValueFrom} from 'rxjs';
+import {AnfitrionServices} from '../../services/anfitrion-services';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-register-proveedor',
   imports: [
     RouterLink,
-    NgOptimizedImage,
     ReactiveFormsModule
   ],
   templateUrl: './register-proveedor.html',
@@ -34,13 +35,15 @@ export class RegisterProveedor {
   proveedor: Proveedor[] = [];
   especializacion: Especializacion[] = [];
   proveedorService: ProveedorServices = inject(ProveedorServices);
+  anfitrionService: AnfitrionServices = inject(AnfitrionServices);
   especializacionService: EspecializacionServices = inject(EspecializacionServices);
   private fb: FormBuilder = inject(FormBuilder);
+  botpressService: BotpressService = inject(BotpressService);
   constructor(private el: ElementRef, fb: FormBuilder) {
     this.registroForm = fb.group({
       Ruc: ['', [Validators.required, Validators.minLength(11), Validators.maxLength(11)]],
       Organizacion: ['', [Validators.required, Validators.minLength(2)]],
-      Email: ['', [Validators.required, Validators.email]],
+      Email: ['', [Validators.required, Validators.email], [this.emailUnicoValidator]],
       Celular: ['', [Validators.required, Validators.minLength(9), Validators.maxLength(9)]],
       Contrasena: ['', [Validators.required, Validators.minLength(6)]],
       Contrasena2: ['', Validators.required],
@@ -50,7 +53,38 @@ export class RegisterProveedor {
       validators: this.passwordMatchValidator
     });
   }
+  emailUnicoValidator = async (control: AbstractControl) => {
+    const email = control.value;
+    if (!email) return null;
+    try {
+      let proveedorExiste = false;
+      try {
+        const proveedor = await firstValueFrom(
+          this.proveedorService.listarPorCorreo(email)
+        );
+        proveedorExiste = !!proveedor;
+      } catch (_) {
+        proveedorExiste = false;
+      }
+      let anfitrionExiste = false;
+      try {
+        const anfitrion = await firstValueFrom(
+          this.anfitrionService.listarPorCorreo(email)
+        );
+        anfitrionExiste = !!anfitrion;
+      } catch (_) {
+        anfitrionExiste = false;
+      }
+      if (proveedorExiste || anfitrionExiste) {
+        return { emailExiste: true };
+      }
+      return null;
+    } catch (err) {
+      return null;
+    }
+  };
   ngOnInit() {
+    this.botpressService.destroyChat();
     this.especializacionService.listar().subscribe({
       next: (data) => this.especializacion = data,
       error: (err) => console.error('Error al cargar especializaciones:', err)
@@ -125,6 +159,8 @@ export class RegisterProveedor {
     if (emailControl?.errors?.['email'] && emailControl.touched) {
       return 'El formato del email no es válido';
     }
+    if (emailControl?.errors?.['emailExiste'] && emailControl.touched)
+      return 'El correo ya está registrado';
     return '';
   }
   get organizacionError(): string {

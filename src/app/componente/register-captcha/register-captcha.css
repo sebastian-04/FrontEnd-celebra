@@ -1,13 +1,13 @@
 :host {
   display: block;
   height: auto;
-  overflow-y: auto; /* permitir scroll */
+  overflow-y: auto;
 }
 html, body {
   margin: 0;
   padding: 0;
-  height: auto; /* antes 100% */
-  overflow-y: auto; /* permite hacer scroll */
+  height: auto;
+  overflow-y: auto;
 }
 #celebraLogo{
   padding: 0.5rem;
@@ -41,7 +41,7 @@ nav #becameAnAnfitrion a{
 }
 
 .fondo {
-  position: fixed; /* que se quede atrás al hacer scroll */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -49,12 +49,12 @@ nav #becameAnAnfitrion a{
   overflow: hidden;
   user-select: none;
   pointer-events: none;
-  z-index: 0; /* el fondo siempre detrás */
+  z-index: 0;
 }
 
 .confetti {
   position: absolute;
-  top: 7%; /* ajusta según quieras moverlo */
+  top: 7%;
   left: 0;
   width: 100%;
   height: 100%;

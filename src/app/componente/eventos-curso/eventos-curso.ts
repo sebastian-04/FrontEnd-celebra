@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {DatePipe, NgOptimizedImage} from "@angular/common";
+import {DatePipe} from "@angular/common";
 import {Anfitrion} from '../../model/anfitrion';
 import {Evento} from '../../model/evento';
 import {ImagenEvento} from '../../model/imagenEvento';
@@ -21,20 +21,29 @@ import {Mensaje} from '../../model/mensaje';
 import {MensajeServices} from '../../services/mensaje-services';
 import {Chat} from '../../model/chat';
 import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {ValoracionEventoServices} from '../../services/valoracion-evento-services';
+import {ValoracionEvento} from '../../model/valoracionEvento';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-eventos-curso',
   imports: [
     FormsModule,
-    NgOptimizedImage,
     ReactiveFormsModule,
     RouterLink,
-    DatePipe
+    DatePipe,
+    TranslatePipe
   ],
   templateUrl: './eventos-curso.html',
   styleUrl: './eventos-curso.css',
 })
 export class EventosCurso {
+  activeChatTitle: string | null = null;
+  favoritos: { [ContratoEventoId: number]: boolean } = {};
+  loginService: LoginService = inject(LoginService);
+  cantidadResenas: number;
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -48,6 +57,7 @@ export class EventosCurso {
   mensajeTexto: string = '';
   anfitrion: Anfitrion;
   id: number;
+  idAnfitrion: number;
   menuActivo = false;
   animando = false;
   buscarForm: FormGroup;
@@ -81,10 +91,13 @@ export class EventosCurso {
   tipoEventoService: TipoEventoServices = inject(TipoEventoServices);
   eventoService: EventoService = inject(EventoService);
   anfitrionService: AnfitrionServices = inject(AnfitrionServices);
+  valoracionEventoService = inject(ValoracionEventoServices);
   route: ActivatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
   private imagenEventoService = inject(ImagenEventoService);
   private fb: FormBuilder = inject(FormBuilder);
+  translate: TranslateService = inject(TranslateService);
+  botpressService: BotpressService = inject(BotpressService);
   constructor(private cdr: ChangeDetectorRef) {
     this.buscarForm = this.fb.group({
       Distrito: ['', Validators.required],
@@ -103,7 +116,11 @@ export class EventosCurso {
     })
   }
   ngOnInit(): void {
-    const idParam = this.route.snapshot.params['id'];
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
+    const idParam = this.route.snapshot.params['idAnfitrion'];
     const id = Number(idParam);
     this.cargarAnfitrion(id);
     this.distritoService.listar().subscribe({
@@ -122,11 +139,27 @@ export class EventosCurso {
         this.contratoEvento.forEach(contrato => {
           const idEvento = contrato.evento?.id;
           if (idEvento) {
+            this.eventoService.calcularCantidadResenasPorEvento(contrato.evento.id!).subscribe({
+              next: (data) => {
+                this.cantidadResenas = data;
+              }
+            });
             this.cargarImagenesPorEvento(idEvento);
           }
         });
       },
       error: (err) => console.error('Error al cargar los contratos', err)
+    });
+    this.valoracionEventoService.listarValoracionEventoPorAnfitrion(id).subscribe({
+      next: (valoraciones) => {
+        valoraciones.forEach(val => {
+          if (val.favorito && val.evento?.id) {
+            this.favoritos[val.evento.id] = true;
+          }
+        });
+        console.log("Mapa de favoritos cargado:", this.favoritos);
+      },
+      error: (err) => console.error("Error al cargar favoritos", err)
     });
     this.cargarChats(id);
     this.chatListPollingInterval = setInterval(() => {
@@ -148,15 +181,17 @@ export class EventosCurso {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -316,7 +351,7 @@ export class EventosCurso {
         alturaAcumulada += elemento.offsetHeight + 20;
       });
       this.alturaTotalContenido = alturaAcumulada;
-      console.log('📏 Altura total del contenido:', this.alturaTotalContenido, 'px');
+      console.log('Altura total del contenido:', this.alturaTotalContenido, 'px');
     }
   }
   actualizarPosicionBarra() {
@@ -384,15 +419,26 @@ export class EventosCurso {
   onScroll() {
     this.cdr.detectChanges();
   }
-  onCorazonClick(event: MouseEvent) {
-    const img = event.target as HTMLImageElement;
-    if (!img) return;
-    img.classList.toggle('activo');
-    if (img.classList.contains('activo')) {
-      img.src = '/assets/HeartPintado.png';
-    } else {
-      img.src = '/assets/Heart.png';
-    }
+  onCorazonClick(event: MouseEvent, contratoEvento: ContratoEvento) {
+    event.stopPropagation();
+    const idEvento = contratoEvento.evento.id!;
+    const nuevoEstado = !this.favoritos[idEvento];
+    this.favoritos[idEvento] = nuevoEstado;
+    const valoracionEvento: ValoracionEvento = {
+      favorito: nuevoEstado,
+      anfitrion: contratoEvento.anfitrion,
+      evento: contratoEvento.evento,
+    };
+    this.valoracionEventoService
+      .alternarFavoritoContrato(this.anfitrion.id!, contratoEvento.id!, valoracionEvento)
+      .subscribe({
+        next: () => console.log("Favorito actualizado"),
+        error: (err) => {
+          console.error("Error actualizando favorito", err);
+          this.favoritos[idEvento] = !nuevoEstado;
+          this.cdr.detectChanges();
+        }
+      });
   }
   toggleFiltrosAvanzados() {
     if (this.animando) return;
@@ -470,6 +516,7 @@ export class EventosCurso {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
@@ -521,13 +568,9 @@ export class EventosCurso {
   iniciarCarrusel(idEvento: number) {
     const imagenes = this.obtenerImagenesPorEvento(idEvento);
     if (!imagenes || imagenes.length <= 1) return;
-
-    // Inicialización limpia (sin animación)
     this.indices[idEvento] = 0;
     this.indicePrevio[idEvento] = -1;
     this.haIniciadoAnimacion[idEvento] = true;
-
-    // Sincronizar arranque en un solo tiempo global
     if (!this.intervalos['GLOBAL']) {
       this.intervalos['GLOBAL'] = setInterval(() => {
         this.actualizarCarruseles();
@@ -538,11 +581,8 @@ export class EventosCurso {
     for (const idEvento in this.indices) {
       const imagenes = this.obtenerImagenesPorEvento(Number(idEvento));
       if (!imagenes || imagenes.length <= 1) continue;
-
       const actual = this.indices[idEvento];
       const siguiente = (actual + 1) % imagenes.length;
-
-      // Desde la segunda transición → animación normal
       this.indicePrevio[idEvento] = actual;
       this.indices[idEvento] = siguiente;
     }
@@ -552,18 +592,15 @@ export class EventosCurso {
   getImagenSrc(base64: string): string {
     if (!base64) return '/assets/placeholder.png';
     const trimmed = base64.trim();
-    // Si el string base64 comienza con el encabezado 'data:image', ya está completo
     if (trimmed.startsWith('data:image')) {
       return trimmed;
     }
-    // Detectar el tipo de imagen según los primeros caracteres del base64
     if (trimmed.startsWith('/9j/')) {
       return 'data:image/jpeg;base64,' + trimmed; // JPG
     }
     if (trimmed.startsWith('iVBOR')) {
       return 'data:image/png;base64,' + trimmed; // PNG
     }
-    // Por defecto, asume JPG
     return 'data:image/jpeg;base64,' + trimmed;
   }
 }

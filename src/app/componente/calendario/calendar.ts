@@ -1,16 +1,19 @@
 import {ChangeDetectorRef, Component, EventEmitter, HostListener, inject, Input, OnInit, Output} from '@angular/core';
 import {DatePipe} from '@angular/common';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-calendar',
   templateUrl: './calendar.html',
   standalone: true,
   imports: [
-    DatePipe
+    DatePipe,
+    TranslatePipe
   ],
   styleUrls: ['./calendar.css']
 })
 export class CalendarComponent implements OnInit {
+  translate: TranslateService = inject(TranslateService);
   cdr: ChangeDetectorRef = inject(ChangeDetectorRef);
   constructor() { }
   @Output() dateSelected = new EventEmitter<{ start: Date, end?: Date }>();
@@ -38,16 +41,15 @@ export class CalendarComponent implements OnInit {
   weeks: any[] = [];
 
   ngOnInit() {
-    // Usar las fechas que vienen del backend
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
     this.selectedStartDate = this.normalize(this.fechaInicio);
     this.selectedEndDate = this.normalize(this.fechaFin);
-
-    // Ajustar vista del calendario si existe fecha inicio
     if (this.selectedStartDate) {
       this.viewYear = this.selectedStartDate.getFullYear();
       this.viewMonth = this.selectedStartDate.getMonth();
     }
-
     this.generateCalendar(this.viewYear, this.viewMonth);
   }
 

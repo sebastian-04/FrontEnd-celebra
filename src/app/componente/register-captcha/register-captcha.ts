@@ -1,18 +1,17 @@
-import {AfterViewInit, Component, ElementRef, inject, NgZone, OnInit, ViewChild} from '@angular/core';
-import {NgOptimizedImage} from '@angular/common';
+import {AfterViewInit, Component, ElementRef, inject, NgZone, ViewChild} from '@angular/core';
 import {debounceTime, fromEvent} from 'rxjs';
-import {ActivatedRoute, Route, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {jsPDF} from 'jspdf';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AnfitrionServices} from '../../services/anfitrion-services';
 import {Anfitrion} from '../../model/anfitrion';
 import {Proveedor} from '../../model/proveedor';
 import {ProveedorServices} from '../../services/proveedor-services';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-register-captcha',
   imports: [
-    NgOptimizedImage,
     RouterLink,
     ReactiveFormsModule
   ],
@@ -35,12 +34,15 @@ export class RegisterCaptcha implements AfterViewInit {
   form: FormGroup;
   private fb: FormBuilder = inject(FormBuilder);
   private ngZone: NgZone = inject(NgZone);
+  botpressService = inject(BotpressService);
   constructor() {
     this.form = this.fb.group({
       aceptarTerminos: [false, Validators.requiredTrue],
     });
   }
   ngOnInit() {
+    this.botpressService.destroyChat();
+    localStorage.removeItem('token');
     this.route.queryParams.subscribe(params => {
       this.datos = params;
       this.tipoUsuario = params['tipo'];

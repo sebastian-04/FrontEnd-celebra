@@ -1,6 +1,5 @@
 import {Component, ElementRef, inject} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {NgOptimizedImage} from '@angular/common';
 import {
   AbstractControl,
   FormBuilder,
@@ -11,11 +10,13 @@ import {
 } from '@angular/forms';
 import {Anfitrion} from '../../model/anfitrion';
 import {AnfitrionServices} from '../../services/anfitrion-services';
+import {ProveedorServices} from '../../services/proveedor-services';
+import {firstValueFrom} from 'rxjs';
+import {BotpressService} from '../../services/botpress-service';
 @Component({
   selector: 'app-register-anfitrion',
   imports: [
     RouterLink,
-    NgOptimizedImage,
     ReactiveFormsModule
   ],
   templateUrl: './register-anfitrion.html',
@@ -27,13 +28,16 @@ export class RegisterAnfitrion {
   private headerOffset = 80;
   previewUrl: string | ArrayBuffer | null = null;
   fotoBase64: string = '';
+  anfitrionService: AnfitrionServices = inject(AnfitrionServices);
+  proveedorService: ProveedorServices = inject(ProveedorServices);
   private fb: FormBuilder = inject(FormBuilder);
+  botpressService: BotpressService = inject(BotpressService);
   anfitrion: Anfitrion[] = []
   route : Router = inject(Router);
   constructor(private el: ElementRef, fb: FormBuilder) {
     this.registroForm = fb.group({
       Nombre: ['', [Validators.required, Validators.minLength(2)]],
-      Email: ['', [Validators.required, Validators.email]],
+      Email: ['', [Validators.required, Validators.email], [this.emailUnicoValidator]],
       Dni: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(8), Validators.pattern('^[0-9]+$')]],
       Celular: ['', [Validators.required, Validators.minLength(9), Validators.maxLength(9), Validators.pattern('^[0-9]+$')]],
       Contrasena: ['', [Validators.required, Validators.minLength(6)]],
@@ -43,6 +47,39 @@ export class RegisterAnfitrion {
       validators: this.passwordMatchValidator
     });
   }
+  ngOnInit() {
+    this.botpressService.destroyChat();
+  }
+  emailUnicoValidator = async (control: AbstractControl) => {
+    const email = control.value;
+    if (!email) return null;
+    try {
+      let anfitrionExiste = false;
+      try {
+        const anfitrion = await firstValueFrom(
+          this.anfitrionService.listarPorCorreo(email)
+        );
+        anfitrionExiste = !!anfitrion;
+      } catch (_) {
+        anfitrionExiste = false;
+      }
+      let proveedorExiste = false;
+      try {
+        const proveedor = await firstValueFrom(
+          this.proveedorService.listarPorCorreo(email)
+        );
+        proveedorExiste = !!proveedor;
+      } catch (_) {
+        proveedorExiste = false;
+      }
+      if (anfitrionExiste || proveedorExiste) {
+        return { emailExiste: true };
+      }
+      return null;
+    } catch (err) {
+      return null;
+    }
+  };
   continuarRegistro() {
     if (this.registroForm.invalid) {
       this.registroForm.markAllAsTouched();
@@ -109,6 +146,8 @@ export class RegisterAnfitrion {
     if (emailControl?.errors?.['email'] && emailControl.touched) {
       return 'El formato del email no es válido';
     }
+    if (emailControl?.errors?.['emailExiste'] && emailControl.touched)
+      return 'El correo ya está registrado';
     return '';
   }
   get nombreError(): string {

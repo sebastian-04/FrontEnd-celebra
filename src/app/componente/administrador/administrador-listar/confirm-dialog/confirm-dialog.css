@@ -1,0 +1,15 @@
+.titulo{
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  font-weight: bold;
+}
+p{
+  font-family: 'Inter', sans-serif;
+  text-align: center;
+  font-weight: bold;
+}
+mat-dialog-actions{
+  justify-content: center;
+  display: flex;
+  gap: 3rem;
+}

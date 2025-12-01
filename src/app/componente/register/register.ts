@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
-import {RouterLink, RouterOutlet} from '@angular/router';
+import {Component, inject} from '@angular/core';
+import {RouterLink} from '@angular/router';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-register',
@@ -11,5 +12,10 @@ import {RouterLink, RouterOutlet} from '@angular/router';
   styleUrl: './register.css'
 })
 export class Register {
+    botPressService = inject(BotpressService);
     nombre: String = "Iniciar Sesión";
+    ngOnInit(): void {
+      this.botPressService.destroyChat();
+      localStorage.removeItem('token');
+    }
 }

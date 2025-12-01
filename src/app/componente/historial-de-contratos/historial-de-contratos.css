@@ -503,21 +503,17 @@ body.modal-abierto {
   text-decoration: none;
 }
 
-/* --- INICIO HISTORIAL DE EVENTOS --- */
-
 .historial-contenido {
-  /* Posición y tamaño (para que encaje con el header y menú) */
   flex: 1;
   padding: 2.5rem 4rem;
-  margin-top: 6.25rem; /* Altura del header fijo */
-  margin-left: 5rem; /* Ancho del menú hamburguesa */
+  margin-top: 6.25rem;
+  margin-left: 5rem;
   height: calc(100vh - 6.25rem);
   overflow-y: auto;
   background-color: #FFFFFF;
   font-family: 'Inter', sans-serif;
 }
 
-/* Encabezado (botón y título) */
 .historial-header {
   display: flex;
   align-items: center;
@@ -525,7 +521,6 @@ body.modal-abierto {
   margin-bottom: 2rem;
 }
 
-/* Reutilizamos el estilo del botón de perfil */
 .perfil-back-button {
   display: flex;
   align-items: center;
@@ -554,10 +549,9 @@ body.modal-abierto {
   margin: 0;
 }
 
-/* Dropdown de Filtro */
 .historial-filtro {
   display: flex;
-  justify-content: flex-end; /* Alinea a la derecha */
+  justify-content: flex-end;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 2rem;
@@ -582,15 +576,12 @@ body.modal-abierto {
   cursor: pointer;
 }
 
-/* Grilla de tarjetas */
 .historial-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 3 columnas */
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
-  padding-bottom: 3rem; /* Espacio al final */
+  padding-bottom: 3rem;
 }
-
-/* Tarjeta de Evento Individual */
 .evento-card {
   border: 1px solid #E0E0E0;
   border-radius: 0.5rem;
@@ -608,15 +599,15 @@ body.modal-abierto {
 
 .card-imagen {
   width: 100%;
-  height: 200px; /* Altura fija para la imagen */
+  height: 200px;
   object-fit: cover;
-  background-color: #f0f0f0; /* Color mientras carga */
+  background-color: #f0f0f0;
 }
 
 .card-contenido {
   padding: 1.25rem;
   font-family: 'Inter', sans-serif;
-  flex: 1; /* Ocupa el espacio restante */
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
@@ -641,7 +632,7 @@ body.modal-abierto {
   font-size: 0.9rem;
   font-weight: 600;
   color: #333;
-  flex-shrink: 0; /* Evita que se encoja */
+  flex-shrink: 0;
 }
 
 .card-subtitulo, .card-precio, .card-fecha, .card-anfitrion {
@@ -665,7 +656,7 @@ body.modal-abierto {
   color: #000;
 }
 .card-links {
-  margin-top: auto; /* Empuja los links al fondo */
+  margin-top: auto;
   padding-top: 1rem;
   display: flex;
   justify-content: space-between;
@@ -679,11 +670,11 @@ body.modal-abierto {
   font-weight: 500;
 }
 .card-links a:hover {
-  color: #8138ff; /* Color morado */
+  color: #8138ff;
 }
 
 .link-reseña-pendiente {
-  color: #FF7A7A !important; /* Rojo */
+  color: #FF7A7A !important;
   text-decoration: none !important;
 }
 .encabezado-buscar-formulario select{
@@ -717,18 +708,17 @@ body.modal-abierto {
   border-radius: 50%;
   object-fit: cover;
 }
-/* Contenedor: Define la altura y la perspectiva 3D */
+
 .carrusel {
   position: relative;
   width: 100%;
-  height: 16rem; /* Ajusta la altura según tu diseño */
+  height: 16rem;
   overflow: hidden;
   background-color: #f3f3f3;
   border-radius: 10px 10px 0 0;
-  perspective: 1600px; /* OBLIGATORIO para el efecto 3D */
+  perspective: 1600px;
 }
 
-/* Estado base: Imagen oculta y rotada a la espera (como página cerrada) */
 .carrusel-img {
   position: absolute;
   top: 0;
@@ -737,17 +727,13 @@ body.modal-abierto {
   height: 100%;
   object-fit: cover;
   border-radius: 5%;
-  /* Configuración inicial (Invisible y rotada 90 grados) */
   opacity: 0;
-  backface-visibility: hidden; /* Oculta la parte trasera */
+  backface-visibility: hidden;
   transform: rotateY(90deg);
-  transform-origin: right center; /* Pivota desde el borde derecho */
-
-  /* Tiempos de animación suaves */
+  transform-origin: right center;
   transition:
     transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
     opacity 0.5s ease;
-
   z-index: 1;
 }
 .evento-imagenes{
@@ -764,7 +750,7 @@ body.modal-abierto {
   height: 60%;
   object-fit: cover;
 }
-/* CLASE VISIBLE (Tu clase .activa): La imagen entra recta */
+
 .carrusel-img.visible {
   opacity: 1;
   transform: rotateY(0deg);
@@ -772,11 +758,10 @@ body.modal-abierto {
   z-index: 2;
 }
 
-/* CLASE PREV (Tu clase .saliente): La imagen vieja se dobla hacia la izquierda */
 .carrusel-img.prev {
   opacity: 1;
   transform: rotateY(-90deg);
-  transform-origin: left center; /* Pivote cambia a la izquierda */
+  transform-origin: left center;
   z-index: 1;
 }
 .chat-widget-container {
@@ -784,7 +769,7 @@ body.modal-abierto {
   bottom: 20px;
   right: 20px;
   width: 360px;
-  z-index: 1000;
+  z-index: 998;
   display: flex;
   flex-direction: column;
 }
@@ -1090,4 +1075,15 @@ body.modal-abierto {
   color: #999;
   text-align: center;
   margin: 15px 0 5px 0;
+}
+.chat-name-container{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.chat-title {
+  font-weight: 500;
+  color: #999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
 }

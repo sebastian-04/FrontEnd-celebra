@@ -627,14 +627,9 @@ body.modal-abierto {
   opacity: 0.7;
 }
 
-/* ========================================== */
-/* ===     ESTILOS DEL LAYOUT PRINCIPAL     === */
-/* ========================================== */
-
-/* 1. Contenedor principal (fondo gris) */
 .detalle-container {
   display: flex;
-  justify-content: center; /* Centra el wrapper */
+  justify-content: center;
   margin-left: 2rem;
   margin-top: 6.25rem;
   width: calc(100% - 5rem);
@@ -642,28 +637,21 @@ body.modal-abierto {
   overflow: hidden;
   background-color: white;
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif; /* Fuente principal */
+  font-family: 'Inter', sans-serif;
 }
 
-
-/* 2. Wrapper centrado (con scroll) */
 .detalle-wrapper {
-  width: 100%; /* <-- CAMBIADO DE 100% A 75% */
-  max-width: 1200px; /* <-- LÍMITE DE ANCHO */
+  width: 100%;
+  max-width: 1200px;
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; /* Scroll solo aquí */
+  overflow-y: auto;
   padding: 2.5rem;
   box-sizing: border-box;
   gap: 1.5rem;
 }
 
-/* ========================================== */
-/* ===      ESTILOS DEL COMPONENTE        === */
-/* ========================================== */
-
-/* --- Encabezado --- */
 .detalle-header {
   display: flex;
   align-items: center;
@@ -689,8 +677,6 @@ body.modal-abierto {
   margin: 0;
 }
 
-/* --- Carrusel --- */
-/* --- Carrusel --- */
 .carousel-container {
   width: 100%;
   height: 60vh;
@@ -702,7 +688,6 @@ body.modal-abierto {
 .carousel-track {
   display: flex;
   transition: transform 0.5s ease-in-out;
-  /* (¡SIN 'height' aquí!) */
 }
 
 .carousel-slide {
@@ -710,23 +695,17 @@ body.modal-abierto {
   width: calc(100% / 3);
   box-sizing: border-box;
   padding: 0 8px;
-
-  /* ¡LA CLAVE ESTÁ AQUÍ! */
-  /* Forzamos el "marco" a ser 4:3 (alto) */
   aspect-ratio: 4 / 3;
-
   overflow: hidden;
   border-radius: 8px;
-  /* (¡SIN 'height' aquí!) */
 }
 
 .carousel-slide img {
   width: 100%;
-  height: 100%; /* <-- Esto fuerza a la imagen a rellenar el marco 4:3 */
-  object-fit: cover; /* <-- Esto hará zoom y cortará los lados */
+  height: 100%;
+  object-fit: cover;
 }
 
-/* --- Botones --- */
 .carousel-btn {
   position: absolute;
   top: 50%;
@@ -755,7 +734,6 @@ body.modal-abierto {
   right: 1.5rem;
 }
 
-/* --- Efecto Desvanecido (Fade) --- */
 .carousel-fade {
   position: absolute;
   top: 0;
@@ -773,7 +751,6 @@ body.modal-abierto {
   background: linear-gradient(to left, #F9F9F9 20%, transparent);
 }
 
-/* --- Contenido (2 columnas) --- */
 .detalle-contenido {
   display: flex;
   gap: 2rem;
@@ -781,20 +758,19 @@ body.modal-abierto {
 }
 
 .columna-principal {
-  flex: 3; /* Ocupa más espacio */
+  flex: 3;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
 .columna-lateral {
-  flex: 1; /* Ocupa menos espacio */
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-/* --- Estilos Columna Principal --- */
 .titulo-evento {
   font-size: 1.75rem;
   font-weight: 600;
@@ -842,7 +818,7 @@ body.modal-abierto {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  margin-left: auto; /* Empuja a la derecha */
+  margin-left: auto;
 }
 .star-icon {
   color: #FFC107;
@@ -856,7 +832,7 @@ body.modal-abierto {
   color: #777;
 }
 .chat-btn {
-  background-color: #E4CCFF; /* Morado claro */
+  background-color: #E4CCFF;
   border: none;
   border-radius: 50%;
   width: 44px;
@@ -894,7 +870,6 @@ body.modal-abierto {
   min-height: 100px;
 }
 
-/* --- Estilos Columna Lateral --- */
 .detalles-box {
   background-color: #FFFFFF;
   padding: 1.5rem;
@@ -965,13 +940,13 @@ body.modal-abierto {
 .reservar-btn-finalizar:hover {
   background-color: #53a9ff;
 }
-/* --- Efecto Desvanecido (Fade) --- */
+
 .carousel-fade {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 100px; /* Ancho del desvanecido */
-  pointer-events: none; /* Permite hacer clic "a través" de él */
+  width: 100px;
+  pointer-events: none;
   z-index: 5;
 }
 .carousel-fade.left {
@@ -983,21 +958,13 @@ body.modal-abierto {
   background: linear-gradient(to left, #F9F9F9 20%, transparent);
 }
 
-
-
-/* ========================================== */
-/* ===   NUEVA SECCIÓN (PROVEEDOR/REGLAS)   === */
-/* ========================================== */
-
-/* 1. Contenedor de la nueva sección de 2 columnas */
 .proveedor-reglas-section {
   display: flex;
-  gap: 2rem; /* Mismo gap que .detalle-contenido */
+  gap: 2rem;
   width: 100%;
-  padding-bottom: 2.5rem; /* Espacio extra al final del scroll */
+  padding-bottom: 2.5rem;
 }
 
-/* 2. Estilos de las tarjetas (reusando el estilo 'box') */
 .columna-proveedor-card,
 .columna-reglas-card {
   background-color: #FFFFFF;
@@ -1007,13 +974,12 @@ body.modal-abierto {
   font-family: 'Inter', sans-serif;
 }
 
-/* 3. Columna Izquierda (Perfil Proveedor) */
 .columna-proveedor-card {
-  flex: 1; /* Ocupa menos espacio */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centra el contenido */
-  align-self: flex-start; /* Evita que se estire verticalmente */
+  align-items: center;
+  align-self: flex-start;
   text-align: center;
 }
 
@@ -1026,7 +992,7 @@ body.modal-abierto {
 
 .columna-proveedor-card .perfil-avatar {
   border-radius: 50%;
-  width: 100px; /* Tamaño de la foto de perfil */
+  width: 100px;
   height: 100px;
   object-fit: cover;
   margin-bottom: 1rem;
@@ -1089,14 +1055,14 @@ body.modal-abierto {
 
 .contacto-item span {
   color: #555;
-  word-break: break-all; /* Para emails largos */
+  word-break: break-all;
 }
 
 .contactar-btn {
   font-family: 'Inter', sans-serif;
-  background-color: #E4CCFF; /* Morado claro (existente) */
-  border: 1px solid #D577FF; /* Borde morado (existente) */
-  color: #1E1E1E; /* Texto oscuro */
+  background-color: #E4CCFF;
+  border: 1px solid #D577FF;
+  color: #1E1E1E;
   font-weight: 600;
   font-size: 1rem;
   padding: 0.75rem 1.5rem;
@@ -1117,9 +1083,8 @@ body.modal-abierto {
   height: 20px;
 }
 
-/* 4. Columna Derecha (Reglas) */
 .columna-reglas-card {
-  flex: 3; /* Ocupa más espacio */
+  flex: 3;
 }
 
 .columna-reglas-card h2 {
@@ -1150,8 +1115,8 @@ body.modal-abierto {
 }
 
 .reglas-seccion ul {
-  list-style-type: disc; /* Puntos de viñeta */
-  padding-left: 1.5rem; /* Espacio para las viñetas */
+  list-style-type: disc;
+  padding-left: 1.5rem;
   margin: 0;
 }
 
@@ -1214,7 +1179,6 @@ body.modal-abierto {
   object-fit: cover;
 }
 
-/* Sección de Comentarios */
 .resenas-seccion {
 
 }
@@ -1242,7 +1206,7 @@ body.modal-abierto {
 }
 
 .btn-mis-resenas {
-  background-color: #F0E6FF; /* Morado muy claro */
+  background-color: #F0E6FF;
   border: 1px solid #D577FF;
   color: #000;
   font-family: 'Inter', sans-serif;
@@ -1252,7 +1216,7 @@ body.modal-abierto {
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-left: auto; /* Empuja el botón a la derecha */
+  margin-left: auto;
 }
 .botones{
   display: flex;
@@ -1260,7 +1224,7 @@ body.modal-abierto {
   margin-left: 25%;
 }
 .btn-eliminar-resenas{
-  background-color: #FF7477; /* Morado muy claro */
+  background-color: #FF7477;
   border: 1px solid #D577FF;
   color: #FFFFFF;
   font-family: 'Inter', sans-serif;
@@ -1278,7 +1242,7 @@ body.modal-abierto {
 .btn-eliminar-resenas:hover {
   background-color: red;
 }
-/* Lista de Resenas */
+
 .resena-list {
   display: flex;
   flex-direction: column;
@@ -1287,12 +1251,10 @@ body.modal-abierto {
 
 .resena-card {
   display: flex;
-  gap: 1.5rem; /* Un poco mas de espacio */
-
-  /* --- ESTO ES LO NUEVO --- */
-  border: 1px solid #E0E0E0;  /* El borde completo */
-  border-radius: 0.5rem;       /* Esquinas redondeadas */
-  padding: 1.5rem;             /* Relleno en todos los lados */
+  gap: 1.5rem;
+  border: 1px solid #E0E0E0;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
   background-color: #FFFFFF;
 }
 
@@ -1328,7 +1290,7 @@ body.modal-abierto {
   font-size: 0.9rem;
 }
 .resena-estrellas span {
-  color: #FFC107; /* Color de estrella */
+  color: #FFC107;
 }
 .resena-estrellas .rating-numero {
   color: #333;
@@ -1343,4 +1305,326 @@ body.modal-abierto {
   line-height: 1.6;
   margin: 0;
 }
+.chat-widget-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 360px;
+  z-index: 998;
+  display: flex;
+  flex-direction: column;
+}
 
+.chat-views-wrapper {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all 300ms ease-out;
+  opacity: 0;
+  transform: translateY(30px);
+  max-height: 0px;
+  visibility: hidden;
+}
+
+.chat-views-wrapper.visible {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 480px;
+  visibility: visible;
+}
+
+.chat-list {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: auto;
+  transition: all 350ms ease-in-out;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.chat-list:not(.active) {
+  opacity: 0;
+  transform: translateX(-100%);
+  visibility: hidden;
+}
+
+.chat-window {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  transition: all 350ms ease-in-out;
+  opacity: 0;
+  transform: translateX(100%);
+  visibility: hidden;
+}
+
+.chat-window.active {
+  opacity: 1;
+  transform: translateX(0);
+  visibility: visible;
+}
+
+.chat-window-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #ebebeb;
+  background: #fdfdfd;
+  flex-shrink: 0;
+}
+
+.chat-back-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+  padding: 0 5px;
+  color: #555;
+}
+.chat-back-button:hover {
+  color: #000;
+}
+
+.chat-window-body {
+  flex-grow: 1;
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #f9f9f9;
+}
+
+.message-bubble {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 80%;
+}
+.message-bubble .chat-avatar-msg {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.message-bubble span {
+  padding: 10px 14px;
+  border-radius: 18px;
+  background-color: #f0f0f0;
+  color: #000;
+  line-height: 1.4;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+}
+
+.message-bubble.message-incoming {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.message-bubble.message-incoming span {
+  background-color: #E2C9FF;
+}
+
+.message-bubble.message-outgoing {
+  align-self: flex-start;
+}
+.message-bubble.message-outgoing span {
+  background-color: #ffffff;
+  border: 1px solid #eee;
+}
+
+.chat-window-footer {
+  display: flex;
+  padding: 12px;
+  border-top: 1px solid #ebebeb;
+  background: #fff;
+  flex-shrink: 0;
+}
+.chat-window-footer input {
+  flex-grow: 1;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  padding: 10px 16px;
+  margin-right: 8px;
+  font-size: 14px;
+}
+.chat-window-footer input:focus {
+  outline: none;
+  border-color: #E2C9FF;
+}
+
+.send-button {
+  background: #E2C9FF;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #333;
+  padding-left: 3px;
+}
+
+.chat-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #ebebeb;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+.chat-item:last-child {
+  border-bottom: none;
+}
+.chat-item:hover {
+  background-color: #E2C9FF;
+}
+.chat-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 14px;
+}
+.chat-name {
+  font-weight: 500;
+  color: #1c1c1c;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+}
+.chat-open-button {
+  width: 100%;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  text-align: center;
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.chat-open-button:hover,
+.chat-open-button.activo {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  background-color: #E2C9FF;
+}
+.msg-date {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #7e7e7e;
+  margin: 12px 0;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.message-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.message-sender-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.message-bubble.message-incoming .message-sender-name {
+  text-align: right;
+  color: #6a1b9a;
+}
+
+.message-bubble.message-outgoing .message-sender-name {
+  text-align: left;
+}
+.message-row {
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+.chat-avatar-msg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 8px;
+}
+
+.message-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.message-sender-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.message-bubble {
+  padding: 8px 12px;
+  border-radius: 18px;
+  line-height: 1.4;
+}
+
+.message-row.outgoing-row {
+  justify-content: flex-end;
+}
+
+.message-row.outgoing-row .message-sender-name {
+  text-align: right;
+  color: #000000;
+}
+
+.message-row.outgoing-row .message-bubble {
+  background-color: #ede2ff;
+  color: #333;
+  border-bottom-right-radius: 2px;
+}
+
+.message-row.incoming-row {
+  justify-content: flex-start;
+}
+
+.message-row.incoming-row .message-sender-name {
+  text-align: left;
+}
+
+.message-row.incoming-row .message-bubble {
+  background-color: #f0f0f0;
+  color: #000000;
+  border-bottom-left-radius: 2px;
+}
+
+.msg-date {
+  font-size: 0.75rem;
+  color: #999;
+  text-align: center;
+  margin: 15px 0 5px 0;
+}
+.chat-name-container{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.chat-title {
+  font-weight: 500;
+  color: #999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+}

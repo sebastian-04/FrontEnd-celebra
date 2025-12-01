@@ -12,7 +12,6 @@
   padding: 1rem;
 }
 
-/* HEADER */
 .calendar-header {
   display: flex;
   align-items: center;
@@ -47,15 +46,14 @@
 }
 .month-btn:hover, .year-btn:hover { background: #EDEAFF; }
 
-/* PICKERS (CENTRADOS DENTRO DEL CALENDARIO) */
 .pickers {
   position: absolute;
-  inset: 0; /* reemplaza top/left/width/height */
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 30;
-  pointer-events: none; /* evita bloquear clics cuando están ocultos */
+  pointer-events: none;
 }
 
 .month-picker,
@@ -76,7 +74,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: all; /* activamos clics dentro del picker */
+  pointer-events: all;
 }
 
 @keyframes fadeIn {
@@ -117,7 +115,6 @@
 }
 .year-item:hover { background: #F3F6FF; }
 
-/* WEEK NAMES */
 .weeknames {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -127,7 +124,6 @@
   margin-bottom: 6px;
 }
 
-/* WEEKS */
 .weeks {
   min-height: 16rem;
   transition: none !important;
@@ -139,7 +135,6 @@
   gap: 6px;
 }
 
-/* DÍAS */
 .day {
   width: 2.5rem;
   height: 2.5rem;
@@ -161,14 +156,12 @@
   transition: background-color 0.25s ease;
 }
 
-/* RANGO ENTRE FECHAS */
 .day.in-range {
   background-color: #E2C9FF !important;
   color: #1e1e1e;
   transition: background-color 0.25s ease;
 }
 
-/* INICIO Y FIN DEL RANGO */
 .day.range-start,
 .day.range-end {
   background-color: #D577FF !important;
@@ -181,13 +174,12 @@
   transform: scale(1.05);
 }
 
-/* FOOTER */
 .calendar-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: 10px;
-  gap: 16px; /* más espacio entre el botón y el texto */
+  gap: 16px;
   padding-top: 12px;
   border-top: 1px solid #f2f2f2;
 }
@@ -216,7 +208,6 @@
   box-shadow: 0 0 6px rgba(213, 119, 255, 0.4);
 }
 
-/* 🔹 Rango intermedio en tono más suave */
 .day.in-range:not(.selected) {
   background-color: #E2C9FF !important;
   color: #1e1e1e;

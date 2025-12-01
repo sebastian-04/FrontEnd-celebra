@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, ViewChild} from '@angular/core';
-import {DatePipe, NgOptimizedImage} from '@angular/common';
+import {DatePipe} from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Proveedor} from '../../model/proveedor';
@@ -16,20 +16,25 @@ import {Mensaje} from '../../model/mensaje';
 import {MensajeServices} from '../../services/mensaje-services';
 import {Chat} from '../../model/chat';
 import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-comunicate-con-nosotros',
   imports: [
     ReactiveFormsModule,
     RouterLink,
-    NgOptimizedImage,
     DatePipe,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   templateUrl: './comunicate-con-nosotros.html',
   styleUrl: './comunicate-con-nosotros.css',
 })
 export class ComunicateConNosotros {
+  activeChatTitle: string | null = null;
+  loginService: LoginService = inject(LoginService);
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -62,6 +67,8 @@ export class ComunicateConNosotros {
   usuario: Anfitrion | Proveedor;
   private route = inject(ActivatedRoute);
   private fb: FormBuilder = inject(FormBuilder);
+  translate: TranslateService = inject(TranslateService);
+  botpressService = inject(BotpressService);
   constructor(private cdr: ChangeDetectorRef) {
     this.buscarForm = this.fb.group({
       Distrito: ['', Validators.required],
@@ -84,6 +91,10 @@ export class ComunicateConNosotros {
     })
   }
   ngOnInit(): void {
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
     const id = Number(this.route.snapshot.params['id']);
     const role = this.route.snapshot.params['role'];
     this.distritoService.listar().subscribe({
@@ -141,15 +152,17 @@ export class ComunicateConNosotros {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -336,6 +349,7 @@ export class ComunicateConNosotros {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
@@ -363,8 +377,6 @@ export class ComunicateConNosotros {
     }
 
   }
-
-  // --- Empieza comunicate-con-nosotros, Cesar estas son fucniones para el futuro pero nose su funquen xd---
 
   iniciarChatWhatsApp(): void {
     console.log('Iniciando chat de WhatsApp...');

@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, ViewChild} from '@angular/core';
+ import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Anfitrion} from '../../model/anfitrion';
@@ -8,7 +8,7 @@ import {EventoService} from '../../services/evento-services';
 import {ImagenEvento} from '../../model/imagenEvento';
 import {debounceTime, fromEvent} from 'rxjs';
 import {ImagenEventoService} from '../../services/imagenEvento-services';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {Distrito} from '../../model/distrito';
 import {DistritoServices} from '../../services/distrito-services';
 import {Ciudad} from '../../model/ciudad';
@@ -19,6 +19,11 @@ import {Mensaje} from '../../model/mensaje';
 import {MensajeServices} from '../../services/mensaje-services';
 import {Chat} from '../../model/chat';
 import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {ValoracionEvento} from '../../model/valoracionEvento';
+import {ValoracionEventoServices} from '../../services/valoracion-evento-services';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-buscar-eventos',
@@ -26,13 +31,22 @@ import {ChatServices} from '../../services/chat-services';
     RouterLink,
     ReactiveFormsModule,
     CommonModule,
-    NgOptimizedImage,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   templateUrl: './buscar-eventos.html',
   styleUrl: './buscar-eventos.css',
 })
 export class BuscarEventos {
+  valoracionEventoService = inject(ValoracionEventoServices);
+  favoritos: { [eventoId: number]: boolean } = {};
+  indices: { [key: number]: number } = {};
+  haIniciadoAnimacion: { [key: number]: boolean } = {};
+  indicePrevio: { [key: number]: number } = {};
+  intervalosCarrusel: Record<number, any> = {};
+  intervalos: { [key: string]: any } = {};
+  loginService: LoginService = inject(LoginService);
+  cantidadResenas: number;
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -43,6 +57,7 @@ export class BuscarEventos {
   activeChatId: number | null = null;
   activeChatName: string | null = null;
   activeChatAvatar: string | null = null;
+  activeChatTitle: string | null = null;
   mensajeTexto: string = '';
   idAnfitrion!: number;
   anfitrion: Anfitrion;
@@ -59,7 +74,7 @@ export class BuscarEventos {
   buscarAvanzadaForm: FormGroup;
   mostrarCerrarSesion = false;
   scrollPosition = 0;
-  barraHeight = 64;
+  barraHeight = 68;
   alturaTotalContenido = 0;
   opacidadSuperior = 0;
   opacidadInferior = 0;
@@ -73,10 +88,17 @@ export class BuscarEventos {
   eventoService: EventoService = inject(EventoService);
   imagenEventoService: ImagenEventoService = inject(ImagenEventoService);
   imagenesEvento: ImagenEvento[] = [];
+  botpressService: BotpressService = inject(BotpressService);
+  id: number;
   private route = inject(ActivatedRoute);
   private fb: FormBuilder = inject(FormBuilder);
+  translate: TranslateService = inject(TranslateService);
   constructor(private cdr: ChangeDetectorRef) {}
   ngOnInit(): void {
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
     this.buscarForm = this.fb.group({
       Distrito: ['', Validators.required],
       Aforo: ['', Validators.required],
@@ -102,7 +124,7 @@ export class BuscarEventos {
     this.tipoEventoService.listar().subscribe({
       next: (data) => this.tipoEvento = data,
     })
-    this.idAnfitrion = Number(this.route.snapshot.params['id']);
+    this.idAnfitrion = Number(this.route.snapshot.params['idAnfitrion']);
     this.anfitrionService.listarPorId(this.idAnfitrion).subscribe({
       next: (data: Anfitrion) => {
         this.anfitrion = data;
@@ -147,6 +169,7 @@ export class BuscarEventos {
     if (this.chatListPollingInterval) {
       clearInterval(this.chatListPollingInterval);
     }
+    Object.values(this.intervalosCarrusel).forEach(clearInterval);
   }
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
   toggleChat(): void {
@@ -154,15 +177,17 @@ export class BuscarEventos {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -236,6 +261,18 @@ export class BuscarEventos {
       next: (data) =>{
         this.eventosFiltradosAvanzados = data;
         this.eventosFiltradosAvanzados.forEach(evento => {
+          this.eventoService.calcularCantidadResenasPorEvento(evento.id!).subscribe({
+            next: (data) => {
+              this.cantidadResenas = data;
+            }
+          });
+          this.valoracionEventoService.listarValoracionEventoPorAnfitrion(this.idAnfitrion).subscribe({
+            next: (valoraciones) => {
+              this.favoritos[evento.id!] = valoraciones.some(v => v.favorito === true);
+              console.log("Favorito evento", evento.id, this.favoritos[evento.id!]);
+            },
+            error: (err) => console.error("Error al cargar favoritos", err)
+          });
           if (evento.id != null) {
             this.cargarImagenesPorEvento(evento.id);
           }
@@ -252,6 +289,18 @@ export class BuscarEventos {
       next: (data) => {
         this.eventosFiltrados = data;
         this.eventosFiltrados.forEach(evento => {
+          this.eventoService.calcularCantidadResenasPorEvento(evento.id!).subscribe({
+            next: (data) => {
+              this.cantidadResenas = data;
+            }
+          });
+          this.valoracionEventoService.listarValoracionEventoPorAnfitrion(this.idAnfitrion).subscribe({
+            next: (valoraciones) => {
+              this.favoritos[evento.id!] = valoraciones.some(v => v.favorito === true);
+              console.log("Favorito evento", evento.id, this.favoritos[evento.id!]);
+            },
+            error: (err) => console.error("Error al cargar favoritos", err)
+          });
           if (evento.id != null) {
             this.cargarImagenesPorEvento(evento.id);
           }
@@ -266,19 +315,67 @@ export class BuscarEventos {
       next: (imagenes: ImagenEvento[]) => {
         if (imagenes && imagenes.length > 0) {
           this.imagenesEvento = this.imagenesEvento.concat(imagenes);
+          this.indices[idEvento] = 0;
+          this.indicePrevio[idEvento] = -1;
+          this.iniciarCarrusel(idEvento);
           console.log('Imágenes cargadas:', this.imagenesEvento);
         }
       },
       error: (err) => console.error(`Error al cargar imágenes del evento ${idEvento}:`, err)
     });
   }
+  obtenerIndiceActual(idEvento: number): number {
+    return this.indices[idEvento] ?? 0;
+  }
+  iniciarCarrusel(idEvento: number) {
+    const imagenes = this.obtenerImagenesPorEvento(idEvento);
+    if (!imagenes || imagenes.length <= 1) return;
+    this.haIniciadoAnimacion[idEvento] = true;
+    if (!this.intervalos['GLOBAL']) {
+      this.intervalos['GLOBAL'] = setInterval(() => {
+        this.actualizarCarruseles();
+      }, 3000);
+    }
+  }
+  actualizarCarruseles() {
+    for (const idEventoStr in this.indices) {
+      const idEvento = Number(idEventoStr);
+      const imagenes = this.obtenerImagenesPorEvento(idEvento);
+      if (!imagenes || imagenes.length <= 1) continue;
+      const actual = this.indices[idEvento];
+      const siguiente = (actual + 1) % imagenes.length;
+      this.indicePrevio[idEvento] = actual;
+      this.indices[idEvento] = siguiente;
+    }
+    this.cdr.detectChanges();
+  }
   obtenerImagenPorEvento(idEvento: number): string {
     const imagenEncontrada = this.imagenesEvento.find(img => img.evento.id === idEvento);
     if (imagenEncontrada && imagenEncontrada.imagen) {
-      return 'data:image/png;base64,' + imagenEncontrada.imagen;
-    } else {
-      return '/assets/Group%20633475.png';
+      const base64 = imagenEncontrada.imagen.trim();
+      let mimeType = 'image/jpeg';
+      if (base64.startsWith('iVBOR')) mimeType = 'image/png';
+      else if (base64.startsWith('/9j/')) mimeType = 'image/jpeg';
+      return `data:${mimeType};base64,${base64}`;
     }
+    return '/assets/Group%20633475.png';
+  }
+  obtenerImagenesPorEvento(idEvento: number): ImagenEvento[] {
+    return this.imagenesEvento.filter(img => img.evento.id === idEvento);
+  }
+  getImagenSrc(base64: string): string {
+    if (!base64) return '/assets/placeholder.png';
+    const trimmed = base64.trim();
+    if (trimmed.startsWith('data:image')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('/9j/')) {
+      return 'data:image/jpeg;base64,' + trimmed; // JPG
+    }
+    if (trimmed.startsWith('iVBOR')) {
+      return 'data:image/png;base64,' + trimmed; // PNG
+    }
+    return 'data:image/jpeg;base64,' + trimmed;
   }
   toggleMenu() {
     if (this.animando) return;
@@ -337,7 +434,7 @@ export class BuscarEventos {
         alturaAcumulada += elemento.offsetHeight + 20;
       });
       this.alturaTotalContenido = alturaAcumulada;
-      console.log('📏 Altura total del contenido:', this.alturaTotalContenido, 'px');
+      console.log('Altura total del contenido:', this.alturaTotalContenido, 'px');
     }
   }
   actualizarPosicionBarra() {
@@ -348,11 +445,11 @@ export class BuscarEventos {
     const barra1 = document.querySelector('.barra-1') as HTMLElement;
     if (!barra1) return;
     const alturaBarra1 = barra1.clientHeight;
-    const espacioBarra = Math.max(0, alturaBarra1 - this.barraHeight);
+    const espacioMaximoScrollableBarra = Math.max(0, alturaBarra1 - this.barraHeight);
     if (totalScrollable > 0) {
       const scrollPercent = scrollTop / totalScrollable;
-      const targetPos = scrollPercent * espacioBarra;
-      this.scrollPosition = Math.min(espacioBarra, Math.max(0, targetPos));
+      const targetPos = scrollPercent * espacioMaximoScrollableBarra;
+      this.scrollPosition = Math.min(espacioMaximoScrollableBarra, Math.max(0, targetPos));
     } else {
       this.scrollPosition = 0;
     }
@@ -364,9 +461,9 @@ export class BuscarEventos {
   }
   onBarraMouseDown(event: MouseEvent) {
     event.preventDefault();
-    const wrapper = (event.currentTarget as HTMLElement).closest('.eventos-navegacion') as HTMLElement;
-    if (!wrapper) return;
-    const rect = wrapper.getBoundingClientRect();
+    const track = document.querySelector('.barra-1') as HTMLElement;
+    if (!track) return;
+    const rect = track.getBoundingClientRect();
     const espacioBarra = Math.max(0, rect.height - this.barraHeight);
     const startY = event.clientY;
     const startScrollPos = this.scrollPosition;
@@ -405,15 +502,21 @@ export class BuscarEventos {
   onScroll() {
     this.cdr.detectChanges();
   }
-  onCorazonClick(event: MouseEvent) {
-    const img = event.target as HTMLImageElement;
-    if (!img) return;
-    img.classList.toggle('activo');
-    if (img.classList.contains('activo')) {
-      img.src = '/assets/HeartPintado.png';
-    } else {
-      img.src = '/assets/Heart.png';
-    }
+  onCorazonClick(event: MouseEvent, evento: Evento) {
+    const nuevoEstado = !this.favoritos[evento.id!];
+    this.favoritos[evento.id!] = nuevoEstado;
+
+    const valoracionEvento: ValoracionEvento = {
+      favorito: nuevoEstado,
+      anfitrion: this.anfitrion,
+      evento: evento
+    };
+    this.valoracionEventoService
+      .alternarFavorito(this.idAnfitrion, evento.id!, valoracionEvento)
+      .subscribe({
+        next: () => console.log("Favorito actualizado"),
+        error: (err) => console.error("Error actualizando favorito", err)
+      });
   }
   toggleFiltrosAvanzados() {
     if (this.animando) return;
@@ -491,6 +594,7 @@ export class BuscarEventos {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
@@ -513,7 +617,9 @@ export class BuscarEventos {
             fechaInicio: filtro.Fecha
           }
         }
-      );
+      ).then(() => {
+        window.location.reload();
+      });
     }
   }
   buscarAvanzada(): void {
@@ -530,7 +636,10 @@ export class BuscarEventos {
           presupuestoMin: filtro.PresupuestoAvanzadaMin,
           presupuestoMax: filtro.PresupuestoAvanzadaMax,
         },
+      }).then(() => {
+        window.location.reload();
       });
     }
   }
+
 }

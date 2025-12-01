@@ -1,0 +1,63 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 40px;
+  font-family: "Inter", sans-serif;
+}
+.titulo-principal {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 30px;
+  text-align: center;
+  letter-spacing: 1px;
+  font-family: "Inter", sans-serif;
+}
+.perfil-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.card-header-center {
+  justify-content: center;
+  margin-bottom: 15px;
+}
+.info-row {
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+.label {
+  font-weight: bold;
+  color: #555;
+  margin-right: 5px;
+  font-family: "Inter", sans-serif;
+}
+.imagen-container {
+  margin: 25px 0;
+  display: flex;
+  justify-content: center;
+}
+.imagen-container img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  filter: grayscale(100%);
+  border: 1px solid #ddd;
+}
+.info-footer {
+  margin-top: 10px;
+  font-size: 18px;
+}
+.value-highlight {
+  font-weight: 900;
+  color: #000;
+}
+.footer-copyright {
+  margin-top: 40px;
+  color: #777;
+  font-size: 14px;
+}

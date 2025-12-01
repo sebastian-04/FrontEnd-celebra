@@ -1,7 +1,6 @@
 import {Component, inject} from '@angular/core';
-import {TitleCasePipe} from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidatorFn, Validators} from '@angular/forms';
-import {RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 import {MatToolbarModule } from '@angular/material/toolbar';
 import {MatFormFieldModule } from '@angular/material/form-field';
 import {MatSelectModule } from '@angular/material/select';
@@ -15,15 +14,13 @@ import {DistritoServices} from '../../services/distrito-services';
 import {EspecializacionServices} from '../../services/especializacion-services';
 import {TipoEventoServices} from '../../services/tipo-evento-services';
 import {HttpErrorResponse} from '@angular/common/http';
-
+import {LoginService} from '../../services/login-service';
 
 @Component({
-  selector: 'app-administrador',
+  selector: 'app-administrador-header',
   imports: [
-    RouterLink,
     FormsModule,
     ReactiveFormsModule,
-    TitleCasePipe,
     FormsModule,
     ReactiveFormsModule,
     MatToolbarModule,
@@ -38,6 +35,7 @@ import {HttpErrorResponse} from '@angular/common/http';
   styleUrl: './administrador.css',
 })
 export class Administrador {
+  loginService: LoginService = inject(LoginService);
   formulario!: FormGroup;
   entidadSeleccionada: string = '';
   accionSeleccionada: string = '';
@@ -49,7 +47,7 @@ export class Administrador {
   listaDatos: any[] = [];
   private fb: FormBuilder = inject(FormBuilder);
   private snackBar = inject(MatSnackBar);
-
+  private router: Router = inject(Router);
   private ciudadService = inject(CiudadServices);
   private distritoService = inject(DistritoServices);
   private especializacionService = inject(EspecializacionServices);
@@ -204,6 +202,8 @@ export class Administrador {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
+    this.router.navigate(['/login']);
   }
 
   cancelarCerrarSesion(event: MouseEvent) {
@@ -220,7 +220,6 @@ export class Administrador {
     if (this.animando) return;
     this.animando = true;
     const menuPerfil = document.querySelector('.encabezado-perfil-menu');
-    const overlay = document.querySelector('.overlay-buscar-avanzada');
     const menuHamb = document.querySelector('.menu-hamburguesa-text');
     const botonHamb = document.querySelector('.menu-hamburguesa-boton');
     if (this.menuActivo && menuHamb && botonHamb) {

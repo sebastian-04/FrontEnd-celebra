@@ -1,7 +1,6 @@
-import {ChangeDetectorRef, Component, HostListener, inject} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {NgOptimizedImage} from '@angular/common';
-
+import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, ViewChild} from '@angular/core';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {DatePipe} from '@angular/common';
 import { Location } from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Anfitrion} from '../../model/anfitrion';
@@ -18,18 +17,40 @@ import {AnfitrionServices} from '../../services/anfitrion-services';
 import {ImagenEventoService} from '../../services/imagenEvento-services';
 import {ResenaEvento} from '../../model/resenaEvento';
 import {ResenaEventoServices} from '../../services/resena-evento-services';
+import {Mensaje} from '../../model/mensaje';
+import {MensajeServices} from '../../services/mensaje-services';
+import {Chat} from '../../model/chat';
+import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-edicion-de-resenas',
   imports: [
     ReactiveFormsModule,
-    NgOptimizedImage,
-    RouterLink
+    RouterLink,
+    DatePipe,
+    FormsModule,
+    TranslatePipe
   ],
   templateUrl: './edicion-de-resenas.html',
   styleUrl: './edicion-de-resenas.css',
 })
 export class EdicionDeResenas {
+  activeChatTitle: string | null = null;
+  loginService: LoginService = inject(LoginService);
+  private pollingInterval: any;
+  private chatListPollingInterval: any;
+  mensajes: Mensaje[] = [];
+  mensajeService: MensajeServices = inject(MensajeServices);
+  chats: Chat[] = [];
+  chatService: ChatServices = inject(ChatServices);
+  chatVisible: boolean = false;
+  activeChatId: number | null = null;
+  activeChatName: string | null = null;
+  activeChatAvatar: string | null = null;
+  mensajeTexto: string = '';
   anfitrion: Anfitrion;
   anfitrionNuevo: Anfitrion;
   id: number;
@@ -55,12 +76,13 @@ export class EdicionDeResenas {
   animando = false;
   mostrarCerrarSesion = false;
   resenaForm: FormGroup;
-  currentRating = 0; // El rating actual guardado
-  hoverRating = 0;   // El rating sobre el que pasa el mouse
+  currentRating = 0;
+  hoverRating = 0;
   private fb: FormBuilder = inject(FormBuilder);
-  private location = inject(Location); // Para el botón "volver"
-  private route = inject(ActivatedRoute); // Para leer el ID de la URL
-
+  private location = inject(Location);
+  private route = inject(ActivatedRoute);
+  translate: TranslateService = inject(TranslateService);
+  botpressService: BotpressService = inject(BotpressService);
   constructor(private cdr: ChangeDetectorRef) {
     this.buscarForm = this.fb.group({
       Distrito: ['', Validators.required],
@@ -79,15 +101,17 @@ export class EdicionDeResenas {
     })
     const resenaId = this.route.snapshot.paramMap.get('id');
     console.log('ID de la reseña a editar:', resenaId);
-    // Por ahora, usamos datos de ejemplo:
     this.resenaForm = this.fb.group({
       comentario: ['', Validators.required],
-      rating: ['', Validators.required] // Ejemplo: 4 estrellas
+      rating: ['', Validators.required]
     });
-    // Carga el rating inicial del formulario
     this.currentRating = this.resenaForm.get('rating')?.value || 0;
   }
   ngOnInit(): void {
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
     const idAnfitrion = Number(this.route.snapshot.params['idAnfitrion']);
     const idEvento = Number(this.route.snapshot.params['idEvento']);
     this.cargarAnfitrion(idAnfitrion);
@@ -111,15 +135,109 @@ export class EdicionDeResenas {
             rating: this.resenaEvento.valoracion
           });
           this.currentRating = this.resenaEvento.valoracion;
-          console.log('🔄 Modo edición de reseña:', this.resenaEvento);
+          console.log('Modo edición de reseña:', this.resenaEvento);
         } else {
-          console.log('🆕 Modo nueva reseña');
+          console.log('Modo nueva reseña');
         }
       },
       error: (err) => console.error('Error al buscar reseña existente:', err)
     });
+    this.cargarChats(idAnfitrion);
+    this.chatListPollingInterval = setInterval(() => {
+      this.cargarChats(idAnfitrion);
+    }, 1000);
   }
+  ngOnDestroy(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    if (this.chatListPollingInterval) {
+      clearInterval(this.chatListPollingInterval);
+    }
+  }
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+  toggleChat(): void {
+    this.chatVisible = !this.chatVisible;
+    if (!this.chatVisible) {
+      this.activeChatName = null;
+      this.activeChatAvatar = null;
+      this.activeChatTitle = null;
+    }
+  }
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    this.activeChatId = idChat ?? null;
+    this.activeChatName = nombre;
+    this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
+    if (this.activeChatId !== null) {
+      this.cargarMensajes(true);
+      this.pollingInterval = setInterval(() => {
+        this.cargarMensajes(false);
+      }, 1000);
+    } else {
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
+    }
+  }
+  cargarMensajes(forzarScroll: boolean) {
+    if (!this.activeChatId) return;
+    const conteoActual = this.mensajes.length;
+    this.mensajeService.listarPorChat(this.activeChatId).subscribe({
+      next: (res: Mensaje[]) => {
+        this.mensajes = res;
+        if (forzarScroll || this.mensajes.length !== conteoActual) {
+          setTimeout(() => this.scrollBottom(), 50);
+        }
+      },
+      error: (err) => console.error("Error al cargar mensajes:", err)
+    });
+  }
+  enviarMensaje() {
+    if (!this.mensajeTexto.trim() || !this.activeChatId) return;
+
+    const nuevoMsg: Mensaje = {
+      contenido: this.mensajeTexto,
+      fechaenvio: new Date(),
+      chat: { id: this.activeChatId } as Chat
+    };
+
+    this.mensajeService.enviar(this.activeChatId, nuevoMsg).subscribe({
+      next: (msgCreado: any) => {
+        msgCreado.esPropio = true;
+        this.mensajes.push(msgCreado);
+        this.mensajeTexto = '';
+        setTimeout(() => this.scrollBottom(), 50);
+      }
+    });
+  }
+  scrollBottom() {
+    try {
+      this.scrollContainer.nativeElement.scrollTop =
+        this.scrollContainer.nativeElement.scrollHeight;
+    } catch {}
+  }
+  cargarChats(idAnfitrion: number) {
+    this.chatService.listarPorAnfitrion(idAnfitrion).subscribe({
+      next: (data: Chat[]) => {
+        this.chats = data.map(chat => ({
+          ...chat,
+          proveedor: {
+            ...chat.proveedor,
+            foto: chat.proveedor.foto?.startsWith('data:')
+              ? chat.proveedor.foto
+              : `data:image/png;base64,${chat.proveedor.foto}`
+          }
+        }));
+        console.log("Chats cargados:", this.chats);
+      },
+      error: (err) => console.error("Error al cargar chats:", err)
+    });
+  }
   cargarAnfitrion(id: number): void {
     this.anfitrionService.listarPorId(id).subscribe({
       next: (data) => {
@@ -156,9 +274,9 @@ export class EdicionDeResenas {
             ...img,
             imagen: 'data:image/jpeg;base64,' + img.imagen
           }));
-          console.log('🖼️ Imágenes del evento cargadas:', this.imagenesEvento);
+          console.log('Imágenes del evento cargadas:', this.imagenesEvento);
         } else {
-          console.warn('⚠️ No se encontraron imágenes para el evento', idEvento);
+          console.warn('No se encontraron imágenes para el evento', idEvento);
         }
       },
       error: (err) => console.error(`Error al cargar imágenes del evento ${idEvento}:`, err)
@@ -265,6 +383,7 @@ export class EdicionDeResenas {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
@@ -291,7 +410,6 @@ export class EdicionDeResenas {
       this.cerrarMenuPerfil(menuPerfil);
     }
   }
-  /*Seciont de edicon de reseñas*/
 
   seleccionarRating(rating: number) {
     this.currentRating = rating;
@@ -311,34 +429,34 @@ export class EdicionDeResenas {
       };
 
       if (this.resenaEvento?.id) {
-        console.log('🔄 Actualizando reseña existente...', nuevaResena);
+        console.log('Actualizando reseña existente...', nuevaResena);
         this.resenaEventoService.actualizar(nuevaResena).subscribe({
           next: (response) => {
-            console.log('✅ Reseña actualizada correctamente', response);
+            console.log('Reseña actualizada correctamente', response);
             alert('Reseña actualizada correctamente');
             this.volverAtras();
           },
           error: (err) => {
-            console.error('❌ Error al actualizar la reseña:', err);
+            console.error('Error al actualizar la reseña:', err);
             alert('Error al actualizar la reseña');
           }
         });
       } else {
-        console.log('🆕 Registrando nueva reseña...', nuevaResena);
+        console.log('Registrando nueva reseña...', nuevaResena);
         this.resenaEventoService.registrar(nuevaResena).subscribe({
           next: (response) => {
-            console.log('✅ Reseña registrada correctamente', response);
+            console.log('Reseña registrada correctamente', response);
             alert('Reseña registrada correctamente');
             this.volverAtras();
           },
           error: (err) => {
-            console.error('❌ Error al registrar la reseña:', err);
+            console.error('Error al registrar la reseña:', err);
             alert('Error al registrar la reseña');
           }
         });
       }
     } else {
-      console.warn('⚠️ Formulario inválido');
+      console.warn('Formulario inválido');
     }
   }
   volverAtras() {

@@ -1,12 +1,11 @@
-import {AfterViewInit, Component, ElementRef, HostListener, inject, signal} from '@angular/core';
-import {NgOptimizedImage} from '@angular/common';
+import {AfterViewInit, Component, HostListener, inject, signal} from '@angular/core';
 import * as L from 'leaflet';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RouterLink} from '@angular/router';
+import {BotpressService} from '../../services/botpress-service';
 @Component({
   selector: 'app-landing',
   imports: [
-    NgOptimizedImage,
     ReactiveFormsModule,
     RouterLink
   ],
@@ -16,6 +15,7 @@ import {RouterLink} from '@angular/router';
 export class Landing implements AfterViewInit {
   landingForm: FormGroup;
   private lf :FormBuilder = inject(FormBuilder);
+  botpressService: BotpressService = inject(BotpressService);
   constructor() {
     this.landingForm = this.lf.group({
       TipoDeEvento: ['', Validators.required],
@@ -34,6 +34,12 @@ export class Landing implements AfterViewInit {
     { src: '/assets/imagenlanding3.png', width: 619, height: 400, class: 'imagen-landing-3' }
   ];
   private map: L.Map | undefined;
+  ngOnInit() {
+    this.botpressService.initChat();
+  }
+  ngOnDestroy() {
+    this.botpressService.destroyChat();
+  }
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.initializeMap();
@@ -55,7 +61,7 @@ export class Landing implements AfterViewInit {
           const section = entry.target as HTMLElement;
           if (entry.isIntersecting) {
             section.classList.remove('visible');
-            void section.offsetWidth; // fuerza reflow
+            void section.offsetWidth;
             section.classList.add('visible');
           } else {
             section.classList.remove('visible');
@@ -78,6 +84,12 @@ export class Landing implements AfterViewInit {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 18,
       }).addTo(this.map);
+      const customIcon = L.icon({
+        iconUrl: 'assets/684908.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
       const markers = [
         { lat: -12.0464, lng: -77.0428, popup: 'Centro de Lima' },
         { lat: -12.1000, lng: -77.0300, popup: 'Miraflores' },
@@ -85,7 +97,7 @@ export class Landing implements AfterViewInit {
         { lat: -12.0560, lng: -77.0850, popup: 'Callao' }
       ];
       markers.forEach(marker => {
-        L.marker([marker.lat, marker.lng])
+        L.marker([marker.lat, marker.lng], { icon: customIcon })
           .addTo(this.map!)
           .bindPopup(marker.popup);
       });

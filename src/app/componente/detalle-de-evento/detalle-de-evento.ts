@@ -1,6 +1,6 @@
-import {ChangeDetectorRef, Component, HostListener, inject} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {NgOptimizedImage, NgStyle, Location} from '@angular/common';
+import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, ViewChild} from '@angular/core';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Location, DatePipe} from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Anfitrion} from '../../model/anfitrion';
 import {DistritoServices} from '../../services/distrito-services';
@@ -18,20 +18,41 @@ import {ResenaEvento} from '../../model/resenaEvento';
 import {ResenaEventoServices} from '../../services/resena-evento-services';
 import {ContratoEvento} from '../../model/contratoEvento';
 import {ContratoEventoServices} from '../../services/contrato-evento-services';
+import {Mensaje} from '../../model/mensaje';
+import {MensajeServices} from '../../services/mensaje-services';
+import {Chat} from '../../model/chat';
+import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-detalle-de-evento',
   imports: [
-    NgOptimizedImage,
     RouterLink,
     ReactiveFormsModule,
-    NgOptimizedImage// Necesario para el [style.transform]
+    DatePipe,
+    FormsModule,
+    TranslatePipe,
   ],
-
   templateUrl: './detalle-de-evento.html',
   styleUrl: './detalle-de-evento.css',
 })
 export class DetalleDeEvento {
+  activeChatTitle: string | null = null;
+  loginService: LoginService = inject(LoginService);
+  cantidadResenas: number;
+  private pollingInterval: any;
+  private chatListPollingInterval: any;
+  mensajes: Mensaje[] = [];
+  mensajeService: MensajeServices = inject(MensajeServices);
+  chats: Chat[] = [];
+  chatService: ChatServices = inject(ChatServices);
+  chatVisible: boolean = false;
+  activeChatId: number | null = null;
+  activeChatName: string | null = null;
+  activeChatAvatar: string | null = null;
+  mensajeTexto: string = '';
   anfitrion: Anfitrion;
   id: number;
   distrito: Distrito[] = [];
@@ -51,22 +72,12 @@ export class DetalleDeEvento {
   route: ActivatedRoute = inject(ActivatedRoute);
   router = inject(Router);
   imagenEventoService = inject(ImagenEventoService);
-  /* para el fokin  carrusel */
   private location = inject(Location);
-
-  // --- Lógica del Carrusel (NUEVA) ---
-
-  // 1. Define cuántos items mostrar
+  translate: TranslateService = inject(TranslateService);
+  botpressService: BotpressService = inject(BotpressService);
   itemsPorVista = 3;
-
-  // 2. Calcula el ancho de cada "slide"
-  // (100% / 3 = 33.333%)
   slideWidthPercentage = 100 / this.itemsPorVista;
-
-  // 3. El índice de la primera imagen visible
   currentSlideIndex = 0;
-
-  /*fin*/
   buscarForm: FormGroup;
   buscarAvanzadaForm: FormGroup;
   mostrarFiltrosAvanzados = false;
@@ -75,7 +86,6 @@ export class DetalleDeEvento {
   animando = false;
   mostrarCerrarSesion = false;
   private fb: FormBuilder = inject(FormBuilder);
-
   constructor(private cdr: ChangeDetectorRef) {
     this.buscarForm = this.fb.group({
       Distrito: ['', Validators.required],
@@ -95,6 +105,10 @@ export class DetalleDeEvento {
   }
 
   ngOnInit(): void {
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
     const idAnfitrion = Number(this.route.snapshot.params['idAnfitrion']);
     const idEvento = Number(this.route.snapshot.params['idEvento']);
     this.cargarAnfitrion(idAnfitrion);
@@ -117,8 +131,102 @@ export class DetalleDeEvento {
           this.contratoEvento = data.filter(c => c.evento.id === idEvento);
         }
       });
+    this.cargarChats(idAnfitrion);
+    this.chatListPollingInterval = setInterval(() => {
+      this.cargarChats(idAnfitrion);
+    }, 1000);
   }
+  ngOnDestroy(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    if (this.chatListPollingInterval) {
+      clearInterval(this.chatListPollingInterval);
+    }
+  }
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
+  toggleChat(): void {
+    this.chatVisible = !this.chatVisible;
+    if (!this.chatVisible) {
+      this.activeChatName = null;
+      this.activeChatAvatar = null;
+      this.activeChatTitle = null;
+    }
+  }
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
+    this.activeChatId = idChat ?? null;
+    this.activeChatName = nombre;
+    this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
+    if (this.activeChatId !== null) {
+      this.cargarMensajes(true);
+      this.pollingInterval = setInterval(() => {
+        this.cargarMensajes(false);
+      }, 1000);
+    } else {
+      if (this.pollingInterval) {
+        clearInterval(this.pollingInterval);
+      }
+    }
+  }
+  cargarMensajes(forzarScroll: boolean) {
+    if (!this.activeChatId) return;
+    const conteoActual = this.mensajes.length;
+    this.mensajeService.listarPorChat(this.activeChatId).subscribe({
+      next: (res: Mensaje[]) => {
+        this.mensajes = res;
+        if (forzarScroll || this.mensajes.length !== conteoActual) {
+          setTimeout(() => this.scrollBottom(), 50);
+        }
+      },
+      error: (err) => console.error("Error al cargar mensajes:", err)
+    });
+  }
+  enviarMensaje() {
+    if (!this.mensajeTexto.trim() || !this.activeChatId) return;
+
+    const nuevoMsg: Mensaje = {
+      contenido: this.mensajeTexto,
+      fechaenvio: new Date(),
+      chat: { id: this.activeChatId } as Chat
+    };
+
+    this.mensajeService.enviar(this.activeChatId, nuevoMsg).subscribe({
+      next: (msgCreado: any) => {
+        msgCreado.esPropio = true;
+        this.mensajes.push(msgCreado);
+        this.mensajeTexto = '';
+        setTimeout(() => this.scrollBottom(), 50);
+      }
+    });
+  }
+  scrollBottom() {
+    try {
+      this.scrollContainer.nativeElement.scrollTop =
+        this.scrollContainer.nativeElement.scrollHeight;
+    } catch {}
+  }
+  cargarChats(idAnfitrion: number) {
+    this.chatService.listarPorAnfitrion(idAnfitrion).subscribe({
+      next: (data: Chat[]) => {
+        this.chats = data.map(chat => ({
+          ...chat,
+          proveedor: {
+            ...chat.proveedor,
+            foto: chat.proveedor.foto?.startsWith('data:')
+              ? chat.proveedor.foto
+              : `data:image/png;base64,${chat.proveedor.foto}`
+          }
+        }));
+        console.log("Chats cargados:", this.chats);
+      },
+      error: (err) => console.error("Error al cargar chats:", err)
+    });
+  }
   cargarAnfitrion(id: number): void {
     this.anfitrionService.listarPorId(id).subscribe({
       next: (data) => {
@@ -131,11 +239,15 @@ export class DetalleDeEvento {
       }
     });
   }
-
   cargarEventos(id: number): void {
     this.eventoService.listarPorId(id).subscribe({
       next: (data) => {
         this.evento = data;
+        this.eventoService.calcularCantidadResenasPorEvento(data.id!).subscribe({
+          next: (data) => {
+            this.cantidadResenas = data;
+          }
+        });
         console.log('Eventos cargados:', this.evento);
         this.cargarImagenesPorEvento(data.id!);
       },
@@ -144,7 +256,6 @@ export class DetalleDeEvento {
       }
     });
   }
-
   cargarImagenesPorEvento(idEvento: number) {
     this.imagenEventoService.listarPorIdEvento(idEvento).subscribe({
       next: (imagenes: ImagenEvento[]) => {
@@ -153,9 +264,10 @@ export class DetalleDeEvento {
             ...img,
             imagen: 'data:image/jpeg;base64,' + img.imagen
           }));
-          console.log('🖼️ Imágenes del evento cargadas:', this.imagenesEvento);
+          console.log('Imágenes del evento cargadas:', this.imagenesEvento);
         } else {
-          console.warn('⚠️ No se encontraron imágenes para el evento', idEvento);
+          console.warn('No se encontraron imágenes para el evento', idEvento);
+
         }
       },
       error: (err) => console.error(`Error al cargar imágenes del evento ${idEvento}:`, err)
@@ -272,19 +384,17 @@ export class DetalleDeEvento {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
-
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
   }
-
   abrirModalCerrarSesion() {
     this.mostrarCerrarSesion = true;
     document.body.classList.add('modal-abierto');
   }
-
   @HostListener('document:click', ['$event'])
   onClickFuera(event: MouseEvent) {
     if (this.mostrarCerrarSesion) return;
@@ -301,27 +411,17 @@ export class DetalleDeEvento {
       this.cerrarMenuPerfil(menuPerfil);
     }
   }
-
-  /* detalle de evento*/
   siguienteSlide() {
-    // El límite es el número total de imágenes MENOS los items que ya se ven
     const maxIndex = this.imagenesEvento.length - this.itemsPorVista;
     if (this.currentSlideIndex < maxIndex) {
       this.currentSlideIndex++;
     }
   }
-
   anteriorSlide() {
     if (this.currentSlideIndex > 0) {
       this.currentSlideIndex--;
     }
   }
-
-  // --- Fin Lógica Carrusel ---
-
-  /**
-   * Navega a la página anterior
-   */
   volverAtras() {
     this.location.back();
   }
@@ -359,30 +459,25 @@ export class DetalleDeEvento {
       });
     }
   }
-
   getStars(rating: number): any[] {
     const fullStars = Math.floor(rating);
     const emptyStars = 5 - fullStars;
-
-    // Devuelve [true, true, true, false, false] para un rating de 3
     return new Array(fullStars).fill(true).concat(new Array(emptyStars).fill(false));
   }
-
   eliminarResena(id: number) {
     this.resenEventoService.eliminar(id).subscribe({
       next: () => {
-        console.log(`✅ Reseña con ID ${id} eliminada correctamente`);
+        console.log(`Reseña con ID ${id} eliminada correctamente`);
         this.resenaEvento = this.resenaEvento.filter(r => r.id !== id);
         alert('Reseña eliminada correctamente');
         this.ngOnInit();
       },
       error: (err) => {
-        console.error('❌ Error al eliminar la reseña:', err);
+        console.error('Error al eliminar la reseña:', err);
         alert('Error al eliminar la reseña');
       }
     });
   }
-
   finalizarContrato(id: number, anfitrion: Anfitrion, evento: Evento, fechacontrato: Date) {
     const nuevoContrato: ContratoEvento = {
       id: id,
@@ -394,11 +489,11 @@ export class DetalleDeEvento {
     };
     this.contratoEventoService.eventoFinalizado(nuevoContrato).subscribe({
       next: (respuesta) => {
-        console.log('✅ ContratoEvento finalizado correctamente:', respuesta);
+        console.log('ContratoEvento finalizado correctamente:', respuesta);
         alert("El contrato fue finalizado con éxito");
       },
       error: (error) => {
-        console.error('❌ Error al finalizar el contratoEvento:', error);
+        console.error('Error al finalizar el contratoEvento:', error);
         alert("El contrato no se pudo finalizar");
       }
     });

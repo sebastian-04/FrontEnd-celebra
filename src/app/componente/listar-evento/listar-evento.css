@@ -1025,7 +1025,7 @@ body.modal-abierto {
   bottom: 20px;
   right: 20px;
   width: 360px;
-  z-index: 1000;
+  z-index: 998;
   display: flex;
   flex-direction: column;
 }
@@ -1331,4 +1331,15 @@ body.modal-abierto {
   color: #999;
   text-align: center;
   margin: 15px 0 5px 0;
+}
+.chat-name-container{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.chat-title {
+  font-weight: 500;
+  color: #999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
 }

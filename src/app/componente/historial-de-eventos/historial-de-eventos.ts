@@ -11,8 +11,6 @@ import {
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { startWith } from 'rxjs/operators';
-
-// Services & Models
 import { DistritoServices } from '../../services/distrito-services';
 import { AnfitrionServices } from '../../services/anfitrion-services';
 import { CiudadServices } from '../../services/ciudad-services';
@@ -21,7 +19,6 @@ import { EventoService } from '../../services/evento-services';
 import { ImagenEventoService } from '../../services/imagenEvento-services';
 import { ContratoEventoServices } from '../../services/contrato-evento-services';
 import { ResenaEventoServices } from '../../services/resena-evento-services';
-
 import { Distrito } from '../../model/distrito';
 import { Anfitrion } from '../../model/anfitrion';
 import { ImagenEvento } from '../../model/imagenEvento';
@@ -34,6 +31,12 @@ import {Mensaje} from '../../model/mensaje';
 import {MensajeServices} from '../../services/mensaje-services';
 import {Chat} from '../../model/chat';
 import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {ValoracionEventoServices} from '../../services/valoracion-evento-services';
+import {map} from 'rxjs';
+import {ValoracionEvento} from '../../model/valoracionEvento';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-historial-de-eventos',
@@ -42,18 +45,18 @@ import {ChatServices} from '../../services/chat-services';
     ReactiveFormsModule,
     RouterLink,
     DatePipe,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   templateUrl: './historial-de-eventos.html',
   styleUrl: './historial-de-eventos.css',
 })
 export class HistorialDeEventos implements OnInit, OnDestroy {
-  // Inyecciones
+  loginService: LoginService = inject(LoginService);
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
   private route = inject(Router);
   private router = inject(ActivatedRoute);
-
   distritoService = inject(DistritoServices);
   ciudadService = inject(CiudadServices);
   tipoEventoService = inject(TipoEventoServices);
@@ -62,8 +65,10 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
   contratoEventoService = inject(ContratoEventoServices);
   anfitrionService = inject(AnfitrionServices);
   resenaEventoServices = inject(ResenaEventoServices);
-
-  // Datos
+  valoracionEventoService = inject(ValoracionEventoServices);
+  translate: TranslateService = inject(TranslateService);
+  botpressService: BotpressService = inject(BotpressService);
+  cantidadResenas: number;
   id: number = 0;
   anfitrion!: Anfitrion;
   distrito: Distrito[] = [];
@@ -81,19 +86,15 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
   activeChatId: number | null = null;
   activeChatName: string | null = null;
   activeChatAvatar: string | null = null;
+  activeChatTitle: string | null = null;
   mensajeTexto: string = '';
-
-  // Mapa de Imágenes y control de estado
   imagenesEvento: { [idEvento: number]: ImagenEvento[] } = {};
   indices: { [key: number]: number } = {};
   indicePrevio: { [key: number]: number } = {};
   intervalos: { [key: number]: any } = {};
-
-  // Formularios y UI
   buscarForm: FormGroup;
   buscarAvanzadaForm: FormGroup;
   historialForm!: FormGroup;
-
   mostrarFiltrosAvanzados = false;
   menuPerfilActivo = false;
   menuActivo = false;
@@ -106,7 +107,6 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
       Aforo: ['', Validators.required],
       Fecha: ['', Validators.required],
     });
-
     this.buscarAvanzadaForm = this.fb.group({
       UbicacionAvanzada: ['', Validators.required],
       TipoEventoAvanzada: ['', Validators.required],
@@ -120,23 +120,20 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const idParam = this.router.snapshot.params['id'];
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
+    const idParam = this.router.snapshot.params['idAnfitrion'];
     this.id = Number(idParam);
-
-    // Cargar datos auxiliares
     this.cargarAnfitrion(this.id);
     this.cargarListasAuxiliares();
-
-    // Configurar formulario
     this.historialForm = this.fb.group({
       filtro: ['recientes']
     });
-
-    // SOLUCIÓN MAESTRA: Usamos 'startWith' para disparar la carga inicial
-    // como si fuera un filtro automático. Esto unifica la lógica.
     this.historialForm.get('filtro')?.valueChanges
       .pipe(
-        startWith('recientes') // <--- Esto fuerza la ejecución inmediata al cargar la página
+        startWith('recientes')
       )
       .subscribe(() => {
         this.cargarContratos(this.id);
@@ -165,15 +162,17 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -201,13 +200,11 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
   }
   enviarMensaje() {
     if (!this.mensajeTexto.trim() || !this.activeChatId) return;
-
     const nuevoMsg: Mensaje = {
       contenido: this.mensajeTexto,
       fechaenvio: new Date(),
       chat: { id: this.activeChatId } as Chat
     };
-
     this.mensajeService.enviar(this.activeChatId, nuevoMsg).subscribe({
       next: (msgCreado: any) => {
         msgCreado.esPropio = true;
@@ -249,20 +246,21 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
 
   cargarContratos(id: number): void {
     const filtro = this.historialForm.get('filtro')?.value;
-
-    // Limpiamos todo antes de cargar para evitar conflictos
     this.limpiarIntervalos();
     this.imagenesEvento = {};
     this.indices = {};
     this.indicePrevio = {};
-
     this.obtenerContratosSegunFiltro(id, filtro).subscribe({
       next: (data) => {
         this.contratoEvento = data;
         console.log(`Contratos cargados (${filtro}):`, this.contratoEvento.length);
-
         this.contratoEvento.forEach(contrato => {
           if (contrato.evento && contrato.evento.id) {
+            this.eventoService.calcularCantidadResenasPorEvento(contrato.evento.id!).subscribe({
+              next: (data) => {
+                this.cantidadResenas = data;
+              }
+            });
             this.cargarImagenesPorEvento(contrato.evento.id);
           }
         });
@@ -275,13 +273,10 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     this.imagenEventoService.listarPorIdEvento(idEvento).subscribe({
       next: (imagenes: ImagenEvento[]) => {
         if (!imagenes || imagenes.length === 0) {
-          // Asignamos array vacío para que el HTML sepa que ya cargó
           this.imagenesEvento = { ...this.imagenesEvento, [idEvento]: [] };
           this.cdr.detectChanges();
           return;
         }
-
-        // Normalización de Base64
         const normalizadas = imagenes.map(img => {
           const raw = (img as any).imagenEvento || img.imagen || '';
           let imagenFinal = '';
@@ -290,24 +285,16 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
           }
           return { ...img, imagen: imagenFinal };
         });
-
-        // Actualizamos el mapa de imágenes
-        // Usamos el spread (...) para forzar a Angular a detectar el cambio en el objeto
         this.imagenesEvento = {
           ...this.imagenesEvento,
           [idEvento]: normalizadas
         };
 
-        // Configuramos el índice inicial (Visible inmediatamente)
         if (this.indices[idEvento] === undefined) {
           this.indices[idEvento] = 0;
           this.indicePrevio[idEvento] = -1;
         }
-
-        // Forzamos la detección de cambios para pintar la primera imagen YA
         this.cdr.detectChanges();
-
-        // Arrancamos el carrusel
         this.iniciarCarrusel(idEvento);
       },
       error: (err) => console.error(`Error imágenes evento ${idEvento}:`, err),
@@ -318,20 +305,14 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     if (this.intervalos[idEvento]) {
       clearInterval(this.intervalos[idEvento]);
     }
-
     this.intervalos[idEvento] = window.setInterval(() => {
       const imgs = this.imagenesEvento[idEvento];
       if (!imgs || imgs.length <= 1) return;
-
       const total = imgs.length;
       const indiceActual = this.indices[idEvento];
       const indiceSiguiente = (indiceActual + 1) % total;
-
-      // Evitar animación doble en el salto del último al primero
       this.indicePrevio[idEvento] = indiceActual;
       this.indices[idEvento] = indiceSiguiente;
-
-      // Forzar Angular a pintar cambios
       this.cdr.detectChanges();
     }, 3000);
   }
@@ -353,10 +334,23 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
       case 'mejor-valorados': return this.contratoEventoService.historialEventoSegunAnfitrionPorMejorValoracion(id);
       case 'peor-valorados': return this.contratoEventoService.historialEventoSegunAnfitrionPorPeorValoracion(id);
       case 'recientes': return this.contratoEventoService.historialEventoSegunAnfitrionPorFechaMasReciente(id);
+      case 'favoritos': return this.valoracionEventoService.listarValoracionEventoPorAnfitrion(id)
+        .pipe(map(valoraciones => this.mapValoracionesToContrato(valoraciones)));
       default: return this.contratoEventoService.historialEventoSegunAnfitrionPorFechaMasReciente(id);
     }
   }
-
+  private mapValoracionesToContrato(valoraciones: ValoracionEvento[]): ContratoEvento[] {
+    return valoraciones.map(v => {
+      return {
+        id: 0,
+        anfitrion: v.anfitrion,
+        evento: v.evento,
+        fechacontrato: new Date(),
+        fechafinalizacion: new Date(),
+        estado: "FAVORITO"
+      } as ContratoEvento;
+    });
+  }
   cargarAnfitrion(id: number): void {
     this.anfitrionService.listarPorId(id).subscribe({
       next: (data) => {
@@ -368,14 +362,9 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
       error: (err) => console.error('Error al cargar anfitrión', err)
     });
   }
-
-  // Helper para HTML
   obtenerImagenesPorEvento(idEvento: number): ImagenEvento[] {
     return this.imagenesEvento[idEvento] || [];
   }
-
-  // --- UI & MENU LOGIC ---
-
   toggleMenu() {
     if (this.animando) return;
     this.animando = true;
@@ -392,7 +381,6 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     }
     setTimeout(() => (this.animando = false), 600);
   }
-
   toggleFiltrosAvanzados() {
     if (this.animando) return;
     this.animando = true;
@@ -434,6 +422,7 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
 
   cancelarCerrarSesion(event: MouseEvent) {
@@ -456,8 +445,6 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     if (this.menuActivo && !esMenuHamb) this.toggleMenu();
     if (this.menuPerfilActivo && !esPerfil) this.toggleMenuPerfil();
   }
-
-  // --- Navegación ---
   buscar() {
     if (this.buscarForm.valid && this.anfitrion?.id) {
       const filtro = this.buscarForm.value;
@@ -470,7 +457,6 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
       });
     }
   }
-
   buscarAvanzada(): void {
     if (this.buscarAvanzadaForm.valid && this.anfitrion?.id) {
       const filtro = this.buscarAvanzadaForm.value;
@@ -489,12 +475,9 @@ export class HistorialDeEventos implements OnInit, OnDestroy {
     }
   }
   haHechoResena(idEvento: number): boolean {
-    // Si no se ha cargado el anfitrión o la lista de reseñas, asumimos que no
     if (!this.anfitrion || !this.resenaEvento) {
       return false;
     }
-
-    // Usamos .some() para ver si AL MENOS UNA reseña cumple la condición
     return this.resenaEvento.some(
       resena => resena.evento?.id === idEvento && resena.anfitrion?.id === this.anfitrion.id
     );

@@ -5,8 +5,8 @@
 }
 :host {
   display: block;
-  height: 100vh; /* Ocupa toda la altura de la vista */
-  overflow: hidden; /* Oculta el scroll de la PÁGINA */
+  height: 100vh;
+  overflow: hidden;
   font-family: 'Inter', sans-serif;
 }
 .encabezado{
@@ -627,71 +627,60 @@ body.modal-abierto {
   opacity: 0.7;
 }
 
-/*confirmar pago*/
 :host {
   display: block;
-  height: 100vh; /* Ocupa toda la altura de la vista */
-  overflow: hidden; /* Oculta el scroll de la PÁGINA */
+  height: 100vh;
+  overflow: hidden;
   font-family: 'Inter', sans-serif;
 }
 
-/* Contenedor principal que centra el contenido
-  y aplica el fondo gris.
-*/
 .detalle-container {
   display: block;
-  /* Altura fija: 100% de la vista MENOS el header */
   height: calc(100vh - 6.25rem);
   width: 100%;
-  margin-top: 6.25rem; /* Empujado por el header */
-  overflow: hidden; /* EL CONTENEDOR NO TIENE SCROLL */
+  margin-top: 6.25rem;
+  overflow: hidden;
   background-color: white;
   box-sizing: border-box;
 }
 .scroll-wrapper {
   height: 100%;
   width: 100%;
-  overflow-y: auto; /* <-- ¡AQUÍ ESTÁ EL SCROLL INTERNO! */
+  overflow-y: auto;
   overflow-x: hidden;
-  padding: 2.5rem; /* El padding va aquí */
+  padding: 2.5rem;
   box-sizing: border-box;
 }
 
-/* 1. Layout Principal de 2 Columnas */
 .reserva-wrapper {
   display: flex;
   gap: 2rem;
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto; /* Centra el contenido */
-  padding: 0; /* Padding ya está en .scroll-wrapper */
+  margin: 0 auto;
+  padding: 0;
 }
 
 .reserva-wrapper,
 .recibo-wrapper {
   max-width: 1200px;
-  margin: 0 auto; /* Centra el contenido */
-  padding: 0; /* ¡El padding se movió a .scroll-wrapper! */
-
-  /* Tus otros estilos (display: grid, gap, etc.) van aquí */
+  margin: 0 auto;
+  padding: 0;
 }
 
 .columna-pago {
-  flex: 2; /* Ocupa 2/3 del espacio */
+  flex: 2;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Espacio entre los bloques */
+  gap: 1.5rem;
 }
 
 .columna-resumen {
-  flex: 1; /* Ocupa 1/3 del espacio */
-  position: sticky; /* Se queda fijo al hacer scroll */
-  /* (6.25rem header + 2.5rem padding) */
+  flex: 1;
+  position: sticky;
   top: 8.75rem;
-  align-self: flex-start; /* Necesario para que 'sticky' funcione */
+  align-self: flex-start;
 }
-
-/* 2. Estilos Columna Izquierda (Pago) */
 
 .reserva-header {
   grid-area: header;
@@ -707,7 +696,6 @@ body.modal-abierto {
   margin: 0;
 }
 
-/* Botón 'volver' (puedes copiarlo de tu otro CSS si es global) */
 .btn-volver {
   background-color: #FFFFFF;
   border: 1px solid #E0E0E0;
@@ -733,7 +721,6 @@ body.modal-abierto {
   margin: 0;
 }
 
-/* --- Estilos de Opciones de Pago (Radio Buttons) --- */
 .opciones-pago {
   display: flex;
   flex-direction: column;
@@ -757,12 +744,10 @@ body.modal-abierto {
   border-color: #AAAAAA;
 }
 
-/* Ocultar el radio button real */
 .opcion-radio input[type="radio"] {
   display: none;
 }
 
-/* Círculo exterior personalizado */
 .radio-custom {
   width: 20px;
   height: 20px;
@@ -774,25 +759,22 @@ body.modal-abierto {
   transition: border-color 0.2s;
 }
 
-/* Círculo interior (cuando está seleccionado) */
 .opcion-radio input[type="radio"]:checked + .radio-custom::after {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 10px; /* Tamaño del punto interior */
+  width: 10px;
   height: 10px;
-  background-color: #8138ff; /* Color morado */
+  background-color: #8138ff;
   border-radius: 50%;
 }
 
-/* Estilo del borde cuando está seleccionado */
 .opcion-radio input[type="radio"]:checked + .radio-custom {
   border-color: #8138ff;
 }
 
-/* Resaltar toda la caja cuando está seleccionada */
 .opcion-radio:has(input[type="radio"]:checked) {
   border-color: #8138ff;
   box-shadow: 0 0 5px rgba(129, 56, 255, 0.3);
@@ -817,14 +799,12 @@ body.modal-abierto {
 }
 .opcion-logos img {
   object-fit: contain;
-  max-height: 24px; /* Altura unificada */
+  max-height: 24px;
 }
-/* Ajuste para el ícono del banco que es más alto */
+
 .opcion-logos img[alt="Banco"] {
   max-height: 30px;
 }
-
-/* 3. Estilos Columna Derecha (Resumen) */
 
 .resumen-card {
   background-color: #FFFFFF;
@@ -833,7 +813,7 @@ body.modal-abierto {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem; /* Espacio entre secciones internas */
+  gap: 1.25rem;
 }
 
 .resumen-evento-header {
@@ -848,7 +828,7 @@ body.modal-abierto {
   width: 100px;
   aspect-ratio: 4 / 3;
   height: auto;
-  background-color: #F0F0F0; /* Fondo mientras carga */
+  background-color: #F0F0F0;
 }
 
 .resumen-evento-info {
@@ -948,7 +928,6 @@ body.modal-abierto {
   background-color: #D5B8FF;
 }
 
-/* Estilo para el botón deshabilitado */
 .pagar-btn:disabled {
   background-color: #EFEFEF;
   border-color: #E0E0E0;
@@ -957,27 +936,17 @@ body.modal-abierto {
   opacity: 0.7;
 }
 
-
-
-/* ================================== */
-/* ===   NUEVOS ESTILOS (RECIBO)  === */
-/* ================================== */
-
-/* 1. Layout Principal del Recibo */
 .recibo-wrapper {
   display: grid;
-  /* Define 2 columnas: 2/3 para main, 1/3 para sidebar */
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto; /* Centra el contenido */
-  padding: 0; /* Padding ya está en .scroll-wrapper */
-
-  /* Asigna los elementos a las áreas del grid */
+  margin: 0 auto;
+  padding: 0;
   grid-template-areas:
-    "header header"  /* <-- 1. AÑADE ESTA LÍNEA PARA EL HEADER */
-    "main sidebar"   /* <-- 2. ESTA LÍNEA QUEDA ASÍ */
+    "header header"
+    "main sidebar"
     "footer footer";
 }
 
@@ -985,15 +954,14 @@ body.modal-abierto {
   grid-area: main;
   display: flex;
   flex-direction: column;
-
-  gap: 1.5rem; /* Espacio entre las cajas de la izquierda */
+  gap: 1.5rem;
 }
 
 .recibo-col-sidebar {
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Espacio entre las cajas de la derecha */
+  gap: 1.5rem;
 }
 
 .recibo-footer {
@@ -1009,8 +977,6 @@ body.modal-abierto {
   cursor: pointer;
 }
 
-/* 2. Estilos Columna Izquierda (Recibo) */
-
 .recibo-card-evento {
   display: flex;
   gap: 1rem;
@@ -1025,7 +991,7 @@ body.modal-abierto {
 .recibo-img {
   border-radius: 6px;
   object-fit: cover;
-  width: 160px; /* Más grande que en el resumen */
+  width: 160px;
   aspect-ratio: 4 / 3;
   height: auto;
   background-color: #F0F0F0;
@@ -1051,7 +1017,7 @@ body.modal-abierto {
   align-items: center;
   gap: 0.25rem;
 }
-.recibo-rating .star-icon { /* Reutiliza el star-icon */
+.recibo-rating .star-icon {
   color: #FFC107;
 }
 
@@ -1065,8 +1031,6 @@ body.modal-abierto {
   border: 1px solid #E0E0E0;
 
 }
-
-/* Reutilizamos .recibo-item (ver más abajo) */
 
 .recibo-seccion-texto {
   padding: 1.5rem;
@@ -1094,8 +1058,6 @@ body.modal-abierto {
   cursor: pointer;
 }
 
-/* 3. Estilos Columna Derecha (Desglose) */
-
 .recibo-card-box {
   background-color: #FFFFFF;
   border-radius: 8px;
@@ -1103,7 +1065,7 @@ body.modal-abierto {
   display: flex;
   border: 1px solid #E0E0E0;
   flex-direction: column;
-  gap: 1rem; /* Espacio entre items */
+  gap: 1rem;
 }
 
 .recibo-card-box h2 {
@@ -1116,7 +1078,6 @@ body.modal-abierto {
 }
 
 .aceptar-btn {
-  /* Botón con fondo morado claro */
   background-color: #E4CCFF;
   border: 1px solid #D577FF;
   color: white;
@@ -1131,8 +1092,6 @@ body.modal-abierto {
 .aceptar-btn:hover {
   background-color: #D5B8FF;
 }
-
-/* 4. Estilos Reutilizables para el Recibo */
 
 .recibo-item {
   display: flex;
@@ -1155,7 +1114,6 @@ body.modal-abierto {
   font-weight: 600;
 }
 
-/* Para el desglose y pago */
 .recibo-card-box .recibo-item {
   border-bottom: none;
   padding-bottom: 0;
@@ -1224,25 +1182,21 @@ body.modal-abierto {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 360px; /* Ancho del widget */
-  z-index: 1000;
+  width: 360px;
+  z-index: 998;
   display: flex;
   flex-direction: column;
 }
 
-/* --- NUEVO Contenedor de Vistas --- */
-/* Este es el 'pop-up' que se anima desde abajo */
 .chat-views-wrapper {
-  position: relative; /* Clave para posicionar las vistas adentro */
+  position: relative;
   width: 100%;
-  height: 480px; /* Altura fija para el pop-up */
+  height: 480px;
   background-color: #ffffff;
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   margin-bottom: 12px;
-  overflow: hidden; /* ¡Súper importante para la animación de deslizamiento! */
-
-  /* Animación de aparición (la que ya tenías) */
+  overflow: hidden;
   transition: all 300ms ease-out;
   opacity: 0;
   transform: translateY(30px);
@@ -1253,64 +1207,50 @@ body.modal-abierto {
 .chat-views-wrapper.visible {
   opacity: 1;
   transform: translateY(0);
-  max-height: 480px; /* Coincide con la altura */
+  max-height: 480px;
   visibility: visible;
 }
 
-/* --- VISTA 1: Lista de Chats --- */
 .chat-list {
-  /* Posición absoluta para apilarse con la ventana de chat */
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  overflow-y: auto; /* Mantiene el scroll */
-
-  /* Animación de deslizamiento */
+  overflow-y: auto;
   transition: all 350ms ease-in-out;
   opacity: 1;
   transform: translateX(0);
-
-  /* ... (Pega tus estilos de scrollbar .chat-list::-webkit-scrollbar... aquí) ... */
 }
 
 .chat-list:not(.active) {
-  /* Estado oculto: se desliza a la izquierda */
   opacity: 0;
   transform: translateX(-100%);
   visibility: hidden;
 }
 
-/* --- VISTA 2: Ventana de Chat --- */
 .chat-window {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   display: flex;
   flex-direction: column;
   background: #fff;
-
-  /* Animación de deslizamiento */
   transition: all 350ms ease-in-out;
-
-  /* Estado oculto: empieza a la derecha */
   opacity: 0;
   transform: translateX(100%);
   visibility: hidden;
 }
 
 .chat-window.active {
-  /* Estado visible: se desliza al centro */
   opacity: 1;
   transform: translateX(0);
   visibility: visible;
 }
 
-/* --- Estilos para los elementos de la Ventana de Chat --- */
 .chat-window-header {
   display: flex;
   align-items: center;
   padding: 12px 16px;
   border-bottom: 1px solid #ebebeb;
   background: #fdfdfd;
-  flex-shrink: 0; /* Evita que se encoja */
+  flex-shrink: 0;
 }
 
 .chat-back-button {
@@ -1327,7 +1267,7 @@ body.modal-abierto {
 }
 
 .chat-window-body {
-  flex-grow: 1; /* Ocupa todo el espacio disponible */
+  flex-grow: 1;
   padding: 16px;
   overflow-y: auto;
   display: flex;
@@ -1338,9 +1278,9 @@ body.modal-abierto {
 
 .message-bubble {
   display: flex;
-  align-items: flex-start; /* Alinea el avatar con la burbuja */
+  align-items: flex-start;
   gap: 8px;
-  max-width: 80%; /* Evita que los mensajes sean demasiado anchos */
+  max-width: 80%;
 }
 .message-bubble .chat-avatar-msg {
   width: 32px;
@@ -1355,22 +1295,20 @@ body.modal-abierto {
   color: #000;
   line-height: 1.4;
   hyphens: auto;
-  -webkit-hyphens: auto; /* Para Safari/Chrome */
-  -ms-hyphens: auto;     /* Para IE/Edge antiguo */
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
 }
 
-/* Mensaje entrante (tuyo) */
 .message-bubble.message-incoming {
-  align-self: flex-end; /* Alinea a la derecha */
-  flex-direction: row-reverse; /* Invierte el orden (avatar a la derecha) */
+  align-self: flex-end;
+  flex-direction: row-reverse;
 }
 .message-bubble.message-incoming span {
-  background-color: #E2C9FF; /* Tu color de tema */
+  background-color: #E2C9FF;
 }
 
-/* Mensaje saliente (de ellos) */
 .message-bubble.message-outgoing {
-  align-self: flex-start; /* Alinea a la izquierda */
+  align-self: flex-start;
 }
 .message-bubble.message-outgoing span {
   background-color: #ffffff;
@@ -1382,7 +1320,7 @@ body.modal-abierto {
   padding: 12px;
   border-top: 1px solid #ebebeb;
   background: #fff;
-  flex-shrink: 0; /* Evita que se encoja */
+  flex-shrink: 0;
 }
 .chat-window-footer input {
   flex-grow: 1;
@@ -1406,10 +1344,9 @@ body.modal-abierto {
   cursor: pointer;
   font-size: 18px;
   color: #333;
-  padding-left: 3px; /* Centra la flecha */
+  padding-left: 3px;
 }
 
-/* --- (Tus estilos existentes para .chat-item, .chat-avatar, .chat-name, .chat-open-button se mantienen igual) --- */
 .chat-item {
   display: flex;
   align-items: center;
@@ -1466,45 +1403,38 @@ body.modal-abierto {
 }
 .message-content {
   display: flex;
-  flex-direction: column; /* Apila el nombre ENCIMA de la burbuja */
+  flex-direction: column;
 }
 
-/* Estilo para el nombre del remitente */
 .message-sender-name {
-  font-size: 0.8rem; /* Tamaño pequeño */
-  font-weight: 600;   /* Negrita */
-  color: #555;       /* Color gris oscuro */
-  margin-bottom: 4px; /* Espacio entre el nombre y la burbuja */
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 4px;
 }
 
-/* --- AJUSTES DE ALINEACIÓN --- */
-
-/* Para TUS mensajes (message-incoming, a la derecha) */
 .message-bubble.message-incoming .message-sender-name {
-  text-align: right; /* Alinea tu nombre a la derecha */
-  color: #6a1b9a;    /* Un color morado que combine */
+  text-align: right;
+  color: #6a1b9a;
 }
 
-/* Para SUS mensajes (message-outgoing, a la izquierda) */
 .message-bubble.message-outgoing .message-sender-name {
-  text-align: left; /* Alinea su nombre a la izquierda */
+  text-align: left;
 }
 .message-row {
   display: flex;
-  align-items: flex-end; /* Alinea los elementos al final (abajo) de la fila */
-  margin-bottom: 10px; /* Espacio entre filas de mensajes */
+  align-items: flex-end;
+  margin-bottom: 10px;
 }
 
-/* Estilo para los avatares */
 .chat-avatar-msg {
-  width: 40px; /* Tamaño del avatar */
+  width: 40px;
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  margin: 0 8px; /* Espacio alrededor del avatar */
+  margin: 0 8px;
 }
 
-/* Contenedor del nombre y la burbuja */
 .message-content-wrapper {
   display: flex;
   flex-direction: column;
@@ -1519,48 +1449,55 @@ body.modal-abierto {
   margin-bottom: 4px;
 }
 
-/* Estilo general para la burbuja del mensaje */
 .message-bubble {
   padding: 8px 12px;
   border-radius: 18px;
   line-height: 1.4;
 }
 
-/* Mensajes ENTRANTES (tuyos, a la derecha) */
 .message-row.outgoing-row {
-  justify-content: flex-end; /* Alinea toda la fila a la derecha */
+  justify-content: flex-end;
 }
 
 .message-row.outgoing-row .message-sender-name {
-  text-align: right; /* Alinea el nombre a la derecha */
-  color: #000000;    /* Color para tu nombre */
+  text-align: right;
+  color: #000000;
 }
 
 .message-row.outgoing-row .message-bubble {
-  background-color: #ede2ff; /* Un azul claro para tus mensajes */
+  background-color: #ede2ff;
   color: #333;
-  border-bottom-right-radius: 2px; /* Esquina de la burbuja */
+  border-bottom-right-radius: 2px;
 }
 
-/* Mensajes SALIENTES (de ellos, a la izquierda) */
 .message-row.incoming-row {
-  justify-content: flex-start; /* Alinea toda la fila a la izquierda */
+  justify-content: flex-start;
 }
 
 .message-row.incoming-row .message-sender-name {
-  text-align: left; /* Alinea el nombre a la izquierda */
+  text-align: left;
 }
 
 .message-row.incoming-row .message-bubble {
-  background-color: #f0f0f0; /* Un gris claro para los mensajes de otros */
+  background-color: #f0f0f0;
   color: #000000;
-  border-bottom-left-radius: 2px; /* Esquina de la burbuja */
+  border-bottom-left-radius: 2px;
 }
 
-/* Ajustes para la fecha */
 .msg-date {
   font-size: 0.75rem;
   color: #999;
   text-align: center;
-  margin: 15px 0 5px 0; /* Más espacio para la fecha */
+  margin: 15px 0 5px 0;
+}
+.chat-name-container{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.chat-title {
+  font-weight: 500;
+  color: #999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
 }

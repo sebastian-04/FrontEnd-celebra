@@ -1,19 +1,19 @@
 <section class="encabezado">
   <div class="encabezado-logos">
-    <a [routerLink]="['/']"><img src="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img"></a>
+    <img src="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img">
   </div>
-  <a class="encabezado-h3-p" [routerLink]="['/register-anfitrion']">Conviertete en un anfitrión</a>
+  <a class="encabezado-h3-p" [routerLink]="['/register-anfitrion']">{{ 'BECOME_HOST' | translate }}</a>
   <div class="encabezado-perfil">
     <img [src]="proveedor.foto" width="60" height="60">
     <div class="encabezado-perfil-container" (click)="toggleMenuPerfil()">
-      <h3 class="encabezado-perfil-container-1">inicio de sesión como:</h3>
+      <h3 class="encabezado-perfil-container-1">{{ 'LOGGED_IN_AS' | translate }}</h3>
       <h3 class="encabezado-perfil-container-2">{{proveedor.email}}</h3>
     </div>
     <div class="encabezado-perfil-menu" [class.activo]="menuPerfilActivo">
       <nav class="encabezado-perfil-menu-nav">
         <ul class="encabezado-perfil-menu-ul">
-          <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', proveedor.id, proveedor.role?.name]">Ver mi perfil</a></li>
-          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+          <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', proveedor.id, proveedor.role?.name]">{{ 'SEE_PROFILE' | translate }}</a></li>
+          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">{{ 'LOGOUT' | translate }}</a></li>
         </ul>
       </nav>
     </div>
@@ -27,16 +27,15 @@
   <div class="overlay" [class.activo]="menuActivo"></div>
   <nav class="menu-hamburguesa-text">
     <ul class="menu-hamburguesa-text-1-p">
-      <li><a class="ContratosActuales-p" [routerLink]="['/listar-eventos', proveedor.id]">Crear eventos</a></li>
-      <li><a class="HistorialDeContratos-p" [routerLink]="['/historial-contratos', proveedor.id]">Historial de contratos</a></li>
-      <li><a class="ConsultarReportes-p" [routerLink]="['/reporte-proveedor', proveedor.id]">Consultar reportes</a></li>
-      <li><a class="ChatearConLaIA-p" href="#">Chatear con la IA</a></li>
-      <li><a class="CentroDeAyuda-p" [routerLink]="['/centro-ayuda', proveedor.id, proveedor.role?.name]">Centro de ayuda</a></li>
+      <li><a class="ContratosActuales-p" [routerLink]="['/listar-eventos', proveedor.id]">{{ 'CREATE_EVENTS' | translate }}</a></li>
+      <li><a class="HistorialDeContratos-p" [routerLink]="['/historial-contratos', proveedor.id]">{{ 'CONTRACT_HISTORY' | translate }}</a></li>
+      <li><a class="ConsultarReportes-p" [routerLink]="['/reporte-proveedor', proveedor.id]">{{ 'VIEW_REPORTS' | translate }}</a></li>
+      <li><a class="CentroDeAyuda-p" [routerLink]="['/centro-ayuda', proveedor.id, proveedor.role?.name]">{{ 'HELP_CENTER' | translate }}</a></li>
     </ul>
     <ul class="menu-hamburguesa-text-2-p">
-      <li><a class="Configuracion-p" [routerLink]="['/configuracion', proveedor.id, proveedor.role?.name]">Configuración</a></li>
-      <li><a class="CerrarSesion-p" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
-      <li><a class="legal-p" [routerLink]="['/legal', proveedor.id, proveedor.role?.name]">Legal</a></li>
+      <li><a class="Configuracion-p" [routerLink]="['/configuracion', proveedor.id, proveedor.role?.name]">{{ 'SETTINGS' | translate }}</a></li>
+      <li><a class="CerrarSesion-p" (click)="abrirModalCerrarSesion()">{{ 'LOGOUT' | translate }}</a></li>
+      <li><a class="legal-p" [routerLink]="['/legal', proveedor.id, proveedor.role?.name]">{{ 'LEGAL' | translate }}</a></li>
     </ul>
   </nav>
 </section>
@@ -44,11 +43,11 @@
     <section class="cerrar-sesion">
       <div class="overlay-cerrar-sesion"></div>
       <div class="cerrar-sesion-container" (click)="$event.stopPropagation()">
-        <h1>Cerrar Sesión</h1>
-        <h3>¿Estas seguro de cerrar tu sesión?</h3>
+        <h1>{{ 'LOGOUT_TITLE' | translate }}</h1>
+        <h3>{{ 'CONFIRM_LOGOUT' | translate }}</h3>
         <div class="cerrar-sesion-container-botones" (click)="cerrarSesion()">
-          <button class="boton-si" (click)="confirmarCerrarSesion($event)"><a [routerLink]="['/']">Sí</a></button>
-          <button class="boton-no" (click)="cancelarCerrarSesion($event)">No</button>
+          <button class="boton-si" (click)="confirmarCerrarSesion($event)">{{ 'YES' | translate }}</button>
+          <button class="boton-no" (click)="cancelarCerrarSesion($event)">{{ 'NO' | translate }}</button>
         </div>
       </div>
     </section>
@@ -57,20 +56,20 @@
 
   <div class="historial-header">
     <button [routerLink]="['/menu-proveedor', proveedor.id]" type="button" class="perfil-back-button">
-      <img src="/assets/back.png" width="44" height="44" alt="Volver">
+      <img src="/assets/back.png" width="44" height="44" [alt]="'BACK_ALT' | translate">
     </button>
-    <h1 class="historial-title">Tu historial de contratos</h1>
+    <h1 class="historial-title">{{ 'YOUR_CONTRACT_HISTORY' | translate }}</h1>
   </div>
 
   <form [formGroup]="historialForm" class="historial-filtro">
-    <label for="filtro-select">Filtrar por</label>
+    <label for="filtro-select">{{ 'FILTER_BY' | translate }}</label>
     <select id="filtro-select" formControlName="filtro">
-      <option value="recientes">Más recientes</option>
-      <option value="antiguos">Más antiguos</option>
-      <option value="mejor-valorados">Más valorados</option>
-      <option value="peor-valorados">Peor valorados</option>
-      <option value="mayor-presupuesto">Mayor presupuesto</option>
-      <option value="menor-presupuesto">Menor presupuesto</option>
+      <option value="recientes">{{ 'FILTER_MOST_RECENT' | translate }}</option>
+      <option value="antiguos">{{ 'FILTER_OLDEST' | translate }}</option>
+      <option value="mejor-valorados">{{ 'FILTER_HIGHEST_RATED' | translate }}</option>
+      <option value="peor-valorados">{{ 'FILTER_LOWEST_RATED' | translate }}</option>
+      <option value="mayor-presupuesto">{{ 'FILTER_HIGHEST_BUDGET' | translate }}</option>
+      <option value="menor-presupuesto">{{ 'FILTER_LOWEST_BUDGET' | translate }}</option>
     </select>
   </form>
   <div class="historial-grid">
@@ -84,23 +83,23 @@
                 <img
                   class="carrusel-img"
                   [src]="img.imagen"
-                  alt="Foto de {{ contrato.evento.titulo }}"
+                  alt="{{ 'PHOTO_OF' | translate }} {{ contrato.evento.titulo }}"
                   [class.visible]="indices[contrato.evento.id!] === $index"
                   [class.prev]="indicePrevio[contrato.evento.id!] === $index"
                 />
               }
             }
-        </div>
+          </div>
         </div>
         <div class="card-contenido">
           <div class="card-header">
             <h2 class="card-titulo">{{contrato.evento.titulo}}</h2>
-            <span class="card-rating">⭐ {{contrato.evento.valoracion}}</span>
+            <span class="card-rating">⭐ {{contrato.evento.valoracion}} ({{this.cantidadResenas}})</span>
           </div>
           <p class="card-subtitulo">{{contrato.evento.tipoevento.nombre}}. {{contrato.evento.descripcion}}</p>
-          <p class="card-precio">S/.{{contrato.evento.presupuesto}} para {{contrato.evento.aforo}} personas</p>
-          <p class="card-fecha">Contrato válido desde el {{contrato.evento.fechainicio}} hasta {{contrato.evento.fechafin}}</p>
-          <p class="card-anfitrion">Para el anfitrión {{contrato.anfitrion.apellido}}, {{contrato.anfitrion.nombre}}</p>
+          <p class="card-precio">S/.{{contrato.evento.presupuesto}} {{ 'FOR' | translate }} {{contrato.evento.aforo}} {{ 'PEOPLE' | translate }}</p>
+          <p class="card-fecha">{{ 'CONTRACT_VALID_FROM' | translate }} {{contrato.evento.fechainicio}} {{ 'UNTIL' | translate }} {{contrato.evento.fechafin}}</p>
+          <p class="card-anfitrion">{{ 'FOR_HOST' | translate }} {{contrato.anfitrion.apellido}}, {{contrato.anfitrion.nombre}}</p>
         </div>
       </div>
     }
@@ -113,9 +112,12 @@
       <div class="chat-list" [class.active]="activeChatName === null">
         @for (c of chats; track c.id) {
           <div class="chat-item"
-               (click)="selectChat(c.anfitrion.nombre ?? '',c.anfitrion.foto ?? null,c.id)">
-            <img [src]="c.anfitrion.foto ?? 'assets/default-avatar.png'" class="chat-avatar" alt="Avatar">
-            <span class="chat-name">{{ c.anfitrion.nombre }}</span>
+               (click)="selectChat(c.anfitrion.nombre ?? '',c.anfitrion.foto ?? null, c.titulo, c.id)">
+            <img [src]="c.anfitrion.foto ?? 'assets/default-avatar.png'" class="chat-avatar" [alt]="'AVATAR_ALT' | translate">
+            <div class="chat-name-container">
+              <span class="chat-name">{{ c.anfitrion.nombre + ' ' + c.anfitrion.apellido}}</span>
+              <span class="chat-title">{{ c.titulo }}</span>
+            </div>
           </div>
         }
       </div>
@@ -123,9 +125,12 @@
       <div class="chat-window" [class.active]="activeChatName !== null">
 
         <div class="chat-window-header">
-          <button class="chat-back-button" (click)="selectChat(null, null)">&larr;</button>
-          <img [src]="activeChatAvatar ?? '/assets/default.png'" alt="Avatar" class="chat-avatar">
-          <span class="chat-name">{{ activeChatName }}</span>
+          <button class="chat-back-button" (click)="selectChat(null, null, null)">&larr;</button>
+          <img [src]="activeChatAvatar ?? '/assets/default.png'" [alt]="'AVATAR_ALT' | translate" class="chat-avatar">
+          <div class="chat-name-container">
+            <span class="chat-name">{{ activeChatName }}</span>
+            <span class="chat-title">{{ activeChatTitle }}</span>
+          </div>
         </div>
 
         <div class="chat-window-body" #scrollContainer>
@@ -164,14 +169,14 @@
         <div class="chat-window-footer">
           <input type="text"
                  [(ngModel)]="mensajeTexto"
-                 placeholder="Escribe un mensaje..."
+                 placeholder="{{ 'TYPE_YOUR_MESSAGE' | translate }}"
                  (keyup.enter)="enviarMensaje()">
           <button class="send-button" (click)="enviarMensaje()">&#9658;</button>
         </div>
       </div>
     </div>
     <button class="chat-open-button" [class.activo]="chatVisible" (click)="toggleChat()">
-      Click para abrir sus chats con anfitriones
+      {{ 'OPEN_CHATS_HOSTS' | translate }}
     </button>
   </div>
 </section>

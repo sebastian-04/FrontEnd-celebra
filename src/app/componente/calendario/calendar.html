@@ -1,6 +1,6 @@
-<div class="calendar-root" role="application" aria-label="Calendario">
+<div class="calendar-root" role="application" aria-label="'CALENDAR_ARIA_LABEL' | translate">
   <div class="calendar-header">
-    <button type="button" class="nav-btn" (click)="prevMonth()" aria-label="Mes anterior">‹</button>
+    <button type="button" class="nav-btn" (click)="prevMonth()" aria-label="'PREVIOUS_MONTH_ARIA' | translate">‹</button>
 
     <div class="month-year">
       <button type="button" class="month-btn" (click)="toggleMonthPicker()">
@@ -11,7 +11,7 @@
       </button>
     </div>
 
-    <button type="button" class="nav-btn" (click)="nextMonth()" aria-label="Mes siguiente">›</button>
+    <button type="button" class="nav-btn" (click)="nextMonth()" aria-label="'NEXT_MONTH_ARIA' | translate">›</button>
   </div>
 
   <div class="pickers">
@@ -45,7 +45,13 @@
   </div>
 
   <div class="weeknames">
-    <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+    <div>{{ 'SUNDAY_SHORT' | translate }}</div>
+    <div>{{ 'MONDAY_SHORT' | translate }}</div>
+    <div>{{ 'TUESDAY_SHORT' | translate }}</div>
+    <div>{{ 'WEDNESDAY_SHORT' | translate }}</div>
+    <div>{{ 'THURSDAY_SHORT' | translate }}</div>
+    <div>{{ 'FRIDAY_SHORT' | translate }}</div>
+    <div>{{ 'SATURDAY_SHORT' | translate }}</div>
   </div>
 
   <div class="weeks">
@@ -66,18 +72,18 @@
   </div>
 
   <div class="calendar-footer">
-    <button type="button" class="today-btn" (click)="goToToday()">Hoy</button>
+    <button type="button" class="today-btn" (click)="goToToday()">{{ 'TODAY_BUTTON' | translate }}</button>
 
     @if (selectedStartDate && selectedEndDate) {
       <div class="selected-info">
-        Rango seleccionado:
+        {{ 'SELECTED_RANGE_LABEL' | translate }}
         {{ selectedStartDate | date:'mediumDate' }} – {{ selectedEndDate | date:'mediumDate' }}
       </div>
     }
 
     @if (selectedStartDate && !selectedEndDate) {
       <div class="selected-info">
-        Fecha de inicio: {{ selectedStartDate | date:'mediumDate' }}
+        {{ 'START_DATE_LABEL' | translate }} {{ selectedStartDate | date:'mediumDate' }}
       </div>
     }
   </div>

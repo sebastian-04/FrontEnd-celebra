@@ -30,37 +30,34 @@
   max-height: 5.063rem;
   margin-left: 1rem;
 }
-/* Estilos para el body (toda la página) */
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
   Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   display: flex;
-  flex-direction: column; /* Apila el logo y el formulario */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
   background-color: #f9f9f9;
   margin: 0;
-  position: relative; /* Importante para el posicionamiento del fondo */
+  position: relative;
   overflow-x: hidden;
 }
 
-/* Contenedor del logo en la parte superior */
 .header-logo {
-  position: absolute; /* Posiciona el logo independientemente */
-  top: 30px; /* Ajusta la distancia desde arriba */
-  z-index: 3; /* Asegura que el logo esté por encima de todo */
+  position: absolute;
+  top: 30px;
+  z-index: 3;
 }
 
 .logo {
-  width: 120px; /* Ajusta el tamaño del logo */
+  width: 120px;
   height: auto;
 }
 
-
-/* Contenedor blanco principal del formulario */
 .formulario {
-  background-color: rgba(255, 255, 255, 0.9); /* Fondo blanco con 90% de opacidad */
+  background-color: rgba(255, 255, 255, 0.9);
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -70,22 +67,20 @@ body {
   position: relative;
   z-index: 2;
   box-sizing: border-box;
-  margin-top: 120px; /* Aumenta el margen superior para dejar espacio al logo */
+  margin-top: 120px;
   margin-bottom: 20px;
 }
 
-/* Título "Iniciar Sesión" */
 .formulario-container h3 {
   font-size: 1.5rem;
   font-weight: 600;
   color: #333;
   margin-top: 0;
   margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem; /* --- NUEVO ---: Espacio para la línea */
-  border-bottom: 1px solid #e0e0e0; /* --- NUEVO ---: Línea gris clara */
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-/* Estilos para los campos de input */
 .formulario-container input {
   width: 100%;
   padding: 10px 10px;
@@ -99,12 +94,12 @@ body {
 .formulario-container h3{
   font-weight: 850;
 }
-/* Estilo para el placeholder */
+
 .formulario-container input::placeholder {
   color: #777;
 }
 
-/* Botón "Continuar" principal */
+
 .formulario-container button {
   width: 100%;
   padding: 10px;
@@ -123,35 +118,33 @@ body {
   background-color: #d8b4fe;
 }
 
-/* Separador "o" */
 .separador {
   font-size: 0.85rem;
   color: #888;
   margin: 1.2rem 0;
   font-weight: 400;
-  display: flex; /* --- MODIFICADO ---: Convertido a flex container */
-  align-items: center; /* --- NUEVO ---: Centra 'o' verticalmente */
-  gap: 0.75rem; /* --- NUEVO ---: Espacio entre líneas y 'o' */
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-/* --- REGLA NUEVA ---: Para las líneas del separador */
 .separador::before,
 .separador::after {
-  content: ''; /* Requerido */
-  flex: 1; /* Las líneas crecen para llenar el espacio */
-  height: 1px; /* Grosor de la línea */
-  background-color: #ccc; /* Color de la línea */
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: #ccc;
 }
 
-
-/* Contenedor de las opciones sociales */
 .formulario-opciones-varias {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
 }
+.formulario-opciones-varias a{
+  text-decoration: none;
+}
 
-/* Estilo base para todos los botones sociales */
 .opcion-social {
   position: relative;
   display: flex;
@@ -169,7 +162,6 @@ body {
   background-color: #f7f7f7;
 }
 
-/* Iconos dentro de los botones sociales */
 .opcion-social img {
   margin-right: 15px;
   position: static;
@@ -179,7 +171,6 @@ body {
   object-fit: contain;
 }
 
-/* Texto de los botones sociales */
 .opcion-social h3 {
   margin: 0;
   font-size: 0.85rem;
@@ -187,7 +178,6 @@ body {
   color: #333;
 }
 
-/* Texto "Olvidaste tu contraseña" */
 .olvidaste-contrasena {
   font-size: 0.85rem;
   font-weight: 500;
@@ -203,13 +193,11 @@ body {
   color: #333;
 }
 
-/* Contenedor para "Primera vez..." */
 .extra {
   display: flex;
-  justify-content: flex-start; /* Alinea a la izquierda */
+  justify-content: flex-start;
   align-items: center;
   margin-top: 0.8rem;
-  /* El "flex-wrap: nowrap;" (opcional) asegura que los dos h3 no se pongan uno sobre otro */
   flex-wrap: nowrap;
 }
 
@@ -218,16 +206,13 @@ body {
   font-size: 0.85rem;
   font-weight: 500;
   color: #555;
-  white-space: nowrap; /* --- NUEVO --- Evita que el texto se parta en varias líneas */
+  white-space: nowrap;
 }
 
-/* Le damos un pequeño margen derecho al primer texto para simular un espacio */
 .extra h3:not(.registrese-ahora) {
   margin-right: 0.25rem;
 }
 
-
-/* Texto "¡Regístrese ahora!" */
 .extra .registrese-ahora {
   color: #9333ea;
   font-weight: 600;
@@ -239,15 +224,14 @@ body {
   color: #7c2dbe;
 }
 
-/* Imagen de fondo (Globos) */
 .fondo {
-  position: fixed; /* Cambiado a fixed para que siempre esté en la parte inferior */
+  position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
   height: auto;
   max-height: 363px;
   object-fit: cover;
-  z-index: 1; /* Sigue detrás del formulario */
+  z-index: 1;
 }
 

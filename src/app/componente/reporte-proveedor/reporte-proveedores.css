@@ -369,21 +369,17 @@ body.modal-abierto {
   text-decoration: none;
 }
 
-/* --- INICIO HISTORIAL DE EVENTOS --- */
-
 .historial-contenido {
-  /* Posición y tamaño (para que encaje con el header y menú) */
   flex: 1;
   padding: 2.5rem 4rem;
-  margin-top: 6.25rem; /* Altura del header fijo */
-  margin-left: 5rem; /* Ancho del menú hamburguesa */
+  margin-top: 6.25rem;
+  margin-left: 5rem;
   height: calc(100vh - 6.25rem);
   overflow-y: auto;
   background-color: #FFFFFF;
   font-family: 'Inter', sans-serif;
 }
 
-/* Encabezado (botón y título) */
 .historial-header {
   display: flex;
   align-items: center;
@@ -391,7 +387,6 @@ body.modal-abierto {
   margin-bottom: 2rem;
 }
 
-/* Reutilizamos el estilo del botón de perfil */
 .perfil-back-button {
   display: flex;
   align-items: center;
@@ -420,10 +415,9 @@ body.modal-abierto {
   margin: 0;
 }
 
-/* Dropdown de Filtro */
 .historial-filtro {
   display: flex;
-  justify-content: flex-end; /* Alinea a la derecha */
+  justify-content: flex-end;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 2rem;
@@ -468,19 +462,17 @@ body.modal-abierto {
   position: relative;
   min-height: 400px;
 }
-/* Contenedor para el recuadro de total */
-/* Contenedor para el recuadro de total */
+
 .kpi-container {
   flex-shrink: 0;
   padding-top: 1.5rem;
-  display: flex; /* <-- Esto los pone en fila */
-  flex-wrap: wrap; /* Permite que se reorganicen en pantallas pequeñas */
-  justify-content: center; /* Centra las cajas */
-  gap: 1.5rem; /* Espacio entre las cajas */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
   width: 100%;
 }
 
-/* 2. Estilo base para CADA caja de KPI */
 .kpi-box {
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
@@ -488,12 +480,11 @@ body.modal-abierto {
   padding: 1rem 1.5rem;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  min-width: 280px; /* Ancho mínimo para cada caja */
-  flex: 1; /* Permite que crezcan un poco */
-  max-width: 320px; /* Pero no demasiado */
+  min-width: 280px;
+  flex: 1;
+  max-width: 320px;
 }
 
-/* 3. Etiqueta (ej. "GANANCIAS TOTALES") */
 .kpi-label {
   display: block;
   font-size: 0.8rem;
@@ -503,37 +494,33 @@ body.modal-abierto {
   letter-spacing: 0.5px;
 }
 
-/* 4. Estilo para el valor principal (el total) */
 .kpi-valor-total {
   display: block;
   font-size: 2.25rem;
   font-weight: 700;
   color: #1E1E1E;
-  margin-top: 0.5rem; /* Más espacio para el total */
+  margin-top: 0.5rem;
   line-height: 1.2;
 }
 
-/* 5. Estilo para el valor secundario (el mes) */
 .kpi-valor-sub {
   display: block;
-  font-size: 1.25rem; /* Un poco más grande */
+  font-size: 1.25rem;
   font-weight: 600;
   color: #333;
   margin-top: 0.25rem;
 }
 
-/* 6. Estilo para el monto (en min/max) */
 .kpi-valor-monto {
   display: block;
-  font-size: 1.5rem; /* Un poco más pequeño que el total */
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1E1E1E;
   margin-top: 0.1rem;
 }
 
-/* Opcional: Destacar la caja del total */
 .kpi-box--total {
-  border-color: #D577FF; /* Borde morado */
+  border-color: #D577FF;
   box-shadow: 0 4px 15px rgba(129, 56, 255, 0.1);
 }
 .chat-widget-container {
@@ -847,4 +834,15 @@ body.modal-abierto {
   color: #999;
   text-align: center;
   margin: 15px 0 5px 0;
+}
+.chat-name-container{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.chat-title {
+  font-weight: 500;
+  color: #999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
 }

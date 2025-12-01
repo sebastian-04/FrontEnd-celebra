@@ -126,143 +126,6 @@ body {
 
 }
 
-.toolbar {
-  background: #ede7f6;
-  color: #4a148c;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0 2rem;
-  gap: 2rem;
-  border-bottom: 1px solid #ddd;
-}
-
-.titulo {
-  font-size: 1.2rem;
-  font-weight: 600;
-  flex-shrink: 0;
-}
-
-.campo-toolbar {
-  width: 220px;
-}
-
-.contenido {
-  flex: 1;
-  display: flex;
-  padding: 2rem;
-  gap: 2rem;
-  overflow: auto;
-}
-
-.panel-listado {
-  flex: 1;
-  background: #fff;
-  padding: 2rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  overflow: auto;
-}
-
-.panel-listado h2 {
-  margin-bottom: 1.5rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-}
-
-.panel-formulario {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-}
-
-mat-card {
-  width: 100%;
-  max-width: 600px;
-  padding: 1rem;
-}
-
-mat-card-title {
-  font-weight: 600;
-  color: #4a148c;
-}
-
-mat-form-field.campo {
-  width: 100%;
-  margin-bottom: 1rem;
-}
-
-mat-form-field.combo {
-  width: 220px;
-  margin: 0 10px;
-  z-index: 20;
-}
-
-.mat-form-field input {
-  text-align: center;
-}
-
-mat-form-field.mat-form-field {
-  text-align: center;
-  display: flex;
-  justify-content: center;
-}
-
-.mat-select-value {
-  justify-content: center !important;
-  text-align: center !important;
-}
-
-.mat-form-field-label {
-  width: 100%;
-  text-align: center !important;
-}
-
-.mat-select-value-text {
-  width: 100%;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-}
-
-.mat-select-value,
-.mat-select-value-text,
-.mat-select-trigger {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-  width: 100%;
-}
-
-.mat-input-element {
-  text-align: center !important;
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-}
-
-.mat-input-element::placeholder {
-  padding-left: 12px;
-}
-
-.acciones {
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-button[mat-raised-button] {
-  background-color: #8e24aa;
-  color: white;
-}
-
-button[mat-stroked-button] {
-  color: #8e24aa;
-  border-color: #8e24aa;
-}
-
 .boton-si, .boton-no {
   background-color: #e2c9ff;
   border: none;
@@ -318,6 +181,7 @@ button[mat-stroked-button] {
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   text-align: center;
   z-index: 2001 !important;
+  font-family: 'Inter', sans-serif;
 }
 
 .cerrar-sesion-container h1 {
@@ -340,35 +204,12 @@ button[mat-stroked-button] {
   margin-top: 2rem;
 }
 
-.panel-listado, .panel-formulario {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.panel-listado.ng-enter, .panel-formulario.ng-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.mat-option-text {
-  text-align: center !important;
-  width: 100%;
-  justify-content: center;
-  display: flex;
-}
-
-.mat-select-panel {
-  background-color: #fff !important;
-  border-radius: 6px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  border: 1px solid #ddd;
-}
-
-.mat-form-field-infix {
-  text-align: center !important;
-  display: flex;
-  justify-content: center;
-}
 .encabezado-perfil img{
   border-radius: 50%;
   object-fit: cover;
+}
+.CerrarSesion-a{
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  text-decoration: none !important;
 }

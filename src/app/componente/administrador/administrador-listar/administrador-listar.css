@@ -1,0 +1,21 @@
+mat-toolbar {
+  top: 10rem;
+}
+mat-toolbar-row{
+  gap: 1rem;
+  border-radius: 2px;
+  border-bottom: 1px solid #C4C4C4;
+}
+mat-toolbar button{
+  font-family: 'Inter', sans-serif;
+  font-weight: 750;
+  background-color: #5376FF;
+  color: white;
+}
+th{
+  font-family: 'Inter', sans-serif;
+  font-weight: 750;
+}
+.btn-activo {
+  background-color: #2c3e50 !important;
+}

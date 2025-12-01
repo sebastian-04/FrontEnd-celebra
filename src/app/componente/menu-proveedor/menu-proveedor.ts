@@ -1,34 +1,40 @@
-import {
-  AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, inject, NgZone, OnInit, ViewChild
-} from '@angular/core';
-import {DatePipe, NgOptimizedImage} from '@angular/common';
+import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, NgZone, ViewChild} from '@angular/core';
+import {DatePipe} from '@angular/common';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, RouterLink} from '@angular/router';
-import {Proveedor} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/proveedor';
-import {ProveedorServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/proveedor-services';
-import {ContratoEventoServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/contrato-evento-services';
-import {ContratoEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/contratoEvento';
-import {ImagenEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/imagenEvento';
-import {ImagenEventoService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/imagenEvento-services';
+import {Proveedor} from '../../model/proveedor';
+import {ProveedorServices} from '../../services/proveedor-services';
+import {ContratoEventoServices} from '../../services/contrato-evento-services';
+import {ContratoEvento} from '../../model/contratoEvento';
+import {ImagenEvento} from '../../model/imagenEvento';
+import {ImagenEventoService} from '../../services/imagenEvento-services';
 import {debounceTime, fromEvent} from 'rxjs';
-import {Mensaje} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/mensaje';
-import {MensajeServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/mensaje-services';
-import {Chat} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/chat';
-import {ChatServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/chat-services';
+import {Mensaje} from '../../model/mensaje';
+import {MensajeServices} from '../../services/mensaje-services';
+import {Chat} from '../../model/chat';
+import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {EventoService} from '../../services/evento-services';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-menu-proveedor',
   imports: [
     ReactiveFormsModule,
-    NgOptimizedImage,
     RouterLink,
     DatePipe,
-    FormsModule
+    FormsModule,
+    TranslatePipe
   ],
   templateUrl: './menu-proveedor.html',
   styleUrl: './menu-proveedor.css',
 })
 export class MenuProveedor{
+  activeChatTitle: string | null = null;
+  loginService: LoginService = inject(LoginService);
+  eventoService: EventoService = inject(EventoService);
+  cantidadResenas: number;
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -58,14 +64,20 @@ export class MenuProveedor{
   zone: NgZone = inject(NgZone);
   contratoEventoService = inject(ContratoEventoServices);
   imagenEventoService: ImagenEventoService = inject(ImagenEventoService);
+  botpressService = inject(BotpressService);
   imagenEvento: ImagenEvento[] = [];
   contratoEvento: ContratoEvento[] = [];
   proveedorService: ProveedorServices = inject(ProveedorServices);
   route: ActivatedRoute = inject(ActivatedRoute);
   private fb: FormBuilder = inject(FormBuilder);
+  translate: TranslateService = inject(TranslateService);
   constructor(private cdr: ChangeDetectorRef) {}
   ngOnInit(): void {
-    const idParam = this.route.snapshot.params['id'];
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
+    const idParam = this.route.snapshot.params['idProveedor'];
     const id = Number(idParam);
     this.cargarProveedor(id);
     this.buscarForm = this.fb.group({
@@ -107,15 +119,17 @@ export class MenuProveedor{
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -192,11 +206,15 @@ export class MenuProveedor{
       next: (data) => {
         this.contratoEvento = data;
         console.log(`Contratos cargados:`, this.contratoEvento.length);
-
         this.contratoEvento.forEach(contrato => {
           if (contrato.evento && contrato.evento.id) {
             this.cargarImagenesPorEvento(contrato.evento.id);
           }
+          this.eventoService.calcularCantidadResenasPorEvento(contrato.evento.id!).subscribe({
+            next: (data) => {
+              this.cantidadResenas = data;
+            }
+          });
         });
       },
       error: (err) => console.error('Error al cargar contratos', err)
@@ -220,7 +238,6 @@ export class MenuProveedor{
         }
 
         const normalizadas = imagenes.map(img => {
-          // ... (tu normalización está bien)
           const raw = (img as any).imagenEvento || img.imagen || '';
           let imagenFinal = '';
           if (raw && typeof raw === 'string') {
@@ -228,17 +245,11 @@ export class MenuProveedor{
           }
           return { ...img, imagen: imagenFinal };
         });
-
-        // Actualización inmutable (esto ya está bien)
         this.imagenesEvento = {
           ...this.imagenesEvento,
           [idEvento]: normalizadas
         };
-
-        // Configuramos el índice inicial (Visible inmediatamente)
         if (this.indices[idEvento] === undefined) {
-
-          // *** CAMBIO AQUÍ: Recrear los objetos ***
           this.indices = {
             ...this.indices,
             [idEvento]: 0
@@ -250,8 +261,8 @@ export class MenuProveedor{
         }
 
         console.log("RESpuesta del backend:", imagenes);
-        this.cdr.detectChanges(); // Correcto, para pintar la primera imagen
-        this.iniciarCarrusel(idEvento); // Correcto, para arrancar el intervalo
+        this.cdr.detectChanges();
+        this.iniciarCarrusel(idEvento);
       },
       error: (err) => console.error(`Error imágenes evento ${idEvento}:`, err),
     });
@@ -266,19 +277,9 @@ export class MenuProveedor{
         this.zone.run(() => {
           const imgs = this.imagenesEvento[idEvento];
           if (!imgs || imgs.length <= 1) return;
-
           const total = imgs.length;
           const indiceActual = this.indices[idEvento];
           const indiceSiguiente = (indiceActual + 1) % total;
-
-          // *** ESTE ES EL CAMBIO CRÍTICO ***
-
-          // ▼▼ ESTO ES MUTACIÓN (LO QUE TIENES AHORA) ▼▼
-          // this.indicePrevio[idEvento] = indiceActual;
-          // this.indices[idEvento] = indiceSiguiente;
-
-          // ▼▼ ESTA ES LA SOLUCIÓN (INMUTABILIDAD) ▼▼
-          // Al crear un objeto nuevo, Angular detecta el cambio sí o sí.
           this.indicePrevio = {
             ...this.indicePrevio,
             [idEvento]: indiceActual
@@ -287,11 +288,7 @@ export class MenuProveedor{
             ...this.indices,
             [idEvento]: indiceSiguiente
           };
-
-          // Ya no necesitas cdr.detectChanges(),
-          // this.zone.run() se encarga.
         });
-
       }, 3000);
     });
   }
@@ -409,6 +406,7 @@ export class MenuProveedor{
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
@@ -449,11 +447,10 @@ export class MenuProveedor{
   }
   calcularAlturaTotal() {
     if (this.listaEventos?.nativeElement) {
-      // Adaptamos el selector al de la plantilla de proveedor
       const eventosElements = this.listaEventos.nativeElement.querySelectorAll('.evento-card');
       let alturaAcumulada = 0;
       eventosElements.forEach((elemento: HTMLElement) => {
-        alturaAcumulada += elemento.offsetHeight + 20; // Asumimos un 'gap' de 20px
+        alturaAcumulada += elemento.offsetHeight + 20;
       });
       this.alturaTotalContenido = alturaAcumulada;
       console.log('📏 Altura total del contenido:', this.alturaTotalContenido, 'px');
@@ -464,24 +461,17 @@ export class MenuProveedor{
     const lista = this.listaEventos.nativeElement;
     const scrollTop = lista.scrollTop;
     const totalScrollable = lista.scrollHeight - lista.clientHeight;
-
-    // Busca la barra-1 en el DOM (basado en la lógica original)
     const barra1 = document.querySelector('.barra-1') as HTMLElement;
     if (!barra1) return;
-
     const alturaBarra1 = barra1.clientHeight;
     const espacioMaximoScrollableBarra = Math.max(0, alturaBarra1 - this.barraHeight);
-
     if (totalScrollable > 0) {
       const scrollPercent = scrollTop / totalScrollable;
-      // La nueva posición de la barra-2 se calcula sobre el "espacioMaximoScrollableBarra"
       const targetPos = scrollPercent * espacioMaximoScrollableBarra;
       this.scrollPosition = Math.min(espacioMaximoScrollableBarra, Math.max(0, targetPos));
     } else {
       this.scrollPosition = 0;
     }
-
-    // Lógica de opacidad (fade) que estaba en el original
     const zonaDifuminada = 80;
     const distanciaDesdeTop = scrollTop;
     const distanciaDesdeBottom = totalScrollable - scrollTop;
@@ -493,22 +483,15 @@ export class MenuProveedor{
     const wrapper = (event.currentTarget as HTMLElement).closest('.eventos-navegacion') as HTMLElement;
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
-
-    // *** CAMBIO CLAVE AQUÍ ***
-    // Usamos la altura de barra-1 y la altura de barra-2 para calcular el espacio de arrastre
-    const barra1 = wrapper.querySelector('.barra-1') as HTMLElement; // Asegurarse de obtener barra-1 dentro del wrapper
+    const barra1 = wrapper.querySelector('.barra-1') as HTMLElement;
     if (!barra1) return;
     const alturaBarra1 = barra1.clientHeight;
     const espacioMaximoArrastreBarra = Math.max(0, alturaBarra1 - this.barraHeight);
-
     const startY = event.clientY;
     const startScrollPos = this.scrollPosition;
-
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaY = moveEvent.clientY - startY;
       let nuevaPosicion = startScrollPos + deltaY;
-
-      // Asegurarse de que no exceda el espacio máximo de arrastre
       nuevaPosicion = Math.min(espacioMaximoArrastreBarra, Math.max(0, nuevaPosicion));
       this.scrollPosition = nuevaPosicion;
 
@@ -516,7 +499,6 @@ export class MenuProveedor{
         const lista = this.listaEventos.nativeElement;
         const totalScrollable = lista.scrollHeight - lista.clientHeight;
         if (totalScrollable > 0) {
-          // La proporción de scroll se calcula sobre el "espacioMaximoArrastreBarra"
           const newScrollTop = (nuevaPosicion / espacioMaximoArrastreBarra) * totalScrollable;
           lista.scrollTop = newScrollTop;
         }
@@ -542,7 +524,7 @@ export class MenuProveedor{
     const visibleHeight = Math.min(rect.bottom, containerRect.bottom) - Math.max(rect.top, containerRect.top);
     const ratio = Math.max(0, Math.min(1, visibleHeight / rect.height));
 
-    return 0.3 + 0.7 * ratio; // 0.3 opacidad base + 0.7 variable
+    return 0.3 + 0.7 * ratio;
   }
   onScroll() {
     this.cdr.detectChanges();

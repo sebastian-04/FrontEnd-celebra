@@ -1,39 +1,48 @@
 import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, OnInit, ViewChild} from '@angular/core';
-import {DatePipe, NgOptimizedImage} from '@angular/common';
+import {DatePipe} from '@angular/common';
 import {debounceTime, fromEvent} from 'rxjs';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {Evento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/evento';
-import {EventoService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/evento-services';
-import {ImagenEventoService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/imagenEvento-services';
-import {ImagenEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/imagenEvento';
-import {Anfitrion} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/anfitrion';
-import {AnfitrionServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/anfitrion-services';
-import {TipoEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/tipoEvento';
-import {CiudadServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/ciudad-services';
-import {Ciudad} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/ciudad';
-import {DistritoServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/distrito-services';
-import {Distrito} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/distrito';
-import {TipoEventoServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/tipo-evento-services';
-import {Chat} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/chat';
-import {ChatServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/chat-services';
-import {Mensaje} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/mensaje';
-import {MensajeServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/mensaje-services';
+import {Evento} from '../../model/evento';
+import {EventoService} from '../../services/evento-services';
+import {ImagenEventoService} from '../../services/imagenEvento-services';
+import {ImagenEvento} from '../../model/imagenEvento';
+import {Anfitrion} from '../../model/anfitrion';
+import {AnfitrionServices} from '../../services/anfitrion-services';
+import {TipoEvento} from '../../model/tipoEvento';
+import {CiudadServices} from '../../services/ciudad-services';
+import {Ciudad} from '../../model/ciudad';
+import {DistritoServices} from '../../services/distrito-services';
+import {Distrito} from '../../model/distrito';
+import {TipoEventoServices} from '../../services/tipo-evento-services';
+import {Chat} from '../../model/chat';
+import {ChatServices} from '../../services/chat-services';
+import {Mensaje} from '../../model/mensaje';
+import {MensajeServices} from '../../services/mensaje-services';
+import {LoginService} from '../../services/login-service';
+import {ValoracionEventoServices} from '../../services/valoracion-evento-services';
+import {ValoracionEvento} from '../../model/valoracionEvento';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-menu-anfitrion',
   standalone: true,
   imports: [
-    NgOptimizedImage,
     ReactiveFormsModule,
     RouterLink,
     DatePipe,
     FormsModule,
+    TranslatePipe,
   ],
   templateUrl: './menu-anfitrion.html',
   styleUrl: './menu-anfitrion.css',
 })
 export class MenuAnfitrion implements OnInit {
+  activeChatTitle: string | null = null;
+  favoritos: { [eventoId: number]: boolean } = {};
+  loginService: LoginService = inject(LoginService);
+  cantidadResenas: number;
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -81,7 +90,10 @@ export class MenuAnfitrion implements OnInit {
   route: ActivatedRoute = inject(ActivatedRoute);
   private router = inject(Router);
   private imagenEventoService = inject(ImagenEventoService);
+  valoracionEventoService = inject(ValoracionEventoServices);
+  translate: TranslateService = inject(TranslateService);
   private fb: FormBuilder = inject(FormBuilder);
+  botpressService = inject(BotpressService);
   constructor(private cdr: ChangeDetectorRef) {
     this.buscarForm = this.fb.group({
       Distrito: ['', Validators.required],
@@ -100,8 +112,13 @@ export class MenuAnfitrion implements OnInit {
     })
   }
   ngOnInit(): void {
-    const idParam = this.route.snapshot.params['id'];
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
+    const idParam = this.route.snapshot.params['idAnfitrion'];
     const id = Number(idParam);
+    this.id = id;
     this.cargarAnfitrion(id);
     this.cargarEventosAleatorios();
     this.distritoService.listar().subscribe({
@@ -134,15 +151,17 @@ export class MenuAnfitrion implements OnInit {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -218,6 +237,18 @@ export class MenuAnfitrion implements OnInit {
           if (evento.id != null) {
             this.cargarImagenesPorEvento(evento.id);
           }
+          this.eventoService.calcularCantidadResenasPorEvento(evento.id!).subscribe({
+            next: (data) => {
+              this.cantidadResenas = data;
+            }
+          });
+          this.valoracionEventoService.listarValoracionEventoPorAnfitrion(this.id).subscribe({
+            next: (valoraciones) => {
+              this.favoritos[evento.id!] = valoraciones.some(
+                v => v.evento.id === evento.id && v.favorito === true
+              );
+            }
+          });
         });
         setTimeout(() => {
           this.eventos.forEach(e => this.iniciarCarrusel(e.id!));
@@ -321,7 +352,7 @@ export class MenuAnfitrion implements OnInit {
         alturaAcumulada += elemento.offsetHeight + 20;
       });
       this.alturaTotalContenido = alturaAcumulada;
-      console.log('📏 Altura total del contenido:', this.alturaTotalContenido, 'px');
+      console.log('Altura total del contenido:', this.alturaTotalContenido, 'px');
     }
   }
   actualizarPosicionBarra() {
@@ -389,15 +420,22 @@ export class MenuAnfitrion implements OnInit {
   onScroll() {
     this.cdr.detectChanges();
   }
-  onCorazonClick(event: MouseEvent) {
-    const img = event.target as HTMLImageElement;
-    if (!img) return;
-    img.classList.toggle('activo');
-    if (img.classList.contains('activo')) {
-      img.src = '/assets/HeartPintado.png';
-    } else {
-      img.src = '/assets/Heart.png';
-    }
+  onCorazonClick(event: MouseEvent, evento: Evento) {
+    const nuevoEstado = !this.favoritos[evento.id!];
+    this.favoritos[evento.id!] = nuevoEstado;
+
+    const valoracionEvento: ValoracionEvento = {
+      favorito: nuevoEstado,
+      anfitrion: this.anfitrion,
+      evento: evento
+    };
+
+    this.valoracionEventoService
+      .alternarFavorito(this.id, evento.id!, valoracionEvento)
+      .subscribe({
+        next: () => console.log("Favorito actualizado"),
+        error: (err) => console.error("Error actualizando favorito", err)
+      });
   }
   toggleFiltrosAvanzados() {
     if (this.animando) return;
@@ -475,6 +513,7 @@ export class MenuAnfitrion implements OnInit {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
@@ -526,13 +565,9 @@ export class MenuAnfitrion implements OnInit {
   iniciarCarrusel(idEvento: number) {
     const imagenes = this.obtenerImagenesPorEvento(idEvento);
     if (!imagenes || imagenes.length <= 1) return;
-
-    // Inicialización limpia (sin animación)
     this.indices[idEvento] = 0;
     this.indicePrevio[idEvento] = -1;
     this.haIniciadoAnimacion[idEvento] = true;
-
-    // Sincronizar arranque en un solo tiempo global
     if (!this.intervalos['GLOBAL']) {
       this.intervalos['GLOBAL'] = setInterval(() => {
         this.actualizarCarruseles();
@@ -543,11 +578,8 @@ export class MenuAnfitrion implements OnInit {
     for (const idEvento in this.indices) {
       const imagenes = this.obtenerImagenesPorEvento(Number(idEvento));
       if (!imagenes || imagenes.length <= 1) continue;
-
       const actual = this.indices[idEvento];
       const siguiente = (actual + 1) % imagenes.length;
-
-      // Desde la segunda transición → animación normal
       this.indicePrevio[idEvento] = actual;
       this.indices[idEvento] = siguiente;
     }
@@ -557,18 +589,15 @@ export class MenuAnfitrion implements OnInit {
   getImagenSrc(base64: string): string {
     if (!base64) return '/assets/placeholder.png';
     const trimmed = base64.trim();
-    // Si el string base64 comienza con el encabezado 'data:image', ya está completo
     if (trimmed.startsWith('data:image')) {
       return trimmed;
     }
-    // Detectar el tipo de imagen según los primeros caracteres del base64
     if (trimmed.startsWith('/9j/')) {
       return 'data:image/jpeg;base64,' + trimmed; // JPG
     }
     if (trimmed.startsWith('iVBOR')) {
       return 'data:image/png;base64,' + trimmed; // PNG
     }
-    // Por defecto, asume JPG
     return 'data:image/jpeg;base64,' + trimmed;
   }
 }

@@ -1,19 +1,19 @@
 <section class="encabezado">
   <div class="encabezado-logos">
-    <a [routerLink]="['/']"><img src="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img"></a>
+    <img src="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img">
   </div>
-  <a class="encabezado-h3-p" [routerLink]="['/register-anfitrion']">Conviertete en un anfitrion</a>
+  <a class="encabezado-h3-p" [routerLink]="['/register-anfitrion']">{{ 'BECOME_HOST' | translate }}</a>
   <div class="encabezado-perfil">
     <img [src]="proveedor.foto" width="60" height="60">
     <div class="encabezado-perfil-container" (click)="toggleMenuPerfil()">
-      <h3 class="encabezado-perfil-container-1">inicio de sesión como:</h3>
+      <h3 class="encabezado-perfil-container-1">{{ 'LOGGED_IN_AS' | translate }}</h3>
       <h3 class="encabezado-perfil-container-2">{{proveedor.email}}</h3>
     </div>
     <div class="encabezado-perfil-menu" [class.activo]="menuPerfilActivo">
       <nav class="encabezado-perfil-menu-nav">
         <ul class="encabezado-perfil-menu-ul">
-          <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', proveedor.id, proveedor.role?.name]">Ver mi perfil</a></li>
-          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+          <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', proveedor.id, proveedor.role?.name]">{{ 'SEE_PROFILE' | translate }}</a></li>
+          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">{{ 'LOGOUT' | translate }}</a></li>
         </ul>
       </nav>
     </div>
@@ -27,16 +27,15 @@
   <div class="overlay" [class.activo]="menuActivo"></div>
   <nav class="menu-hamburguesa-text">
     <ul class="menu-hamburguesa-text-1-p">
-      <li><a class="ContratosActuales-p" [routerLink]="['/listar-eventos', proveedor.id]">Crear eventos</a></li>
-      <li><a class="HistorialDeContratos-p" [routerLink]="['/historial-contratos', proveedor.id]">Historial de contratos</a></li>
-      <li><a class="ConsultarReportes-p" [routerLink]="['/reporte-proveedor', proveedor.id]">Consultar reportes</a></li>
-      <li><a class="ChatearConLaIA-p" href="#">Chatear con la IA</a></li>
-      <li><a class="CentroDeAyuda-p" [routerLink]="['/centro-ayuda', proveedor.id, proveedor.role?.name]">Centro de ayuda</a></li>
+      <li><a class="ContratosActuales-p" [routerLink]="['/listar-eventos', proveedor.id]">{{ 'CREATE_EVENTS' | translate }}</a></li>
+      <li><a class="HistorialDeContratos-p" [routerLink]="['/historial-contratos', proveedor.id]">{{ 'CONTRACT_HISTORY' | translate }}</a></li>
+      <li><a class="ConsultarReportes-p" [routerLink]="['/reporte-proveedor', proveedor.id]">{{ 'VIEW_REPORTS' | translate }}</a></li>
+      <li><a class="CentroDeAyuda-p" [routerLink]="['/centro-ayuda', proveedor.id, proveedor.role?.name]">{{ 'HELP_CENTER' | translate }}</a></li>
     </ul>
     <ul class="menu-hamburguesa-text-2-p">
-      <li><a class="Configuracion-p" [routerLink]="['/configuracion', proveedor.id, proveedor.role?.name]">Configuración</a></li>
-      <li><a class="CerrarSesion-p" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
-      <li><a class="legal-p" [routerLink]="['/legal', proveedor.id, proveedor.role?.name]">Legal</a></li>
+      <li><a class="Configuracion-p" [routerLink]="['/configuracion', proveedor.id, proveedor.role?.name]">{{ 'SETTINGS' | translate }}</a></li>
+      <li><a class="CerrarSesion-p" (click)="abrirModalCerrarSesion()">{{ 'LOGOUT' | translate }}</a></li>
+      <li><a class="legal-p" [routerLink]="['/legal', proveedor.id, proveedor.role?.name]">{{ 'LEGAL' | translate }}</a></li>
     </ul>
   </nav>
 </section>
@@ -44,11 +43,11 @@
     <section class="cerrar-sesion">
       <div class="overlay-cerrar-sesion"></div>
       <div class="cerrar-sesion-container" (click)="$event.stopPropagation()">
-        <h1>Cerrar Sesión</h1>
-        <h3>¿Estas seguro de cerrar tu sesión?</h3>
+        <h1>{{ 'LOGOUT_TITLE' | translate }}</h1>
+        <h3>{{ 'CONFIRM_LOGOUT' | translate }}</h3>
         <div class="cerrar-sesion-container-botones" (click)="cerrarSesion()">
-          <button class="boton-si" (click)="confirmarCerrarSesion($event)"><a [routerLink]="['']">Sí</a></button>
-          <button class="boton-no" (click)="cancelarCerrarSesion($event)">No</button>
+          <button class="boton-si" (click)="confirmarCerrarSesion($event)">{{ 'YES' | translate }}</button>
+          <button class="boton-no" (click)="cancelarCerrarSesion($event)">{{ 'NO' | translate }}</button>
         </div>
       </div>
     </section>
@@ -56,9 +55,9 @@
 <section class="listar-eventos">
   <div class="listar-eventos-header">
     <div class="listar-eventos-back">
-      <a [routerLink]="['/menu-proveedor', proveedor.id]"><img src="/assets/back.png" height="44" width="44" class="back"></a>
+      <a [routerLink]="['/menu-proveedor', proveedor.id]"><img src="/assets/back.png" height="44" width="44" class="back" [alt]="'BACK_ALT' | translate"></a>
     </div>
-    <h1>Creacion de eventos y eventos creados</h1>
+    <h1>{{ 'CREATE_AND_CREATED_EVENTS_TITLE' | translate }}</h1>
   </div>
   <div class="eventos-container">
     <ul #listaEventos class="eventos-container-lista" (scroll)="onScroll()">
@@ -71,11 +70,11 @@
                 @if (obtenerImagenesPorEvento(eventos.id || 0).length > 1) {
                   <div class="carrusel" [attr.data-evento-id]="eventos.id">
                     @for (img of obtenerImagenesPorEvento(eventos.id!); track img; let j = $index) {
-                      <img [src]="getImagenSrc(img.imagen)" alt="Imagen del evento" class="carrusel-img" [class.activa]="j === indices[eventos.id!]" [class.saliente]="haIniciadoAnimacion[eventos.id!] && j === indicePrevio[eventos.id!]"/>
+                      <img [src]="getImagenSrc(img.imagen)" [alt]="'EVENT_IMAGE_ALT' | translate" class="carrusel-img" [class.activa]="j === indices[eventos.id!]" [class.saliente]="haIniciadoAnimacion[eventos.id!] && j === indicePrevio[eventos.id!]"/>
                     }
                   </div>
                 } @else {
-                  <img [src]="obtenerImagenPorEvento(eventos.id || 0)" alt="Imagen del evento" class="img-eventos">
+                  <img [src]="obtenerImagenPorEvento(eventos.id || 0)" [alt]="'EVENT_IMAGE_ALT' | translate" class="img-eventos">
                 }
                 <div class="evento-header-2">
                   <img src="/assets/Edit.png" width="32" height="32" (click)="irEditarEvento(eventos.proveedor.id!, eventos.id!)">
@@ -94,7 +93,7 @@
             <div class="evento-contenido-3">
               <div class="evento-contenido-3-1">
                 <span class="evento-precio">S/.{{eventos.presupuesto}}</span>
-                <span class="evento-aforo">para {{eventos.aforo}} personas</span>
+                <span class="evento-aforo">{{ 'FOR' | translate }} {{eventos.aforo}} {{ 'PEOPLE' | translate }}</span>
               </div>
             </div>
           </li>
@@ -111,10 +110,10 @@
   @if (mostrarModalEliminar) {
     <div class="eliminar">
       <div class="eliminar-container">
-        <h1>¿Está seguro de eliminar este evento?</h1>
+        <h1>{{ 'CONFIRM_DELETE_EVENT' | translate }}</h1>
         <div class="eliminar-botones">
-          <button (click)="confirmarEliminar()">Si</button>
-          <button (click)="cerrarModalEliminar()">No</button>
+          <button (click)="confirmarEliminar()">{{ 'YES' | translate }}</button>
+          <button (click)="cerrarModalEliminar()">{{ 'NO' | translate }}</button>
         </div>
       </div>
     </div>
@@ -127,9 +126,12 @@
       <div class="chat-list" [class.active]="activeChatName === null">
         @for (c of chats; track c.id) {
           <div class="chat-item"
-               (click)="selectChat(c.anfitrion.nombre ?? '',c.anfitrion.foto ?? null,c.id)">
-            <img [src]="c.anfitrion.foto ?? 'assets/default-avatar.png'" class="chat-avatar" alt="Avatar">
-            <span class="chat-name">{{ c.anfitrion.nombre }}</span>
+               (click)="selectChat(c.anfitrion.nombre ?? '',c.anfitrion.foto ?? null, c.titulo, c.id)">
+            <img [src]="c.anfitrion.foto ?? 'assets/default-avatar.png'" class="chat-avatar" [alt]="'AVATAR_ALT' | translate">
+            <div class="chat-name-container">
+              <span class="chat-name">{{ c.anfitrion.nombre + ' ' + c.anfitrion.apellido}}</span>
+              <span class="chat-title">{{ c.titulo }}</span>
+            </div>
           </div>
         }
       </div>
@@ -137,9 +139,12 @@
       <div class="chat-window" [class.active]="activeChatName !== null">
 
         <div class="chat-window-header">
-          <button class="chat-back-button" (click)="selectChat(null, null)">&larr;</button>
-          <img [src]="activeChatAvatar ?? '/assets/default.png'" alt="Avatar" class="chat-avatar">
-          <span class="chat-name">{{ activeChatName }}</span>
+          <button class="chat-back-button" (click)="selectChat(null, null, null)">&larr;</button>
+          <img [src]="activeChatAvatar ?? '/assets/default.png'" [alt]="'AVATAR_ALT' | translate" class="chat-avatar">
+          <div class="chat-name-container">
+            <span class="chat-name">{{ activeChatName }}</span>
+            <span class="chat-title">{{ activeChatTitle }}</span>
+          </div>
         </div>
 
         <div class="chat-window-body" #scrollContainer>
@@ -178,14 +183,14 @@
         <div class="chat-window-footer">
           <input type="text"
                  [(ngModel)]="mensajeTexto"
-                 placeholder="Escribe un mensaje..."
+                 placeholder="{{ 'TYPE_YOUR_MESSAGE' | translate }}"
                  (keyup.enter)="enviarMensaje()">
           <button class="send-button" (click)="enviarMensaje()">&#9658;</button>
         </div>
       </div>
     </div>
     <button class="chat-open-button" [class.activo]="chatVisible" (click)="toggleChat()">
-      Click para abrir sus chats con anfitriones
+      {{ 'OPEN_CHATS_HOSTS' | translate }}
     </button>
   </div>
 </section>

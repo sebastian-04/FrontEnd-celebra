@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {NgOptimizedImage, Location, DatePipe} from '@angular/common';
+import {Location, DatePipe} from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {Anfitrion} from '../../model/anfitrion';
 import {Distrito} from '../../model/distrito';
@@ -20,24 +20,26 @@ import {Mensaje} from '../../model/mensaje';
 import {MensajeServices} from '../../services/mensaje-services';
 import {Chat} from '../../model/chat';
 import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-confirmar-reserva',
   imports: [
-    NgOptimizedImage,
     ReactiveFormsModule,
     RouterLink,
-    ReactiveFormsModule, // Para el formulario de pago
-    NgOptimizedImage,
+    ReactiveFormsModule,
     DatePipe,
     FormsModule,
-    // Para ngSrc
-
+    TranslatePipe,
   ],
   templateUrl: './confirmar-reserva.html',
   styleUrl: './confirmar-reserva.css',
 })
 export class ConfirmarReserva {
+  activeChatTitle: string | null = null;
+  loginService: LoginService = inject(LoginService);
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -49,6 +51,7 @@ export class ConfirmarReserva {
   activeChatName: string | null = null;
   activeChatAvatar: string | null = null;
   mensajeTexto: string = '';
+  cantidadResenas: number;
   contratoEvento: ContratoEvento;
   contratoEventoService: ContratoEventoServices = inject(ContratoEventoServices);
   anfitrion: Anfitrion;
@@ -66,9 +69,7 @@ export class ConfirmarReserva {
   anfitrionService: AnfitrionServices = inject(AnfitrionServices);
   route: ActivatedRoute = inject(ActivatedRoute);
   imagenEventoService = inject(ImagenEventoService);
-  /*par el metodo de pago */
   metodoPagoSeleccionado: string = '';
-  /**/
   private location = inject(Location);
   private router = inject(Router);
   mostrarRecibo = false;
@@ -81,6 +82,8 @@ export class ConfirmarReserva {
   animando = false;
   mostrarCerrarSesion = false;
   private fb: FormBuilder = inject(FormBuilder);
+  translate: TranslateService = inject(TranslateService);
+  botpressService = inject(BotpressService);
   constructor(private cdr: ChangeDetectorRef) {
     this.buscarForm = this.fb.group({
       Distrito: ['', Validators.required],
@@ -97,13 +100,15 @@ export class ConfirmarReserva {
       PresupuestoAvanzadaMin: ['', Validators.required],
       PresupuestoAvanzadaMax: ['', Validators.required],
     })
-    /* pagooos */
     this.pagoForm = this.fb.group({
-      // El radio 'yapeplin' estará seleccionado por defecto, como en la imagen
       metodoPago: ['yapeplin', Validators.required]
     });
   }
   ngOnInit(): void {
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
     const idAnfitrion = Number(this.route.snapshot.params['idAnfitrion']);
     const idEvento = Number(this.route.snapshot.params['idEvento']);
     this.cargarAnfitrion(idAnfitrion);
@@ -137,15 +142,17 @@ export class ConfirmarReserva {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -215,19 +222,22 @@ export class ConfirmarReserva {
   cargarAnfitrion(id: number): void {
     this.anfitrionService.listarPorId(id).subscribe({
       next: (data) => {
-        this.anfitrion = data;
-        this.anfitrion.foto = 'data:image/png;base64,' + this.anfitrion.foto;
-        console.log('Anfitrión cargado:', this.anfitrion);
         this.anfitrionNuevo = {
           ...data,
-          foto: data.foto?.split(',')[1] || data.foto
+          foto: data.foto ? data.foto : undefined
         };
+        this.anfitrion = data;
+        if (this.anfitrion.foto) {
+          this.anfitrion.foto = 'data:image/png;base64,' + this.anfitrion.foto;
+        } else {
+          this.anfitrion.foto = '/assets/Group%20633475.png';
+        }
+        console.log('Anfitrión cargado:', this.anfitrion);
       },
       error: (err) => {
         console.error('Error al cargar el anfitrión', err);
       }
     });
-
   }
   cargarEventos(id: number): void {
     this.eventoService.listarPorId(id).subscribe({
@@ -235,6 +245,11 @@ export class ConfirmarReserva {
         this.evento = data;
         console.log('Eventos cargados:', this.evento);
         this.cargarImagenesPorEvento(data.id!);
+        this.eventoService.calcularCantidadResenasPorEvento(data.id!).subscribe({
+          next: (data) => {
+            this.cantidadResenas = data;
+          }
+        });
       },
       error: (err) => {
         console.error('Error al cargar los eventos', err);
@@ -249,9 +264,14 @@ export class ConfirmarReserva {
             ...img,
             imagen: 'data:image/jpeg;base64,' + img.imagen
           }));
-          console.log('🖼️ Imágenes del evento cargadas:', this.imagenesEvento);
+          console.log('Imágenes del evento cargadas:', this.imagenesEvento);
         } else {
-          console.warn('⚠️ No se encontraron imágenes para el evento', idEvento);
+          this.imagenesEvento = [{
+            id: 0,
+            imagen: "/assets/Group%20633475.png",
+            evento: this.evento,
+          }];
+          console.warn('No se encontraron imágenes para el evento', idEvento);
         }
       },
       error: (err) => console.error(`Error al cargar imágenes del evento ${idEvento}:`, err)
@@ -358,6 +378,7 @@ export class ConfirmarReserva {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
@@ -387,18 +408,16 @@ export class ConfirmarReserva {
 
   volverAtras() {
     if (this.mostrarRecibo) {
-      this.mostrarRecibo = false; // Vuelve del recibo a las opciones de pago
+      this.mostrarRecibo = false;
     } else {
-      this.location.back(); // Vuelve de las opciones de pago a la página anterior
+      this.location.back();
     }
   }
 
   procesarPago() {
     if (this.pagoForm.valid) {
       console.log('Procesando pago con:', this.pagoForm.value.metodoPago);
-      // Simular pago exitoso y mostrar recibo
       this.mostrarRecibo = true;
-      /*metodo para el metodod e pago*/
       const metodo = this.pagoForm.value.metodoPago;
       switch (metodo) {
         case 'yapeplin':
@@ -411,7 +430,7 @@ export class ConfirmarReserva {
           this.metodoPagoSeleccionado = 'Transferencia interbancaria';
           break;
         default:
-          this.metodoPagoSeleccionado = 'Pago'; // Un valor por si acaso
+          this.metodoPagoSeleccionado = 'Pago';
       }
       const nuevoContrato: ContratoEvento = {
         anfitrion: this.anfitrionNuevo,
@@ -422,13 +441,13 @@ export class ConfirmarReserva {
       };
       this.contratoEventoService.eventoContratado(nuevoContrato).subscribe({
         next: (respuesta) => {
-          console.log('✅ ContratoEvento registrado correctamente:', respuesta);
+          console.log('ContratoEvento registrado correctamente:', respuesta);
           this.mostrarRecibo = true;
           this.pagoForm.reset({ metodoPago: 'yapeplin' });
           alert("Se realizó la operación con éxito.");
         },
         error: (error) => {
-          console.error('❌ Error al registrar el contratoEvento:', error);
+          console.error('Error al registrar el contratoEvento:', error);
           alert('Ocurrió un error al procesar el pago. Intente nuevamente.');
         }
       });

@@ -11,8 +11,6 @@ import {
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { startWith } from 'rxjs/operators';
-
-// Services & Models
 import { DistritoServices } from '../../services/distrito-services';
 import { AnfitrionServices } from '../../services/anfitrion-services';
 import { CiudadServices } from '../../services/ciudad-services';
@@ -21,7 +19,6 @@ import { EventoService } from '../../services/evento-services';
 import { ImagenEventoService } from '../../services/imagenEvento-services';
 import { ContratoEventoServices } from '../../services/contrato-evento-services';
 import { ResenaEventoServices } from '../../services/resena-evento-services';
-
 import { Distrito } from '../../model/distrito';
 import { Anfitrion } from '../../model/anfitrion';
 import { ImagenEvento } from '../../model/imagenEvento';
@@ -36,6 +33,9 @@ import {Mensaje} from '../../model/mensaje';
 import {MensajeServices} from '../../services/mensaje-services';
 import {Chat} from '../../model/chat';
 import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-historial-de-contratos',
@@ -43,18 +43,18 @@ import {ChatServices} from '../../services/chat-services';
     FormsModule,
     ReactiveFormsModule,
     RouterLink,
-    DatePipe
+    DatePipe,
+    TranslatePipe
   ],
   templateUrl: './historial-de-contratos.html',
   styleUrl: './historial-de-contratos.css',
 })
 export class HistorialDeContratos {
-  // Inyecciones
+  loginService: LoginService = inject(LoginService);
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
   private route = inject(Router);
   private router = inject(ActivatedRoute);
-
   proveedorService: ProveedorServices = inject(ProveedorServices);
   distritoService = inject(DistritoServices);
   ciudadService = inject(CiudadServices);
@@ -64,8 +64,9 @@ export class HistorialDeContratos {
   contratoEventoService = inject(ContratoEventoServices);
   anfitrionService = inject(AnfitrionServices);
   resenaEventoServices = inject(ResenaEventoServices);
-
-  // Datos
+  translate: TranslateService = inject(TranslateService);
+  botpressService: BotpressService = inject(BotpressService);
+  cantidadResenas: number;
   id: number = 0;
   anfitrion!: Anfitrion;
   distrito: Distrito[] = [];
@@ -84,50 +85,41 @@ export class HistorialDeContratos {
   activeChatId: number | null = null;
   activeChatName: string | null = null;
   activeChatAvatar: string | null = null;
+  activeChatTitle: string | null = null;
   mensajeTexto: string = '';
-
-  // Mapa de Imágenes y control de estado
   imagenesEvento: { [idEvento: number]: ImagenEvento[] } = {};
   indices: { [key: number]: number } = {};
   indicePrevio: { [key: number]: number } = {};
   intervalos: { [key: number]: any } = {};
-
-  // Formularios y UI
   buscarForm: FormGroup;
   buscarAvanzadaForm: FormGroup;
   historialForm!: FormGroup;
-
   mostrarFiltrosAvanzados = false;
   menuPerfilActivo = false;
   menuActivo = false;
   animando = false;
   mostrarCerrarSesion = false;
-
   constructor() {}
 
   ngOnInit(): void {
-    const idParam = this.router.snapshot.params['id'];
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
+    const idParam = this.router.snapshot.params['idProveedor'];
     this.id = Number(idParam);
-
-    // Cargar datos auxiliares
     this.cargarProveedor(this.id);
     this.cargarListasAuxiliares();
-
-    // Configurar formulario
     this.historialForm = this.fb.group({
       filtro: ['recientes']
     });
-
-    // SOLUCIÓN MAESTRA: Usamos 'startWith' para disparar la carga inicial
-    // como si fuera un filtro automático. Esto unifica la lógica.
     this.historialForm.get('filtro')?.valueChanges
       .pipe(
-        startWith('recientes') // <--- Esto fuerza la ejecución inmediata al cargar la página
+        startWith('recientes')
       )
       .subscribe(() => {
         this.cargarContratos(this.id);
       });
-
     setTimeout(() => {
       this.cargarContratos(this.id);
     });
@@ -152,15 +144,17 @@ export class HistorialDeContratos {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -246,9 +240,13 @@ export class HistorialDeContratos {
       next: (data) => {
         this.contratoEvento = data;
         console.log(`Contratos cargados (${filtro}):`, this.contratoEvento.length);
-
         this.contratoEvento.forEach(contrato => {
           if (contrato.evento && contrato.evento.id) {
+            this.eventoService.calcularCantidadResenasPorEvento(contrato.evento.id!).subscribe({
+              next: (data) => {
+                this.cantidadResenas = data;
+              }
+            });
             this.cargarImagenesPorEvento(contrato.evento.id);
           }
         });
@@ -261,13 +259,10 @@ export class HistorialDeContratos {
     this.imagenEventoService.listarPorIdEvento(idEvento).subscribe({
       next: (imagenes: ImagenEvento[]) => {
         if (!imagenes || imagenes.length === 0) {
-          // Asignamos array vacío para que el HTML sepa que ya cargó
           this.imagenesEvento = { ...this.imagenesEvento, [idEvento]: [] };
           this.cdr.detectChanges();
           return;
         }
-
-        // Normalización de Base64
         const normalizadas = imagenes.map(img => {
           const raw = (img as any).imagenEvento || img.imagen || '';
           let imagenFinal = '';
@@ -276,52 +271,35 @@ export class HistorialDeContratos {
           }
           return { ...img, imagen: imagenFinal };
         });
-
-        // Actualizamos el mapa de imágenes
-        // Usamos el spread (...) para forzar a Angular a detectar el cambio en el objeto
         this.imagenesEvento = {
           ...this.imagenesEvento,
           [idEvento]: normalizadas
         };
-
-        // Configuramos el índice inicial (Visible inmediatamente)
         if (this.indices[idEvento] === undefined) {
           this.indices[idEvento] = 0;
           this.indicePrevio[idEvento] = -1;
         }
-
-        // Forzamos la detección de cambios para pintar la primera imagen YA
         this.cdr.detectChanges();
-
-        // Arrancamos el carrusel
         this.iniciarCarrusel(idEvento);
       },
       error: (err) => console.error(`Error imágenes evento ${idEvento}:`, err),
     });
   }
-
   iniciarCarrusel(idEvento: number) {
     if (this.intervalos[idEvento]) {
       clearInterval(this.intervalos[idEvento]);
     }
-
     this.intervalos[idEvento] = window.setInterval(() => {
       const imgs = this.imagenesEvento[idEvento];
       if (!imgs || imgs.length <= 1) return;
-
       const total = imgs.length;
       const indiceActual = this.indices[idEvento];
       const indiceSiguiente = (indiceActual + 1) % total;
-
-      // Evitar animación doble en el salto del último al primero
       this.indicePrevio[idEvento] = indiceActual;
       this.indices[idEvento] = indiceSiguiente;
-
-      // Forzar Angular a pintar cambios
       this.cdr.detectChanges();
     }, 3000);
   }
-
   limpiarIntervalos() {
     for (const key in this.intervalos) {
       if (this.intervalos.hasOwnProperty(key)) {
@@ -330,7 +308,6 @@ export class HistorialDeContratos {
     }
     this.intervalos = {};
   }
-
   obtenerContratosSegunFiltro(id: number, filtro: string) {
     switch (filtro) {
       case 'antiguos': return this.contratoEventoService.historialContratosSegunProveedorPorFechaMasAntigua(id);
@@ -342,7 +319,6 @@ export class HistorialDeContratos {
       default: return this.contratoEventoService.historialContratosSegunProveedorPorFechaMasReciente(id);
     }
   }
-
   cargarProveedor(id: number): void {
     this.proveedorService.listarPorId(id).subscribe({
       next: (data) => {
@@ -354,13 +330,9 @@ export class HistorialDeContratos {
       error: (err) => console.error('Error al cargar proveedor', err)
     });
   }
-
-  // Helper para HTML
   obtenerImagenesPorEvento(idEvento: number): ImagenEvento[] {
     return this.imagenesEvento[idEvento] || [];
   }
-
-  // --- UI & MENU LOGIC ---
 
   toggleMenu() {
     if (this.animando) return;
@@ -420,6 +392,7 @@ export class HistorialDeContratos {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
 
   cancelarCerrarSesion(event: MouseEvent) {

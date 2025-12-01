@@ -1,5 +1,14 @@
-import {ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {CurrencyPipe, DatePipe, NgOptimizedImage} from "@angular/common";
+import {
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
+import {DatePipe} from "@angular/common";
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProveedorServices} from '../../services/proveedor-services';
@@ -24,15 +33,18 @@ import {Mensaje} from '../../model/mensaje';
 import {MensajeServices} from '../../services/mensaje-services';
 import {Chat} from '../../model/chat';
 import {ChatServices} from '../../services/chat-services';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {LoginService} from '../../services/login-service';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-reporte-proveedor',
   imports: [
-    NgOptimizedImage,
     RouterLink,
     FormsModule,
     ReactiveFormsModule,
     DatePipe,
+    TranslatePipe,
   ],
   templateUrl: './reporte-proveedores.html',
   styleUrl: './reporte-proveedores.css',
@@ -51,8 +63,9 @@ export class ReporteProveedores implements OnInit {
   imagenEventoService = inject(ImagenEventoService);
   anfitrionService = inject(AnfitrionServices);
   reporteProveedorService: ReporteProveedorServices = inject(ReporteProveedorServices);
-
-  // Datos
+  translate: TranslateService = inject(TranslateService);
+  loginService: LoginService = inject(LoginService);
+  botpressService: BotpressService = inject(BotpressService);
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -63,6 +76,7 @@ export class ReporteProveedores implements OnInit {
   activeChatId: number | null = null;
   activeChatName: string | null = null;
   activeChatAvatar: string | null = null;
+  activeChatTitle: string | null = null;
   mensajeTexto: string = '';
   id: number = 0;
   gananciaTotal: number = 0;
@@ -77,12 +91,10 @@ export class ReporteProveedores implements OnInit {
   resenaEvento: ResenaEvento[] = [];
   gananciaProveedor: GananciaProveedorDTO[] = [];
   proveedor: Proveedor;
-  // Mapa de Imágenes y control de estado
   imagenesEvento: { [idEvento: number]: ImagenEvento[] } = {};
   indices: { [key: number]: number } = {};
   indicePrevio: { [key: number]: number } = {};
   currentChartData: GananciaProveedorDTO[] = [];
-  // Formularios y UI
   buscarForm: FormGroup;
   buscarAvanzadaForm: FormGroup;
   historialForm!: FormGroup;
@@ -106,7 +118,11 @@ export class ReporteProveedores implements OnInit {
     Chart.register(...registerables);
   }
   ngOnInit(): void {
-    const idParam = this.router.snapshot.params['id'];
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
+    const idParam = this.router.snapshot.params['idProveedor'];
     this.id = Number(idParam);
 
     this.cargarProveedor(this.id);
@@ -115,7 +131,6 @@ export class ReporteProveedores implements OnInit {
       filtro: ['ultimomes'],
       tipoGrafico: ['line']
     });
-
     this.historialForm.get('filtro')!.valueChanges
       .pipe(
         startWith(this.historialForm.get('filtro')!.value)
@@ -124,11 +139,8 @@ export class ReporteProveedores implements OnInit {
         this.cargarDatosDelGrafico(valorFiltro);
       }
     });
-
-    // 5. Suscripción al tipo de GRÁFICO (esto solo redibuja)
     this.historialForm.get('tipoGrafico')!.valueChanges
       .subscribe(() => {
-        // Solo redibuja si ya tenemos datos
         if (this.currentChartData.length > 0) {
           this.renderizarGrafico();
         }
@@ -153,15 +165,17 @@ export class ReporteProveedores implements OnInit {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -230,10 +244,7 @@ export class ReporteProveedores implements OnInit {
   }
   cargarDatosDelGrafico(filtro: string): void {
     let servicioLlamado;
-
-    // Selecciona el endpoint del servicio basado en el filtro
     switch (filtro) {
-      // ... (tu switch está bien)
       case 'ultimomes':
         servicioLlamado = this.reporteProveedorService.reporteUltimoMes(this.id);
         break;
@@ -252,48 +263,31 @@ export class ReporteProveedores implements OnInit {
 
     servicioLlamado.subscribe({
       next: (data) => {
-        // === LA CORRECCIÓN ESTÁ AQUÍ ===
-
-        // 1. Guarda los datos en la variable de la clase
         this.currentChartData = data;
-
-        // 2. Llama a renderizar (ahora sí, sin argumentos)
         this.renderizarGrafico();
       },
       error: (err) => {
         console.error('Error al cargar datos del reporte:', err);
-        this.currentChartData = []; // Limpia en caso de error
-        this.renderizarGrafico(); // Dibuja un gráfico vacío
+        this.currentChartData = [];
+        this.renderizarGrafico();
       }
     });
   }
   renderizarGrafico(): void {
-    // Destruye el gráfico anterior
     if (this.chart) {
       this.chart.destroy();
     }
-
-    // Obtiene los datos y el tipo de gráfico
     const data = this.currentChartData;
     const tipoGrafico = this.historialForm.get('tipoGrafico')?.value || 'line';
-
-    // Procesa los KPIs
     this.procesarKPIs(data);
-
-    // Prepara etiquetas y valores
     const labels = data.map(d => `${this.nombresMeses[d.mes - 1]} ${d.anio}`);
     const valores = data.map(d => d.ganancia);
-
-    let config: ChartConfiguration; // Configuración universal
-
-    // 7. Genera la configuración específica
+    let config: ChartConfiguration;
     if (tipoGrafico === 'pie') {
       config = this.getPieConfig(labels, valores);
     } else {
       config = this.getLineBarConfig(tipoGrafico, labels, valores);
     }
-
-    // 8. Crea el gráfico
     this.chart = new Chart('graficoGanancias', config);
   }
   procesarKPIs(data: GananciaProveedorDTO[]): void {
@@ -305,18 +299,13 @@ export class ReporteProveedores implements OnInit {
       this.montoMayorGanancia = 0;
       return;
     }
-
     this.gananciaTotal = data.reduce((sum, item) => sum + item.ganancia, 0);
-
     const maxGanancia = Math.max(...data.map(item => item.ganancia));
     const minGanancia = Math.min(...data.map(item => item.ganancia));
-
     const allMaxItems = data.filter(item => item.ganancia === maxGanancia);
     const allMinItems = data.filter(item => item.ganancia === minGanancia);
-
     const maxMonthStrings = allMaxItems.map(item => `${this.nombresMeses[item.mes - 1]} ${item.anio}`);
     const minMonthStrings = allMinItems.map(item => `${this.nombresMeses[item.mes - 1]} ${item.anio}`);
-
     this.mesMayorGanancia = this.formatarMeses(maxMonthStrings);
     this.montoMayorGanancia = maxGanancia;
     this.mesMenorGanancia = this.formatarMeses(minMonthStrings);
@@ -347,7 +336,7 @@ export class ReporteProveedores implements OnInit {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: { // <-- Los gráficos de línea/barra SÍ tienen escalas
+        scales: {
           y: {
             beginAtZero: true,
             ticks: {
@@ -389,27 +378,24 @@ export class ReporteProveedores implements OnInit {
     return {
       type: 'pie',
       data: {
-        labels: labels, // Los meses
+        labels: labels,
         datasets: [{
           label: 'Ganancias',
           data: valores,
-          backgroundColor: this.chartColors.slice(0, valores.length), // Asigna un color a cada "quesito"
+          backgroundColor: this.chartColors.slice(0, valores.length),
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        // Los gráficos de torta NO tienen escalas (scales)
         plugins: {
           tooltip: {
             callbacks: {
-              // Tooltip personalizado para mostrar porcentaje
               label: (context) => {
                 const total = context.chart.data.datasets[0].data.reduce((a, b) => (a as number) + (b as number), 0) as number;
                 const value = context.parsed as number;
                 const percentage = ((value / total) * 100).toFixed(1);
                 const monto = 'S/ ' + value.toLocaleString('es-PE');
-
                 return `${context.label}: ${monto} (${percentage}%)`;
               }
             }
@@ -475,15 +461,55 @@ export class ReporteProveedores implements OnInit {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
-
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
   }
-
   cerrarSesion() {
     this.mostrarCerrarSesion = false;
   }
+  @HostListener('document:click', ['$event'])
+  onClickFuera(event: MouseEvent) {
+    if (this.mostrarCerrarSesion) return;
+
+    const target = event.target as HTMLElement;
+    const menu = document.querySelector('.menu-hamburguesa-text');
+    const boton = document.querySelector('.menu-hamburguesa-boton');
+
+    if (this.menuActivo && menu && boton) {
+
+      const clickEnMenu = menu.contains(target);
+      const clickEnBoton = boton.contains(target);
+
+      if (!clickEnMenu && !clickEnBoton) {
+        this.cerrarMenu(menu, boton);
+      }
+    }
+
+    const menuPerfil = document.querySelector('.encabezado-perfil-menu');
+    const containerPerfil = document.querySelector('.encabezado-perfil-container');
+
+    if (this.menuPerfilActivo && menuPerfil && containerPerfil) {
+      const clickEnMenuP = menuPerfil.contains(target);
+      const clickEnBotonP = containerPerfil.contains(target);
+
+      if (!clickEnMenuP && !clickEnBotonP) {
+        this.animando = true;
+        this.menuPerfilActivo = false;
+        menuPerfil.classList.remove('activo');
+        menuPerfil.classList.add('saliendo');
+        setTimeout(() => (this.animando = false), 600);
+      }
+    }
+  }
+  cerrarMenu(menu: Element, boton: Element) {
+    menu.classList.remove('activo');
+    menu.classList.add('saliendo');
+    boton.classList.remove('activo');
+    this.menuActivo = false;
+  }
+
 }

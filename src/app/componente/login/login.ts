@@ -1,11 +1,11 @@
-import {Component, inject, signal} from '@angular/core';
-import {Router, RouterLink, RouterModule, RouterOutlet} from '@angular/router';
+import {Component, inject} from '@angular/core';
+import {Router, RouterModule} from '@angular/router';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {AnfitrionServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/anfitrion-services';
-import {ProveedorServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/proveedor-services';
-import {LoginService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/login-service';
-import {RequestDto} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/request-dto';
-import {ResponseDto} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/response-dto';
+import {AnfitrionServices} from '../../services/anfitrion-services';
+import {ProveedorServices} from '../../services/proveedor-services';
+import {LoginService} from '../../services/login-service';
+import {RequestDto} from '../../model/request-dto';
+import {ResponseDto} from '../../model/response-dto';
 
 @Component({
   selector: 'app-login',
@@ -35,7 +35,8 @@ export class Login {
       localStorage.clear();
       console.log("Token y items eliminados");
     }
-    this.loadForm()
+    this.loadForm();
+    localStorage.removeItem('token');
   }
   loadForm(): void {
     console.log("Form");
@@ -55,7 +56,7 @@ export class Login {
       this.loginService.login(req).subscribe(data => {
         localStorage.setItem("token", data.jwt);
         localStorage.setItem("rol", "ROLE_ADMIN");
-        this.router.navigate(['/administrador']);
+        this.router.navigate(['/administrador-home']);
       });
     }
     const requestDto = new RequestDto();
@@ -88,4 +89,5 @@ export class Login {
       }
     });
   }
+
 }

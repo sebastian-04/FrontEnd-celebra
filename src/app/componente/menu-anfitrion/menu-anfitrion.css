@@ -877,25 +877,23 @@ body.modal-abierto {
   opacity: 0;
   backface-visibility: hidden;
   transform: rotateY(90deg);
-  transform-origin: right center; /* Pivot en el borde derecho */
+  transform-origin: right center;
   transition:
     transform 0.9s cubic-bezier(0.22, 0.61, 0.36, 1),
     opacity 0.5s ease;
 }
 
-/* Imagen que entra (se abre como página llegando) */
 .carrusel-img.activa {
   opacity: 1;
   transform: rotateY(0deg);
-  transform-origin: right center; /* Mantiene el pivot al entrar */
+  transform-origin: right center;
   z-index: 2;
 }
 
-/* Imagen que sale (se dobla hacia atrás como página que se va) */
 .carrusel-img.saliente {
   opacity: 1;
   transform: rotateY(-90deg);
-  transform-origin: left center; /* Pivot opuesto */
+  transform-origin: left center;
   z-index: 1;
 }
 .img-eventos {
@@ -910,7 +908,7 @@ body.modal-abierto {
   bottom: 20px;
   right: 20px;
   width: 360px;
-  z-index: 1000;
+  z-index: 998;
   display: flex;
   flex-direction: column;
 }
@@ -1216,4 +1214,15 @@ body.modal-abierto {
   color: #999;
   text-align: center;
   margin: 15px 0 5px 0;
+}
+.chat-name-container{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.chat-title {
+  font-weight: 500;
+  color: #999;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
 }

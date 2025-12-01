@@ -1,0 +1,82 @@
+<app-administrador-header></app-administrador-header>
+<app-administrador-nav-bar></app-administrador-nav-bar>
+@if (!edicion){
+  <mat-toolbar>
+    <mat-toolbar-row>
+        <button mat-raised-button [class.btn-activo]="entidad === 'TipoEvento'" (click)="seleccionar('TipoEvento')">Tipos de Eventos</button>
+        <button mat-raised-button [class.btn-activo]="entidad === 'Especializacion'" (click)="seleccionar('Especializacion')">Especializaciones</button>
+        <button mat-raised-button [class.btn-activo]="entidad === 'Ciudad'" (click)="seleccionar('Ciudad')">Ciudades</button>
+        <button mat-raised-button [class.btn-activo]="entidad === 'Distrito'" (click)="seleccionar('Distrito')">Distritos</button>
+    </mat-toolbar-row>
+  </mat-toolbar>
+}
+<mat-card class="contenido">
+  @if (entidad == "TipoEvento"){
+    <mat-card-title>Formulario de Tipo de Eventos</mat-card-title>
+  } @else if (entidad == "Especializacion"){
+    <mat-card-title>Formulario de Especializacion</mat-card-title>
+  } @else if (entidad == "Ciudad"){
+    <mat-card-title>Formulario de Ciudad</mat-card-title>
+  } @else if (entidad == "Distrito"){
+    <mat-card-title>Formulario de Distrito</mat-card-title>
+  }
+    <mat-card-content>
+      @if (entidad == "TipoEvento"){
+        <form [formGroup]="formTipoEvento" (ngSubmit)="ngSubmit()" class="formulario">
+          <mat-form-field appearance="fill">
+            <mat-label>Nombre del Tipo de Evento</mat-label>
+            <input matInput formControlName="nombre" placeholder="Escriba el nombre del tipo de evento a registrar" required>
+          </mat-form-field>
+          @if (!edicion){
+            <button mat-raised-button type="submit">Registrar</button>
+          } @else {
+            <button mat-raised-button type="submit">Actualizar</button>
+          }
+        </form>
+      } @else if (entidad == "Especializacion"){
+        <form [formGroup]="formEspecializacion" (ngSubmit)="ngSubmit()" class="formulario">
+          <mat-form-field appearance="fill">
+            <mat-label>Nombre de la Especialización</mat-label>
+            <input matInput formControlName="nombre" placeholder="Escriba el nombre de la especialización a registrar" required>
+          </mat-form-field>
+          @if (!edicion){
+            <button mat-raised-button type="submit">Registrar</button>
+          } @else {
+            <button mat-raised-button type="submit">Actualizar</button>
+          }
+        </form>
+      } @else if (entidad == "Ciudad"){
+        <form [formGroup]="formCiudad" (ngSubmit)="ngSubmit()" class="formulario">
+          <mat-form-field appearance="fill">
+            <mat-label>Nombre de la Ciudad</mat-label>
+            <input matInput formControlName="nombre" placeholder="Escriba el nombre de la ciudad a registrar" required>
+          </mat-form-field>
+          @if (!edicion){
+            <button mat-raised-button type="submit">Registrar</button>
+          } @else {
+            <button mat-raised-button type="submit">Actualizar</button>
+          }
+        </form>
+      } @else if (entidad == "Distrito"){
+        <form [formGroup]="formDistrito" (ngSubmit)="ngSubmit()" class="formulario">
+          <mat-form-field appearance="fill">
+            <mat-label>Nombre del Distrito</mat-label>
+            <input matInput formControlName="nombre" placeholder="Escriba el nombre del distrito a registrar" required>
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Nombre de la Ciudad</mat-label>
+            <mat-select formControlName="ciudad" placeholder="Seleccione la ciudad asignada al distrito" required>
+              @for (ci of ciudad; track ci){
+                <mat-option [value]="ci">{{ci.nombre}}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          @if (!edicion){
+            <button mat-raised-button type="submit">Registrar</button>
+          } @else {
+            <button mat-raised-button type="submit">Actualizar</button>
+          }
+        </form>
+      }
+    </mat-card-content>
+</mat-card>

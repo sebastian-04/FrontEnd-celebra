@@ -11,15 +11,12 @@ nav {
   width: 100%;
 
 }
-/* Con esto se incluye ambos li para no incluirlo en cada uno */
 nav ul li{
   list-style: none;
 }
-/* Se separa un poco el "Conviertete en un anfitrión" de la parte final derecha*/
 nav #becameAnAnfitrion li {
   padding-right: 9em;
 }
-/* Se le coloca el tamaño de acuerdo al Figma */
 nav #becameAnAnfitrion a{
   font-size: 16px;
   color: black;
@@ -32,15 +29,15 @@ nav {
   align-items: center;
   width: 100%;
 }
-/* Con esto se incluye ambos li para no incluirlo en cada uno */
+
 nav ul li{
   list-style: none;
 }
-/* Se separa un poco el "Conviertete en un anfitrión" de la parte final derecha*/
+
 nav #becameAnAnfitrion li {
   padding-right: 9em;
 }
-/* Se le coloca el tamaño de acuerdo al Figma */
+
 nav #becameAnAnfitrion a{
   font-size: 16px;
   color: black;
@@ -56,7 +53,7 @@ nav #becameAnAnfitrion a{
   height: 100%;
 }
 #SelectorSection {
-  padding: 80px 145px 80px 145px; /*Arriba, Derecha, Abajo, Izquierda*/
+  padding: 80px 145px 80px 145px;
 }
 #SelectorSection h1 {
   align-content: flex-start;
@@ -105,12 +102,12 @@ nav #becameAnAnfitrion a{
 
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Centra horizontalmente */
-  align-items: center;   /* Centra verticalmente */
+  justify-content: center;
+  align-items: center;
   margin-top: 1.5rem;
 }
 #ChooseTheRol #RegisterAsAnfitrion p {
-  padding: 20px 53px 20px 53px; /* Arriba, Derecha, Abajo, Izquierda */
+  padding: 20px 53px 20px 53px;
   background: #E4CCFF;
   border: 1px solid #D577FF
 }
@@ -137,12 +134,12 @@ nav #becameAnAnfitrion a{
 
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Centra horizontalmente */
-  align-items: center;   /* Centra verticalmente */
+  justify-content: center;
+  align-items: center;
   margin-top: 1.5rem;
 }
 #ChooseTheRol #RegisterAsProovedor p {
-  padding: 20px 53px 20px 53px; /* Arriba, Derecha, Abajo, Izquierda */
+  padding: 20px 53px 20px 53px;
   background: #E4CCFF;
   border: 1px solid #D577FF;
   border-radius: 10px;

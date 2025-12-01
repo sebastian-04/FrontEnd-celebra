@@ -1,25 +1,27 @@
-import {ChangeDetectorRef, Component, ElementRef, inject, ViewChild} from '@angular/core';
-import {CalendarComponent} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/componente/calendario/calendar';
+import {ChangeDetectorRef, Component, ElementRef, HostListener, inject, ViewChild} from '@angular/core';
 import {FormBuilder, FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {Evento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/evento';
-import {ImagenEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/imagenEvento';
-import {TipoEvento} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/tipoEvento';
-import {Distrito} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/distrito';
-import {Ciudad} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/ciudad';
-import {DistritoServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/distrito-services';
-import {CiudadServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/ciudad-services';
-import {ImagenEventoService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/imagenEvento-services';
-import {EventoService} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/evento-services';
-import {ProveedorServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/proveedor-services';
-import {TipoEventoServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/tipo-evento-services';
+import {Evento} from '../../model/evento';
+import {ImagenEvento} from '../../model/imagenEvento';
+import {TipoEvento} from '../../model/tipoEvento';
+import {Distrito} from '../../model/distrito';
+import {Ciudad} from '../../model/ciudad';
+import {DistritoServices} from '../../services/distrito-services';
+import {CiudadServices} from '../../services/ciudad-services';
+import {ImagenEventoService} from '../../services/imagenEvento-services';
+import {EventoService} from '../../services/evento-services';
+import {ProveedorServices} from '../../services/proveedor-services';
+import {TipoEventoServices} from '../../services/tipo-evento-services';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {Proveedor} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/proveedor';
+import {Proveedor} from '../../model/proveedor';
 import {debounceTime, fromEvent} from 'rxjs';
 import {DatePipe} from '@angular/common';
-import {Mensaje} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/mensaje';
-import {MensajeServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/mensaje-services';
-import {Chat} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/model/chat';
-import {ChatServices} from '../../../../../../../Downloads/Celebra FrontEnd - copia/Celebra FrontEnd - copia/src/app/services/chat-services';
+import {Mensaje} from '../../model/mensaje';
+import {MensajeServices} from '../../services/mensaje-services';
+import {Chat} from '../../model/chat';
+import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-listar-evento',
@@ -28,11 +30,14 @@ import {ChatServices} from '../../../../../../../Downloads/Celebra FrontEnd - co
     ReactiveFormsModule,
     RouterLink,
     DatePipe,
+    TranslatePipe,
   ],
   templateUrl: './listar-evento.html',
   styleUrl: './listar-evento.css',
 })
 export class ListarEvento {
+  activeChatTitle: string | null = null;
+  loginService: LoginService = inject(LoginService);
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -75,10 +80,16 @@ export class ListarEvento {
   opacidadSuperior = 0;
   opacidadInferior = 0;
   private fb: FormBuilder = inject(FormBuilder);
+  translate: TranslateService = inject(TranslateService);
+  botpressService = inject(BotpressService);
   constructor(private cdr: ChangeDetectorRef) {}
   ngOnInit(): void {
-    const idProveedor = Number(this.route.snapshot.params['id']);
-    console.log('🟩 ID de proveedor detectado:', idProveedor);
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
+    const idProveedor = Number(this.route.snapshot.params['idProveedor']);
+    console.log('ID de proveedor detectado:', idProveedor);
     if (!idProveedor) {
       alert('ID de proveedor inválido');
       return;
@@ -124,15 +135,17 @@ export class ListarEvento {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -299,6 +312,7 @@ export class ListarEvento {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
 
   abrirModalCerrarSesion() {
@@ -314,13 +328,9 @@ export class ListarEvento {
   iniciarCarrusel(idEvento: number) {
     const imagenes = this.obtenerImagenesPorEvento(idEvento);
     if (!imagenes || imagenes.length <= 1) return;
-
-    // Inicialización limpia (sin animación)
     this.indices[idEvento] = 0;
     this.indicePrevio[idEvento] = -1;
     this.haIniciadoAnimacion[idEvento] = true;
-
-    // Sincronizar arranque en un solo tiempo global
     if (!this.intervalos['GLOBAL']) {
       this.intervalos['GLOBAL'] = setInterval(() => {
         this.actualizarCarruseles();
@@ -342,11 +352,8 @@ export class ListarEvento {
     for (const idEvento in this.indices) {
       const imagenes = this.obtenerImagenesPorEvento(Number(idEvento));
       if (!imagenes || imagenes.length <= 1) continue;
-
       const actual = this.indices[idEvento];
       const siguiente = (actual + 1) % imagenes.length;
-
-      // Desde la segunda transición → animación normal
       this.indicePrevio[idEvento] = actual;
       this.indices[idEvento] = siguiente;
     }
@@ -359,18 +366,15 @@ export class ListarEvento {
   getImagenSrc(base64: string): string {
     if (!base64) return '/assets/placeholder.png';
     const trimmed = base64.trim();
-    // Si el string base64 comienza con el encabezado 'data:image', ya está completo
     if (trimmed.startsWith('data:image')) {
       return trimmed;
     }
-    // Detectar el tipo de imagen según los primeros caracteres del base64
     if (trimmed.startsWith('/9j/')) {
       return 'data:image/jpeg;base64,' + trimmed; // JPG
     }
     if (trimmed.startsWith('iVBOR')) {
       return 'data:image/png;base64,' + trimmed; // PNG
     }
-    // Por defecto, asume JPG
     return 'data:image/jpeg;base64,' + trimmed;
   }
   onScroll() {
@@ -392,7 +396,6 @@ export class ListarEvento {
         alturaAcumulada += elemento.offsetHeight + 20;
       });
       this.alturaTotalContenido = alturaAcumulada;
-      console.log('📏 Altura total del contenido:', this.alturaTotalContenido, 'px');
     }
   }
   actualizarPosicionBarra() {
@@ -459,6 +462,14 @@ export class ListarEvento {
   }
   abrirModalEliminar(id: number) {
     this.eventoSeleccionadoId = id;
+    this.eventoService.listarPorId(this.eventoSeleccionadoId).subscribe({
+      next: (data) => {
+        if (data.estado == "En curso"){
+          this.cerrarModalEliminar();
+          alert("No puedes eliminar un evento que tenga un contrato activo con un anfitrión.");
+        }
+      }
+    });
     this.mostrarModalEliminar = true;
   }
   cerrarModalEliminar() {
@@ -467,20 +478,54 @@ export class ListarEvento {
   confirmarEliminar() {
     if (!this.eventoSeleccionadoId) return;
     this.eventoService.eliminar(this.eventoSeleccionadoId).subscribe({
-      next: () => {
-        console.log("✅ Evento eliminado:", this.eventoSeleccionadoId);
+      next: (data) => {
+        console.log("Evento eliminado:", this.eventoSeleccionadoId);
         this.evento = this.evento.filter(e => e.id !== this.eventoSeleccionadoId);
         this.imagenesEvento = this.imagenesEvento.filter(img => img.evento.id !== this.eventoSeleccionadoId);
         this.mostrarModalEliminar = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error("❌ Error al eliminar evento:", err);
+        console.error("Error al eliminar evento:", err);
         alert("No se pudo eliminar el evento.");
       }
     });
   }
   irEditarEvento(idProveedor: number, idEvento: number) {
-    this.router.navigate(['/crear-evento/evento', idProveedor, idEvento]);
+    this.eventoService.listarPorId(idEvento).subscribe( data => {
+      if (data.estado == "En curso"){
+        alert("No puedes modificar un evento que tenga un contrato activo con un anfitrión.");
+        return;
+      } else{
+        this.router.navigate(['/crear-evento/evento', idProveedor, idEvento]);
+      }
+    })
+  }
+  @HostListener('document:click', ['$event'])
+  onClickFuera(event: MouseEvent) {
+    if (this.mostrarCerrarSesion) return;
+    const target = event.target as HTMLElement;
+    const menu = document.querySelector('.menu-hamburguesa-text');
+    const boton = document.querySelector('.menu-hamburguesa-boton');
+    if (this.menuActivo && menu && boton) {
+      const clickEnMenu = menu.contains(target);
+      const clickEnBoton = boton.contains(target);
+      if (!clickEnMenu && !clickEnBoton) {
+        this.cerrarMenu(menu, boton);
+      }
+    }
+    const menuPerfil = document.querySelector('.encabezado-perfil-menu');
+    const containerPerfil = document.querySelector('.encabezado-perfil-container');
+    if (this.menuPerfilActivo && menuPerfil && containerPerfil) {
+      const clickEnMenuP = menuPerfil.contains(target);
+      const clickEnBotonP = containerPerfil.contains(target);
+      if (!clickEnMenuP && !clickEnBotonP) {
+        this.animando = true;
+        this.menuPerfilActivo = false;
+        menuPerfil.classList.remove('activo');
+        menuPerfil.classList.add('saliendo');
+        setTimeout(() => (this.animando = false), 600);
+      }
+    }
   }
 }

@@ -1011,3 +1011,14 @@ input::placeholder {
   opacity: 1;
   transform: translateX(0);
 }
+.titulo{
+  font-family: 'Inter', sans-serif;
+  font-size: 4rem;
+  color: #1e1e1e;
+  text-align: center;
+  margin-top: 13%;
+  margin-left: 5%;
+  font-weight: 800;
+  margin-bottom: -11rem;
+  justify-content: center;
+}

@@ -6,7 +6,7 @@
     <form [formGroup]="buscarForm" class="encabezado-buscar-formulario">
       <div class="campo-donde">
         <select id="Distrito" formControlName="Distrito" required>
-          <option value="" disabled selected>Seleccione el distrito</option>
+          <option value="" disabled selected>{{ 'SELECT_DISTRICT' | translate }}</option>
           @for (c of distrito; track c.id) {
             <option [value]="c.id">{{ c.nombre }}</option>
           }
@@ -14,14 +14,14 @@
       </div>
       <div class="campo-aforo">
         <input id="Aforo" formControlName="Aforo" type="number" required>
-        <label for="Aforo">Aforo</label>
+        <label for="Aforo">{{ 'CAPACITY' | translate }}</label>
       </div>
       <div class="campo-fecha">
         <input id="Fecha" formControlName="Fecha" type="date" required>
-        <label for="Fecha">Fecha</label>
+        <label for="Fecha">{{ 'DATE' | translate }}</label>
         <div class="campo-fecha-buscar" [class.invalido]="buscarForm.invalid">
           <a href="#">
-            <button type="submit" [disabled]="buscarForm.invalid" (click)="buscar()"><img ngSrc="/assets/search-13-xxl%201.png" width="22" height="22" class="buscar-img" [class.invalido]="buscarForm.invalid"></button>
+            <button type="submit" [disabled]="buscarForm.invalid" (click)="buscar()"><img src="/assets/search-13-xxl%201.png" width="22" height="22" class="buscar-img" [class.invalido]="buscarForm.invalid"></button>
           </a>
         </div>
       </div>
@@ -36,17 +36,17 @@
     @if (mostrarFiltrosAvanzados){
       <form [formGroup]="buscarAvanzadaForm" class="encabezado-buscar-avanzada-cuadro" (click)="$event.stopPropagation()">
         <div class="encabezado-buscar-avanzada-cuadro-inicio">
-          <h3 class="encabezado-buscar-avanzada-cuadro-h3">Filtros Avanzados</h3>
+          <h3 class="encabezado-buscar-avanzada-cuadro-h3">{{ 'ADVANCED_FILTERS' | translate }}</h3>
           <img src="/assets/X.png" width="29" height="28" class="X" (click)="toggleFiltrosAvanzados()">
         </div>
         <div class="filtros-avanzados">
           <div class="filtros-avanzados-ubicacion">
             <div class="filtros-avanzados-ubicacion-1">
-              <h3>Ubicación</h3>
+              <h3>{{ 'LOCATION' | translate }}</h3>
               <img src="/assets/location_on.png" width="14" height="14">
             </div>
             <select id="UbicacionAvanzada" formControlName="UbicacionAvanzada" required>
-              <option value="" disabled selected>Seleccione el distrito</option>
+              <option value="" disabled selected>{{ 'SELECT_DISTRICT' | translate }}</option>
               @for (c of distrito; track c.id) {
                 <option [value]="c.id">{{ c.nombre }}</option>
               }
@@ -54,11 +54,11 @@
           </div>
           <div class="filtros-avanzados-tipoevento">
             <div class="filtros-avanzados-tipoevento-1">
-              <h3>Tipo de evento</h3>
+              <h3>{{ 'EVENT_TYPE' | translate }}</h3>
               <img src="/assets/icononpng.png" width="10" height="5">
             </div>
             <select id="TipoEventoAvanzada" formControlName="TipoEventoAvanzada" required>
-              <option value="" disabled selected>Seleccione el tipo de evento</option>
+              <option value="" disabled selected>{{ 'SELECT_EVENT_TYPE' | translate }}</option>
               @for (c of tipoevento; track c.id) {
                 <option [value]="c.id">{{ c.nombre }}</option>
               }
@@ -66,28 +66,28 @@
           </div>
           <div class="filtros-avanzados-fechainicio">
             <div class="filtros-avanzados-fechainicio-1">
-              <h3>Fecha inicio</h3>
+              <h3>{{ 'START_DATE' | translate }}</h3>
               <img src="/assets/Icononcalendar1.png" width="15" height="16">
             </div>
             <input formControlName="FechaInicioAvanzada" type="date" required>
           </div>
           <div class="filtros-avanzados-fechafin">
             <div class="filtros-avanzados-fechafin-1">
-              <h3>Fecha fin</h3>
+              <h3>{{ 'END_DATE' | translate }}</h3>
               <img src="/assets/Icononcalendar2.png" width="15" height="16">
             </div>
             <input formControlName="FechaFinAvanzada" type="date" required>
           </div>
           <div class="filtros-avanzados-aforo">
             <div class="filtros-avanzados-aforo-1">
-              <h3>Aforo Mínimo</h3>
+              <h3>{{ 'MIN_CAPACITY' | translate }}</h3>
               <img src="/assets/icononperson.png" width="12" height="12">
             </div>
             <input formControlName="AforoAvanzadaMin" type="number" required>
           </div>
           <div class="filtros-avanzados-aforo">
             <div class="filtros-avanzados-aforo-1">
-              <h3>Aforo Máximo</h3>
+              <h3>{{ 'MAX_CAPACITY' | translate }}</h3>
               <img src="/assets/icononperson.png" width="12" height="12">
             </div>
             <input formControlName="AforoAvanzadaMax" type="number" required>
@@ -95,36 +95,36 @@
           <div class="empujar">
             <div class="filtros-avanzados-presupuesto">
               <div class="filtros-avanzados-presupuesto-1">
-                <h3>Presupuesto Mínimo</h3>
+                <h3>{{ 'MIN_BUDGET' | translate }}</h3>
                 <img src="/assets/Iconondolar.png" width="9" height="16">
               </div>
               <input formControlName="PresupuestoAvanzadaMin" type="number" required>
             </div>
             <div class="filtros-avanzados-presupuesto">
               <div class="filtros-avanzados-presupuesto-1">
-                <h3>Presupuesto Máximo</h3>
-                <img ngSrc="/assets/Iconondolar.png" width="9" height="16">
+                <h3>{{ 'MAX_BUDGET' | translate }}</h3>
+                <img src="/assets/Iconondolar.png" width="9" height="16">
               </div>
               <input formControlName="PresupuestoAvanzadaMax" type="number" required>
             </div>
           </div>
         </div>
-        <button type="submit" [disabled]="buscarAvanzadaForm.invalid" (click)="buscarAvanzada()" class="boton-buscar">Buscar</button>
+        <button type="submit" [disabled]="buscarAvanzadaForm.invalid" (click)="buscarAvanzada()" class="boton-buscar">{{ 'SEARCH' | translate }}</button>
       </form>
     }
   </div>
-  <a class="encabezado-h3" [routerLink]="['/register-proveedor']">Conviertete en un proveedor</a>
+  <a class="encabezado-h3" [routerLink]="['/register-proveedor']">{{ 'BECOME_PROVIDER' | translate }}</a>
   <div class="encabezado-perfil">
     <img [src]="anfitrion.foto" width="60" height="60">
     <div class="encabezado-perfil-container" (click)="toggleMenuPerfil()">
-      <h3 class="encabezado-perfil-container-1">inicio de sesión como:</h3>
+      <h3 class="encabezado-perfil-container-1">{{ 'LOGGED_IN_AS' | translate }}</h3>
       <h3 class="encabezado-perfil-container-2">{{anfitrion.email}}</h3>
     </div>
     <div class="encabezado-perfil-menu" [class.activo]="menuPerfilActivo">
       <nav class="encabezado-perfil-menu-nav">
         <ul class="encabezado-perfil-menu-ul">
-          <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', anfitrion.id, anfitrion.role?.name]">Ver mi perfil</a></li>
-          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+          <li><a class="Vermiperfil-a" [routerLink]="['/ver-mi-perfil', anfitrion.id, anfitrion.role?.name]">{{ 'SEE_PROFILE' | translate }}</a></li>
+          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">{{ 'LOGOUT' | translate }}</a></li>
         </ul>
       </nav>
     </div>
@@ -133,231 +133,226 @@
 <body>
 <section class="menu-hamburguesa">
   <div class="menu-hamburguesa-boton" [class.desactivado]="mostrarFiltrosAvanzados" (click)="toggleMenu()">
-    <img ngSrc="/assets/Menu.png" width="41" height="41" class="menu-hamburguesa-img">
+    <img src="/assets/Menu.png" width="41" height="41" class="menu-hamburguesa-img">
   </div>
   <div class="overlay" [class.activo]="menuActivo"></div>
   <nav class="menu-hamburguesa-text">
     <ul class="menu-hamburguesa-text-1">
-      <li><a class="EventosEnCurso" [routerLink]="['/eventos-curso', anfitrion.id]">Eventos en curso</a></li>
-      <li><a class="HistorialDeEventos" [routerLink]="['/historial-eventos', anfitrion.id]">Historial de eventos</a></li>
-      <li><a class="ChatearConLaIA" href="#">Chatear con la IA</a></li>
-      <li><a class="CentroDeAyuda" [routerLink]="['/centro-ayuda', anfitrion.id, anfitrion.role?.name]">Centro de ayuda</a></li>
+      <li><a class="EventosEnCurso" [routerLink]="['/eventos-curso', anfitrion.id]">{{ 'CURRENT_EVENTS' | translate }}</a></li>
+      <li><a class="HistorialDeEventos" [routerLink]="['/historial-eventos', anfitrion.id]">{{ 'EVENT_HISTORY' | translate }}</a></li>
+      <li><a class="CentroDeAyuda" [routerLink]="['/centro-ayuda', anfitrion.id, anfitrion.role?.name]">{{ 'HELP_CENTER' | translate }}</a></li>
     </ul>
     <ul class="menu-hamburguesa-text-2">
-      <li><a class="Configuracion" [routerLink]="['/configuracion', anfitrion.id, anfitrion.role?.name]">Configuración</a></li>
-      <li><a class="CerrarSesion" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
-      <li><a class="legal" [routerLink]="['/legal', anfitrion.id, anfitrion.role?.name]">Legal</a></li>
+      <li><a class="Configuracion" [routerLink]="['/configuracion', anfitrion.id, anfitrion.role?.name]">{{ 'SETTINGS' | translate }}</a></li>
+      <li><a class="CerrarSesion" (click)="abrirModalCerrarSesion()">{{ 'LOGOUT' | translate }}</a></li>
+      <li><a class="legal" [routerLink]="['/legal', anfitrion.id, anfitrion.role?.name]">{{ 'LEGAL' | translate }}</a></li>
     </ul>
   </nav>
 </section>
 <section class="detalle-container">
   <div class="scroll-wrapper">
-  @if (!mostrarRecibo) {
-    <div class="reserva-wrapper">
+    @if (!mostrarRecibo) {
+      <div class="reserva-wrapper">
 
-      <main class="columna-pago">
+        <main class="columna-pago">
 
+          <div class="reserva-header">
+            <button class="btn-volver" (click)="volverAtras()">
+              <img src="/assets/back.png" width="44" height="44" [alt]="'BACK_ALT' | translate">
+            </button>
+            <h1>{{ 'CONFIRM_BOOKING_TITLE' | translate }}</h1>
+          </div>
+
+          <div class="step-box">
+            <h2>{{ 'STEP_1_ADD_PAYMENT_METHOD' | translate }}</h2>
+          </div>
+
+          <form class="opciones-pago" [formGroup]="pagoForm" (ngSubmit)="procesarPago()">
+
+            <label class="opcion-radio">
+              <input type="radio" formControlName="metodoPago" value="yapeplin">
+              <span class="radio-custom"></span>
+              <div class="opcion-detalle">
+                <span class="opcion-titulo">{{ 'PAYMENT_METHOD_YAPE_PLIN' | translate }}</span>
+                <div class="opcion-logos">
+                  <img src="/assets/plin-logo.png" height="38" width="38" alt="Plin">
+                  <img src="/assets/yape-logo.png" height="38" width="38" alt="Yape">
+                </div>
+              </div>
+            </label>
+
+            <label class="opcion-radio">
+              <input type="radio" formControlName="metodoPago" value="tarjeta">
+              <span class="radio-custom"></span>
+              <div class="opcion-detalle">
+                <span class="opcion-titulo">{{ 'PAYMENT_METHOD_CARD' | translate }}</span>
+                <div class="opcion-logos">
+                  <img src="/assets/visa-mastercard.png" height="36" width="97" alt="Mastercard">
+                </div>
+              </div>
+            </label>
+
+            <label class="opcion-radio">
+              <input type="radio" formControlName="metodoPago" value="transferencia">
+              <span class="radio-custom"></span>
+              <div class="opcion-detalle">
+                <span class="opcion-titulo">{{ 'PAYMENT_METHOD_TRANSFER' | translate }}</span>
+                <div class="opcion-logos">
+                  <img src="/assets/banco.png" height="40" width="40" alt="Banco">
+                </div>
+              </div>
+            </label>
+
+          </form>
+        </main>
+
+        <aside class="columna-resumen">
+          <div class="resumen-card">
+
+            <div class="resumen-evento-header">
+              <img [src]="imagenesEvento[0].imagen" width="100" height="75" [alt]="'EVENT_PHOTO_ALT' | translate" class="resumen-img">
+              <div class="resumen-evento-info">
+                <span class="resumen-titulo">{{evento.titulo}}</span>
+                <div class="resumen-rating">
+                  <span class="star-icon">&#9733;</span> {{evento.valoracion}} ({{this.cantidadResenas}})
+                </div>
+              </div>
+            </div>
+
+            <div class="resumen-seccion">
+              <h3>{{ 'CANCELLATION_INFO_TITLE' | translate }}</h3>
+              <p [innerHTML]="'CANCELLATION_INFO_DESC' | translate"></p>
+            </div>
+
+            <div class="resumen-seccion">
+              <h3>{{ 'DATES_AND_CAPACITY' | translate }}</h3>
+              <div class="resumen-item">
+                <span>{{ 'START_DATE' | translate }}</span>
+                <strong>{{evento.fechainicio}}</strong>
+              </div>
+              <div class="resumen-item">
+                <span>{{ 'END_DATE' | translate }}</span>
+                <strong>{{evento.fechafin}}</strong>
+              </div>
+              <div class="resumen-item">
+                <span>{{ 'CAPACITY' | translate }}</span>
+                <strong>{{evento.aforo}}</strong>
+              </div>
+            </div>
+
+            <div class="resumen-seccion">
+              <h3>{{ 'PRICE_INFO_TITLE' | translate }}</h3>
+              <div class="resumen-item">
+                <span>{{ 'TOTAL_BUDGET' | translate }}: <strong></strong></span>
+                <span>S/. {{evento.presupuesto}}</span>
+              </div>
+              <div class="resumen-item">
+                <span>{{ 'EVENT_SERVICE_FEE' | translate }}: <strong></strong></span>
+                <span>S/. 100</span>
+              </div>
+            </div>
+
+            <div class="resumen-total">
+              <div class="resumen-item">
+                <span><strong>{{ 'TOTAL_PEN' | translate }}</strong></span>
+                <strong>S/. {{evento.presupuesto + 100}}</strong>
+              </div>
+            </div>
+
+            <button
+              class="pagar-btn"
+              [disabled]="pagoForm.invalid"
+              (click)="procesarPago()">
+              {{ 'PAY_BUTTON' | translate }}
+            </button>
+
+          </div>
+        </aside>
+
+      </div> }
+
+    @else {
+      <div class="recibo-wrapper">
         <div class="reserva-header">
-          <button class="btn-volver" (click)="volverAtras()">
-            <img ngSrc="/assets/back.png" width="44" height="44" alt="Volver">
-          </button>
-          <h1>Confirmar Reserva</h1>
+          <h1>{{ 'CELEBRA_RECEIPT_TITLE' | translate }}</h1>
         </div>
+        <main class="recibo-col-main">
 
-        <div class="step-box">
-          <h2>1. Agregue un metodo de pago</h2>
-        </div>
-
-        <form class="opciones-pago" [formGroup]="pagoForm" (ngSubmit)="procesarPago()">
-
-          <label class="opcion-radio">
-            <input type="radio" formControlName="metodoPago" value="yapeplin">
-            <span class="radio-custom"></span>
-            <div class="opcion-detalle">
-              <span class="opcion-titulo">Pago con yape o plin</span>
-              <div class="opcion-logos">
-                <img src="/assets/plin-logo.png" height="38" width="38" alt="Plin">
-                <img src="/assets/yape-logo.png" height="38" width="38" alt="Yape">
-              </div>
-            </div>
-          </label>
-
-          <label class="opcion-radio">
-            <input type="radio" formControlName="metodoPago" value="tarjeta">
-            <span class="radio-custom"></span>
-            <div class="opcion-detalle">
-              <span class="opcion-titulo">Tarjeta de crédito o débito</span>
-              <div class="opcion-logos">
-                <img src="/assets/visa-mastercard.png" height="36" width="97" alt="Mastercard">
-              </div>
-            </div>
-          </label>
-
-          <label class="opcion-radio">
-            <input type="radio" formControlName="metodoPago" value="transferencia">
-            <span class="radio-custom"></span>
-            <div class="opcion-detalle">
-              <span class="opcion-titulo">Transferencia interbancaria</span>
-              <div class="opcion-logos">
-                <img src="/assets/banco.png" height="40" width="40" alt="Banco">
-              </div>
-            </div>
-          </label>
-
-        </form>
-      </main>
-
-      <aside class="columna-resumen">
-        <div class="resumen-card">
-
-          <div class="resumen-evento-header">
-            <img [src]="imagenesEvento[0].imagen" width="100" height="75" alt="Evento" class="resumen-img">
-            <div class="resumen-evento-info">
-              <span class="resumen-titulo">{{evento.titulo}}</span>
-              <div class="resumen-rating">
+          <div class="recibo-card-evento">
+            <img [src]="imagenesEvento[0].imagen" width="160" height="120" [alt]="'EVENT_PHOTO_ALT' | translate" class="recibo-img">
+            <div class="recibo-evento-info">
+              <span class="recibo-titulo">{{evento.titulo}}</span>
+              <div class="recibo-rating">
                 <span class="star-icon">&#9733;</span> {{evento.valoracion}} (435)
               </div>
             </div>
           </div>
 
-          <div class="resumen-seccion">
-            <h3>Cancelación</h3>
-            <p>cancelación anticipada, puede cancelar el evento en una maximo de <strong>3 días</strong> despues de paragarlo. Se le devolvera el dinero en toda su integridad.</p>
+          <div class="recibo-detalles-lista">
+            <div class="recibo-item"><span>{{ 'START_DATE' | translate }}</span><strong>{{evento.fechainicio}}</strong></div>
+            <div class="recibo-item"><span>{{ 'END_DATE' | translate }}</span><strong>{{evento.fechafin}}</strong></div>
+            <div class="recibo-item"><span>{{ 'CAPACITY' | translate }}</span><strong>{{evento.aforo}}</strong></div>
+            <div class="recibo-item"><span>{{ 'ORGANIZED_BY' | translate }}</span><strong>{{evento.proveedor.nombreorganizacion}}</strong></div>
           </div>
 
-          <div class="resumen-seccion">
-            <h3>Fechas y aforo</h3>
-            <div class="resumen-item">
-              <span>Fecha de inicio</span>
-              <strong>{{evento.fechainicio}}</strong>
-            </div>
-            <div class="resumen-item">
-              <span>Fecha de fin</span>
-              <strong>{{evento.fechafin}}</strong>
-            </div>
-            <div class="resumen-item">
-              <span>Aforo</span>
-              <strong>{{evento.aforo}}</strong>
-            </div>
+          <div class="recibo-seccion-texto">
+            <h3>{{ 'CANCELLATION_POLICY_TITLE' | translate }}</h3>
+            <p>{{ 'CANCELLATION_POLICY_RECEIPT' | translate }}</p>
           </div>
 
-          <div class="resumen-seccion">
-            <h3>Información de precio</h3>
-            <div class="resumen-item">
-              <span>Presupuesto: <strong></strong></span>
+          <div class="recibo-seccion-texto">
+            <h3>{{ 'HAVE_DOUBTS_TITLE' | translate }}</h3>
+            <p>{{ 'HAVE_DOUBTS_DESC' | translate }} <a [routerLink]="['/centro-ayuda', anfitrion.id, anfitrion.role?.name]">{{ 'AGENTS_LINK' | translate }}</a>.</p>
+          </div>
+
+        </main>
+
+        <aside class="recibo-col-sidebar">
+
+          <div class="recibo-card-box">
+            <h2>{{ 'PRICE_BREAKDOWN' | translate }}</h2>
+            <div class="recibo-item">
+              <span>{{evento.titulo}}</span>
               <span>S/. {{evento.presupuesto}}</span>
             </div>
-            <div class="resumen-item">
-              <span>Servicio y protección de evento: <strong></strong></span>
-              <span>S/. 100</span>
+            <div class="recibo-item">
+              <span>{{ 'EVENT_SERVICE_FEE' | translate }}</span>
+              <span>S/. 100.00</span>
             </div>
-          </div>
-
-          <div class="resumen-total">
-            <div class="resumen-item">
-              <span><strong>Total PEN</strong></span>
+            <div class="recibo-item total">
+              <strong>Total</strong>
               <strong>S/. {{evento.presupuesto + 100}}</strong>
             </div>
           </div>
 
-          <button
-            class="pagar-btn"
-            [disabled]="pagoForm.invalid"
-            (click)="procesarPago()">
-            Pagar
-          </button>
-
-        </div>
-      </aside>
-
-    </div> }
-
-  @else {
-    <div class="recibo-wrapper">
-      <div class="reserva-header">
-        <button class="btn-volver" (click)="volverAtras()">
-          <img src="/assets/back.png" width="44" height="44" alt="Volver">
-        </button>
-        <h1>Tu recibo de Celebra</h1>
-      </div>
-      <main class="recibo-col-main">
-
-
-        <div class="recibo-card-evento">
-          <img [src]="imagenesEvento[0].imagen" width="160" height="120" alt="Evento" class="recibo-img">
-          <div class="recibo-evento-info">
-            <span class="recibo-titulo">{{evento.titulo}}</span>
-            <div class="recibo-rating">
-              <span class="star-icon">&#9733;</span> {{evento.valoracion}} (435)
+          <div class="recibo-card-box">
+            <h2>{{ 'PAYMENT_TITLE' | translate }}</h2>
+            <div class="recibo-item">
+              <span>{{ metodoPagoSeleccionado }}</span>
+            </div>
+            <div class="recibo-item total">
+              <strong>{{ 'PAID_AMOUNT' | translate }}</strong>
+              <strong>S/. {{evento.presupuesto + 100}}</strong>
             </div>
           </div>
-        </div>
-
-        <div class="recibo-detalles-lista">
-          <div class="recibo-item"><span>Fecha de inicio</span><strong>{{evento.fechainicio}}</strong></div>
-          <div class="recibo-item"><span>Fecha de fin</span><strong>{{evento.fechafin}}</strong></div>
-          <div class="recibo-item"><span>Aforo</span><strong>{{evento.aforo}}</strong></div>
-          <div class="recibo-item"><span>Organiza</span><strong>{{evento.proveedor.nombreorganizacion}}</strong></div>
-        </div>
-
-        <div class="recibo-seccion-texto">
-          <h3>Política de cancelación</h3>
-          <p>Cancelacion gratuita hasta tres dias despues del pago de la reserva. Despues de ese plazo, la reservación no será reembolsable.</p>
-        </div>
-
-        <div class="recibo-seccion-texto">
-          <h3>Tienes alguna duda?</h3>
-          <p>Encuentra la información sobre los pagos y los rembolsos con nuestros <a [routerLink]="['/centro-ayuda', anfitrion.id, anfitrion.role?.name]">agentes</a> o <a [routerLink]="['/menu-anfitrion', anfitrion.id]">celebot</a>.</p>
-        </div>
-
-      </main>
-
-      <aside class="recibo-col-sidebar">
-
-        <div class="recibo-card-box">
-          <h2>Desglose de precios</h2>
-          <div class="recibo-item">
-            <span>{{evento.titulo}}</span>
-            <span>S/. {{evento.presupuesto}}</span>
-          </div>
-          <div class="recibo-item">
-            <span>Servicio y protección de evento</span>
-            <span>S/. 100.00</span>
-          </div>
-          <div class="recibo-item total">
-            <strong>Total</strong>
-            <strong>S/. {{evento.presupuesto + 100}}</strong>
-          </div>
-        </div>
-
-        <div class="recibo-card-box">
-          <h2>Pago</h2>
-          <div class="recibo-item">
-            <span>{{ metodoPagoSeleccionado }}</span>
-          </div>
-          <div class="recibo-item total">
-            <strong>Monto pagado</strong>
-            <strong>S/. {{evento.presupuesto + 100}}</strong>
-          </div>
-        </div>
-        <button class="aceptar-btn" (click)="irAlInicio()">Aceptar</button>
-      </aside>
-      <footer class="recibo-footer">
-        Este recibo sera entregado por correo al contratante del servicio en un plazo maximo de 24h despues de realizar el pago. <a>Mas informacion</a>.
-      </footer>
-    </div>
-  }
+          <button class="aceptar-btn" (click)="irAlInicio()">{{ 'ACCEPT_BUTTON' | translate }}</button>
+        </aside>
+        <footer class="recibo-footer">
+          {{ 'RECEIPT_FOOTER' | translate }} <a>{{ 'MORE_INFO' | translate }}</a>.
+        </footer>
+      </div>
+    }
   </div>
 </section>
   @if (mostrarCerrarSesion) {
     <section class="cerrar-sesion">
       <div class="overlay-cerrar-sesion"></div>
       <div class="cerrar-sesion-container" (click)="$event.stopPropagation()">
-        <h1>Cerrar Sesión</h1>
-        <h3>¿Estas seguro de cerrar tu sesión?</h3>
+        <h1>{{ 'LOGOUT_TITLE' | translate }}</h1>
+        <h3>{{ 'CONFIRM_LOGOUT' | translate }}</h3>
         <div class="cerrar-sesion-container-botones" (click)="cerrarSesion()">
-          <button class="boton-si" (click)="confirmarCerrarSesion($event)"><a [routerLink]="['/']">Sí</a></button>
-          <button class="boton-no" (click)="cancelarCerrarSesion($event)">No</button>
+          <button class="boton-si" (click)="confirmarCerrarSesion($event)">{{ 'YES' | translate }}</button>
+          <button class="boton-no" (click)="cancelarCerrarSesion($event)">{{ 'NO' | translate }}</button>
         </div>
       </div>
     </section>
@@ -369,9 +364,12 @@
       <div class="chat-list" [class.active]="activeChatName === null">
         @for (c of chats; track c.id) {
           <div class="chat-item"
-               (click)="selectChat(c.proveedor.nombreorganizacion ?? '',c.proveedor.foto ?? null,c.id)">
-            <img [src]="c.proveedor.foto ?? 'assets/default-avatar.png'" class="chat-avatar" alt="Avatar">
-            <span class="chat-name">{{ c.proveedor.nombreorganizacion }}</span>
+               (click)="selectChat(c.proveedor.nombreorganizacion ?? '',c.proveedor.foto ?? null, c.titulo ?? '',c.id)">
+            <img [src]="c.proveedor.foto ?? 'assets/default-avatar.png'" class="chat-avatar" [alt]="'AVATAR_ALT' | translate">
+            <div class="chat-name-container">
+              <span class="chat-name">{{ c.proveedor.nombreorganizacion }}</span>
+              <span class="chat-title">{{ c.titulo }}</span>
+            </div>
           </div>
         }
       </div>
@@ -379,9 +377,12 @@
       <div class="chat-window" [class.active]="activeChatName !== null">
 
         <div class="chat-window-header">
-          <button class="chat-back-button" (click)="selectChat(null, null)">&larr;</button>
-          <img [src]="activeChatAvatar ?? '/assets/default.png'" alt="Avatar" class="chat-avatar">
-          <span class="chat-name">{{ activeChatName }}</span>
+          <button class="chat-back-button" (click)="selectChat(null, null, null)">&larr;</button>
+          <img [src]="activeChatAvatar ?? '/assets/default.png'" [alt]="'AVATAR_ALT' | translate" class="chat-avatar">
+          <div class="chat-name-container">
+            <span class="chat-name">{{ activeChatName }}</span>
+            <span class="chat-title">{{ activeChatTitle }}</span>
+          </div>
         </div>
 
         <div class="chat-window-body" #scrollContainer>
@@ -421,14 +422,14 @@
         <div class="chat-window-footer">
           <input type="text"
                  [(ngModel)]="mensajeTexto"
-                 placeholder="Escribe un mensaje..."
+                 placeholder="{{ 'TYPE_YOUR_MESSAGE' | translate }}"
                  (keyup.enter)="enviarMensaje()">
           <button class="send-button" (click)="enviarMensaje()">&#9658;</button>
         </div>
       </div>
     </div>
     <button class="chat-open-button" [class.activo]="chatVisible" (click)="toggleChat()">
-      Click para abrir sus chats con proveedores
+      {{ 'OPEN_CHATS' | translate }}
     </button>
   </div>
 </section>

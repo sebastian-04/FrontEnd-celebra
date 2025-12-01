@@ -8,7 +8,7 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
-import {DatePipe, NgOptimizedImage} from '@angular/common';
+import {DatePipe} from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {DistritoServices} from '../../services/distrito-services';
 import {Distrito} from '../../model/distrito';
@@ -24,15 +24,18 @@ import {Mensaje} from '../../model/mensaje';
 import {MensajeServices} from '../../services/mensaje-services';
 import {Chat} from '../../model/chat';
 import {ChatServices} from '../../services/chat-services';
+import {LoginService} from '../../services/login-service';
+import {TranslatePipe, TranslateService} from '@ngx-translate/core';
+import {BotpressService} from '../../services/botpress-service';
 
 @Component({
   selector: 'app-ver-mi-perfil',
   imports: [
     ReactiveFormsModule,
-    NgOptimizedImage,
     RouterLink,
     DatePipe,
-    FormsModule
+    FormsModule,
+    TranslatePipe
 
   ],
   templateUrl: './ver-mi-perfil.html',
@@ -40,6 +43,8 @@ import {ChatServices} from '../../services/chat-services';
 })
 
 export class VerMiPerfil {
+  activeChatTitle: string | null = null;
+  loginService: LoginService = inject(LoginService);
   private pollingInterval: any;
   private chatListPollingInterval: any;
   mensajes: Mensaje[] = [];
@@ -73,6 +78,7 @@ export class VerMiPerfil {
   proveedorService: ProveedorServices = inject(ProveedorServices);
   anfitrionService: AnfitrionServices = inject(AnfitrionServices);
   distritoService: DistritoServices = inject(DistritoServices);
+  botpressService = inject(BotpressService);
   router: Router = inject(Router);
   private route = inject(ActivatedRoute);
   distrito: Distrito[] = [];
@@ -80,6 +86,7 @@ export class VerMiPerfil {
   mostrarCerrarSesion = false;
   currentUserData: any = {};
   private fb: FormBuilder = inject(FormBuilder);
+  translate: TranslateService = inject(TranslateService);
   constructor(private cdr: ChangeDetectorRef) {
     this.perfilForm = this.fb.group({
       nombres: ['', [Validators.required, Validators.minLength(2)]],
@@ -121,15 +128,21 @@ export class VerMiPerfil {
     })
   }
   ngOnInit(): void {
+    this.botpressService.destroyChat();
+    this.translate.addLangs(['es', 'en', 'pt', 'zh', 'ja']);
+    this.translate.setDefaultLang('es');
+    this.translate.use(localStorage.getItem('lang') ?? 'es');
     const id = Number(this.route.snapshot.params['id']);
     const role = this.route.snapshot.params['role'];
     if (role === 'ROLE_ANFITRION') {
       this.anfitrionService.listarPorId(id).subscribe({
-        next: (a) => { this.anfitrion = a;
+        next: (a) => {
+          this.anfitrion = a;
           if (a.role?.name === 'ROLE_ANFITRION') {
-            this.anfitrion = a;
             if (this.anfitrion.foto) {
               this.anfitrion.foto = 'data:image/png;base64,' + this.anfitrion.foto;
+            } else {
+              this.anfitrion.foto = '/assets/Group%20633475.png';
             }
             this.usuario = a;
             this.perfilForm.patchValue({
@@ -142,15 +155,19 @@ export class VerMiPerfil {
               descripcion: a.descripcion
             });
           }
-        }
+        },
+        error: (err) => console.error('Error al cargar anfitrión:', err)
       });
+
     } else if (role === 'ROLE_PROVEEDOR') {
       this.proveedorService.listarPorId(id).subscribe({
-        next: (p) => { this.proveedor = p;
+        next: (p) => {
+          this.proveedor = p;
           if (p.role?.name === 'ROLE_PROVEEDOR') {
-            this.proveedor = p;
             if (this.proveedor.foto) {
               this.proveedor.foto = 'data:image/png;base64,' + this.proveedor.foto;
+            } else {
+              this.proveedor.foto = '/assets/Group%20633475.png';
             }
             this.usuario = p;
             this.perfilFormProveedor.patchValue({
@@ -196,15 +213,17 @@ export class VerMiPerfil {
     if (!this.chatVisible) {
       this.activeChatName = null;
       this.activeChatAvatar = null;
+      this.activeChatTitle = null;
     }
   }
-  selectChat(nombre: string | null, avatar: string | null, idChat?: number) {
+  selectChat(nombre: string | null, avatar: string | null, titulo: string | null, idChat?: number) {
     if (this.pollingInterval) {
       clearInterval(this.pollingInterval);
     }
     this.activeChatId = idChat ?? null;
     this.activeChatName = nombre;
     this.activeChatAvatar = avatar ?? '/assets/default.png';
+    this.activeChatTitle = titulo;
 
     if (this.activeChatId !== null) {
       this.cargarMensajes(true);
@@ -391,6 +410,7 @@ export class VerMiPerfil {
     event.stopPropagation();
     this.mostrarCerrarSesion = false;
     document.body.classList.remove('modal-abierto');
+    this.loginService.logout();
   }
   cancelarCerrarSesion(event: MouseEvent) {
     event.stopPropagation();
@@ -417,18 +437,14 @@ export class VerMiPerfil {
       this.cerrarMenuPerfil(menuPerfil);
     }
   }
-
-/* Funcionalidades del ver perfil */
   abrirModalEliminarCuenta() {
     this.mostrarEliminarCuenta = true;
     document.body.classList.add('modal-abierto');
   }
-
   cerrarModalEliminar() {
     this.mostrarEliminarCuenta = false;
     document.body.classList.remove('modal-abierto');
   }
-
   confirmarEliminarCuenta(event: MouseEvent) {
     event.stopPropagation();
     if (this.usuario.role?.name === 'ROLE_ANFITRION') {
@@ -454,22 +470,17 @@ export class VerMiPerfil {
     this.mostrarImagenModal = true;
     document.body.classList.add('modal-abierto');
   }
-
   cerrarModalImagen() {
     this.mostrarImagenModal = false;
     document.body.classList.remove('modal-abierto');
   }
-
   togglePasswordVisibility() {
     this.passwordVisible = !this.passwordVisible;
   }
-
   activarModoEdicion() {
     this.modoEdicion = true;
     this.selectedImagePreview = null;
-    // ¡El formulario ya tiene los datos correctos!
   }
-  // 2. Guarda los cambios y sale del modo de edición
   guardarCambios() {
     if (this.usuario.role?.name === 'ROLE_ANFITRION') {
       const actualizado: Anfitrion = {
@@ -540,17 +551,11 @@ export class VerMiPerfil {
       });
     }
   }
-
-  // 3. Cancela la edición y sale
   cancelarEdicion() {
     this.modoEdicion = false;
     this.selectedImagePreview = null;
-
-    // Llama a la función de reseteo para volver a los datos originales
     this.resetFormToOriginalData();
   }
-
-  // 4. Se activa cuando el usuario elige una foto nueva
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
@@ -561,12 +566,10 @@ export class VerMiPerfil {
       reader.readAsDataURL(file);
     }
   }
-  /* Para el guradado de datos en el form de edicion*/
   private resetFormToOriginalData() {
     this.perfilForm.reset({
-      // ... (nombres, dni, email, telefono)
       contrasena: '',
-      confirmarContrasena: '', // <-- AÑADE ESTA LÍNEA
+      confirmarContrasena: '',
       descripcion: this.currentUserData.descripcion
     });
   }
