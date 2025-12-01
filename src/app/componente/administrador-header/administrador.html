@@ -1,0 +1,32 @@
+<section class="encabezado">
+  <div class="encabezado-logos">
+    <img src="/assets/Captura.PNG" width="619" height="241" alt="#" class="encabezado-logos-img">
+  </div>
+  <div class="encabezado-perfil">
+    <img src="/assets/a4644549-5dcd-52fe-8cdf-2733b3e03417.jpg" width="50" height="50">
+    <div class="encabezado-perfil-container" (click)="toggleMenuPerfil()">
+      <h3 class="encabezado-perfil-container-1">inicio de sesión como:</h3>
+      <h3 class="encabezado-perfil-container-2">admin&#64;admin.com</h3>
+    </div>
+    <div class="encabezado-perfil-menu" [class.activo]="menuPerfilActivo">
+      <nav class="encabezado-perfil-menu-nav">
+        <ul class="encabezado-perfil-menu-ul">
+          <li><a class="CerrarSesion-a" (click)="abrirModalCerrarSesion()">Cerrar sesión</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+</section>
+  @if (mostrarCerrarSesion) {
+    <section class="cerrar-sesion">
+      <div class="overlay-cerrar-sesion"></div>
+      <div class="cerrar-sesion-container">
+        <h1>Cerrar Sesión</h1>
+        <h3>¿Estas seguro de cerrar tu sesión?</h3>
+        <div class="cerrar-sesion-container-botones" (click)="cerrarSesion()">
+          <button class="boton-si" (click)="confirmarCerrarSesion($event)">Sí</button>
+          <button class="boton-no" (click)="cancelarCerrarSesion($event)">No</button>
+        </div>
+      </div>
+    </section>
+  }
